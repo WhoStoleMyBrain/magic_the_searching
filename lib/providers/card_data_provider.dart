@@ -10,6 +10,13 @@ class CardDataProvider with ChangeNotifier {
     return [..._cards];
   }
 
+  set cards(List<CardData> queryData) {
+    _cards = queryData;
+    // print('Cards changed');
+    // print(_cards);
+    notifyListeners();
+  }
+
   CardData getCardById(String id) {
     return _cards.firstWhere((card) => card.id == id);
   }

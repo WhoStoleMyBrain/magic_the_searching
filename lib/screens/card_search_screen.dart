@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../screens/card_detail_sreen.dart';
+import '../helpers/scryfall_request_handler.dart';
+import '../models/card_data.dart';
+import '../screens/card_detail_screen.dart';
 import '../widgets/card_display.dart';
 import '../widgets/enter_search_term.dart';
 import '../providers/card_data_provider.dart';
@@ -21,7 +22,9 @@ class CardSearchScreen extends StatelessWidget {
         return GestureDetector(
           onTap: () {},
           child: EnterSearchTerm(
-            startSearchForCard: _startSearchForCard,
+            startSearchForCard: (text) {
+              return _startSearchForCard(ctx, text);
+            },
           ),
           // behavior: HitTestBehavior.opaque,
         );
@@ -29,20 +32,24 @@ class CardSearchScreen extends StatelessWidget {
     );
   }
 
-  void _startSearchForCard(String text) {
-    if (kDebugMode) {
-      print(text);
-    }
+  Future<void> _startSearchForCard(BuildContext ctx, String text) async {
+    final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
+    final scryFallRequestHandler = ScryfallRequestHandler(searchText: text);
+
+    scryFallRequestHandler.translateTextToQuery();
+    await scryFallRequestHandler.sendQueryRequest();
+    final queryResult = scryFallRequestHandler.processQueryData();
+    cardDataProvider.cards = queryResult;
   }
 
   @override
   Widget build(BuildContext context) {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
-    Future.delayed(Duration.zero, () {
-      cardDataProvider.setDummyData();
-    });
+    // Future.delayed(Duration.zero, () {
+    //   cardDataProvider.setDummyData();
+    // });
 
-    final mediaQuery = MediaQuery.of(context);
+    // final mediaQuery = MediaQuery.of(context);
     final appBar = AppBar(
       title: const Text('Search for cards...'),
     );

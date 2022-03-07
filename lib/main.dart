@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/screens/card_detail_sreen.dart';
+import 'package:magic_the_searching/screens/card_detail_screen.dart';
 import 'package:provider/provider.dart';
 import './providers/card_data_provider.dart';
 import './screens/card_search_screen.dart';

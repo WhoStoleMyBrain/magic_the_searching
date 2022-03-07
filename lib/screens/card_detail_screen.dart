@@ -28,7 +28,9 @@ class CardDetailScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image(image: AssetImage(cardData.image)),
+              cardData.image.contains('http')
+                  ? Image.network(cardData.image, fit: BoxFit.cover)
+                  : Image(image: AssetImage(cardData.image)),
               Text(cardData.name),
               Text(cardData.text),
             ],
