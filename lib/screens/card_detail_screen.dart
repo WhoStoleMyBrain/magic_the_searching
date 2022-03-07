@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
-import 'package:magic_the_searching/widgets/card_display.dart';
-import '../models/card_data.dart';
 
 
 class CardDetailScreen extends StatelessWidget {
@@ -28,11 +26,46 @@ class CardDetailScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              cardData.image.contains('http')
-                  ? Image.network(cardData.image, fit: BoxFit.cover)
-                  : Image(image: AssetImage(cardData.image)),
-              Text(cardData.name),
-              Text(cardData.text),
+              cardData.images[0].contains('http')
+                  ? Image.network(cardData.images[0], fit: BoxFit.cover)
+                  : Image(image: AssetImage(cardData.images[0])),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text('Normal'),
+                        Text('Foil'),
+                      ],
+                    ),
+                    const Divider(color: Colors.black, thickness: 1,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // cardData.price.forEach((key, value) {Text('$key:$value')})
+                        // cardData.price.map((key, value) => Text('$key:$value')).toList(),
+                        Text('TCG: ${cardData.price['tcg']}'),
+                        Text('TCG: ${cardData.price['tcg_foil']}'),
+                      ],
+                    ),
+                    const SizedBox(height: 3,),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // cardData.price.forEach((key, value) {Text('$key:$value')})
+                        // cardData.price.map((key, value) => Text('$key:$value')).toList(),
+                        Text('CDM: ${cardData.price['cardmarket']}'),
+                        Text(
+                            'CDM: ${cardData.price['cardmarket_foil']}'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

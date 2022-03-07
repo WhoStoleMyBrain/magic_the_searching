@@ -27,19 +27,41 @@ class CardDataProvider with ChangeNotifier {
         id: '1',
         name: 'black lotus',
         text: 'Add 3 colored mana in any combination',
-        image: 'assets/images/black_lotus.jpg',
+        images: ['assets/images/black_lotus.jpg'],
+        hasTwoSides: false,
+        price: {
+          'tcg': '0.0',
+          'tcg_foil': '0.0',
+          'cardmarket': '0.0',
+          'cardmarket_foil': '0.0',
+        },
       ),
       CardData(
+
         id: '2',
         name: 'tropical island',
         text: 'Add G or B. Play this ability as an interrupt',
-        image: 'assets/images/tropical_island.jpg',
+        images: ['assets/images/tropical_island.jpg'],
+        hasTwoSides: false,
+        price: {
+          'tcg': '0.0',
+          'tcg_foil': '0.0',
+          'cardmarket': '0.0',
+          'cardmarket_foil': '0.0',
+        },
       ),
       CardData(
         id: '3',
         name: 'werebear',
         text: 'He exercises his right to bear arms',
-        image: 'assets/images/werebear.jpg',
+        images: ['assets/images/werebear.jpg'],
+        hasTwoSides: false,
+        price: {
+          'tcg': '0.0',
+          'tcg_foil': '0.0',
+          'cardmarket': '0.0',
+          'cardmarket_foil': '0.0',
+        },
       ),
     ];
     notifyListeners();

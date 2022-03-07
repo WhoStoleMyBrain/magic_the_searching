@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/providers/card_data_provider.dart';
@@ -9,7 +10,8 @@ import '../models/card_data.dart';
 class ScryfallRequestHandler {
   static const String apiBasePath = 'https://api.scryfall.com';
   static const String queryBaseString = '/cards/search?';
-  static const String isshin = 'https://c1.scryfall.com/file/scryfall-cards/large/front/a/0/a062a004-984e-4b62-960c-af7288f7a3e9.jpg?1643846546';
+  static const String isshin =
+      'https://c1.scryfall.com/file/scryfall-cards/large/front/a/0/a062a004-984e-4b62-960c-af7288f7a3e9.jpg?1643846546';
   final String searchText;
   String query = '';
   Map<String, dynamic> responseData = {};
@@ -28,17 +30,62 @@ class ScryfallRequestHandler {
       // print(response.headers);
       // print(response.body);
       responseData = json.decode(response.body);
+      if (response.statusCode != 200) {
+        // print(response.statusCode);
+        // print(response.headers);
+        // throw HttpException('message');
+
+      }
     } catch (error) {
       print(error);
     }
   }
 
-  String findPicture(Map<String, dynamic> card) {
-    // print(card);
-    // card.containsKey("card_faces") ? print(card["card_faces"]) : print('');
+  List<String> getMultiplePictures(card) {
+    List<String> images = [];
+    card["card_faces"].forEach((cardFace) {
+      images.add(cardFace["image_uris"]["normal"]);
+    });
+    return images;
+  }
+
+  List<String> findPictures(Map<String, dynamic> card) {
     return card.containsKey("image_uris")
-        ? card["image_uris"]["normal"]
-        : (card.containsKey("card_faces") ? (card["card_faces"][0].containsKey("image_uris") ? card["card_faces"][0]["image_uris"]["normal"] : isshin) : isshin);
+        ? [card["image_uris"]["normal"]]
+        : (card.containsKey("card_faces")
+            ? (card["card_faces"][0].containsKey("image_uris")
+                ? getMultiplePictures(card)
+
+                // card["card_faces"].forEach((cardFace) {
+                //   return cardFace["image_uris"]["normal"];
+                // })
+                // ] // card["card_faces"][0]["image_uris"]["normal"]
+                : [isshin])
+            : [isshin]);
+  }
+
+  Map<String, String> addPrices(Map<String, dynamic> card) {
+    return card.containsKey('prices')
+        ? {
+            'tcg': card['prices'].containsKey('usd')
+                ? (card['prices']['usd'] ?? '')
+                : '',
+            'tcg_foil': card['prices'].containsKey('usd_foil')
+                ? (card['prices']['usd_foil'] ?? '')
+                : '',
+            'cardmarket': card['prices'].containsKey('eur')
+                ? (card['prices']['eur'] ?? '')
+                : '',
+            'cardmarket_foil': card['prices'].containsKey('eur_foil')
+                ? (card['prices']['eur_foil'] ?? '')
+                : '',
+          }
+        : {
+            'tcg': '',
+            'tcg_foil': '',
+            'cardmarket': '',
+            'cardmarket_foil': '',
+          };
   }
 
   List<CardData> processQueryData() {
@@ -49,24 +96,24 @@ class ScryfallRequestHandler {
     // print(responseData["data"]);
     // print(responseData["data"][0]["id"]);
     // print(responseData["data"]);
-    final res = responseData["data"].map(
-      (result) {
-        // print(result);
-        resultList.add(
-          CardData(
-            id: result["id"] ?? '',
-            name: result["name"] ?? '',
-            text: result["oracle_text"] ?? '',
-            image: findPicture(result),
-            // result.containsKey("image_uris")
-            //     ? result["image_uris"]["small"]
-            //     : isshin,
-          ),
-        );
-      },
-    ).toList();
+    if (responseData["data"] != null) {
+      responseData["data"].map(
+        (result) {
+          // print(result);
+          resultList.add(
+            CardData(
+              id: result["id"] ?? '',
+              name: result["name"] ?? '',
+              text: result["oracle_text"] ?? '',
+              images: findPictures(result),
+              hasTwoSides: result.containsKey("card_faces") ? true : false,
+              price: addPrices(result),
+            ),
+          );
+        },
+      ).toList();
+    }
 
-    // print(res);
     // print(resultList);
     // CardDataProvider().cards = resultList;
     // return resultList;
