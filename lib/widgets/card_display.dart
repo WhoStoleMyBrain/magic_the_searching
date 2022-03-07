@@ -25,7 +25,6 @@ class CardDisplay extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 CardImageDisplay(cardData: cardData, mediaQuery: mediaQuery),
-
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
@@ -34,8 +33,8 @@ class CardDisplay extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: const [
-                          Text('Normal'),
-                          Text('Foil'),
+                          Expanded(child: Text('Normal')),
+                          Expanded(child: Text('Foil')),
                         ],
                       ),
                       const Divider(
@@ -80,7 +79,7 @@ class CardDisplay extends StatelessWidget {
 }
 
 class CardImageDisplay extends StatefulWidget {
-  CardImageDisplay({
+  const CardImageDisplay({
     Key? key,
     required this.cardData,
     required this.mediaQuery,
@@ -88,28 +87,29 @@ class CardImageDisplay extends StatefulWidget {
 
   final CardData cardData;
   final MediaQueryData mediaQuery;
-  int _side = 0;
+
 
   @override
   State<CardImageDisplay> createState() => _CardImageDisplayState();
 }
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
+  int _side = 0;
   @override
   Widget build(BuildContext context) {
     return Stack(
       // alignment: Alignment.center ,
       children: [
-        widget.cardData.images[widget._side].contains('http')
+        widget.cardData.images[_side].contains('http')
             ? Image.network(
-                widget.cardData.images[widget._side],
+                widget.cardData.images[_side],
                 fit: BoxFit.cover,
                 width: (widget.mediaQuery.size.width -
                         widget.mediaQuery.padding.horizontal) /
                     2,
                 height: (widget.mediaQuery.size.height / 3),
               )
-            : Image(image: AssetImage(widget.cardData.images[widget._side])),
+            : Image(image: AssetImage(widget.cardData.images[_side])),
         if (widget.cardData.hasTwoSides)
           Positioned(
             left: (widget.mediaQuery.size.width -
@@ -119,7 +119,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
             child: MaterialButton(
               onPressed: () {
                 setState(() {
-                  widget._side == 0 ? widget._side = 1 : widget._side = 0;
+                  _side == 0 ? _side = 1 : _side = 0;
                 });
 
               },

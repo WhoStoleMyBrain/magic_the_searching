@@ -32,13 +32,34 @@ class CardSearchScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _showFailedQuery(BuildContext ctx, String query) async {
+    return showDialog<void>(
+      context: ctx,
+      builder: (bCtx) {
+        return AlertDialog(
+          title: const Text('No results found'),
+          content: SingleChildScrollView(child: Text('No results matching \'$query\' found.')),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(bCtx).pop();
+                },
+                child: const Text('Okay'))
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _startSearchForCard(BuildContext ctx, String text) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    final scryFallRequestHandler = ScryfallRequestHandler(searchText: text);
-
-    scryFallRequestHandler.translateTextToQuery();
-    await scryFallRequestHandler.sendQueryRequest();
-    final queryResult = scryFallRequestHandler.processQueryData();
+    final scryfallRequestHandler = ScryfallRequestHandler(searchText: text);
+    scryfallRequestHandler.translateTextToQuery();
+    await scryfallRequestHandler.sendQueryRequest();
+    final queryResult = scryfallRequestHandler.processQueryData();
+    if (queryResult.isEmpty) {
+      _showFailedQuery(ctx, text);
+    }
     cardDataProvider.cards = queryResult;
   }
 
@@ -55,23 +76,25 @@ class CardSearchScreen extends StatelessWidget {
     );
     return Scaffold(
       appBar: appBar,
-      body: GridView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 2 / 4,
-          // mainAxisExtent: 1,
-        ),
-        itemCount: cardDataProvider.cards.length,
-        itemBuilder: (ctx, index) {
-          return CardDisplay(
-            cardData: cardDataProvider.cards[index],
-            cardTapped: cardTapped,
-          );
-        },
-      ),
+      body: cardDataProvider.cards.length <= 0
+          ? const Center(child: Text('No cards found. Try searching for some!'))
+          : GridView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 2 / 4,
+                // mainAxisExtent: 1,
+              ),
+              itemCount: cardDataProvider.cards.length,
+              itemBuilder: (ctx, index) {
+                return CardDisplay(
+                  cardData: cardDataProvider.cards[index],
+                  cardTapped: cardTapped,
+                );
+              },
+            ),
       floatingActionButton: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
         child: Row(

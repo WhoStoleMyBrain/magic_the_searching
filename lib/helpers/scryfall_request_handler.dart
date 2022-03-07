@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 import 'package:provider/provider.dart';
@@ -68,25 +69,27 @@ class ScryfallRequestHandler {
     return card.containsKey('prices')
         ? {
             'tcg': card['prices'].containsKey('usd')
-                ? (card['prices']['usd'] ?? '')
+                ? (card['prices']['usd'] ?? ' --.--')
                 : '',
             'tcg_foil': card['prices'].containsKey('usd_foil')
-                ? (card['prices']['usd_foil'] ?? '')
+                ? (card['prices']['usd_foil'] ?? ' --.--')
                 : '',
             'cardmarket': card['prices'].containsKey('eur')
-                ? (card['prices']['eur'] ?? '')
+                ? (card['prices']['eur'] ?? ' --.--')
                 : '',
             'cardmarket_foil': card['prices'].containsKey('eur_foil')
-                ? (card['prices']['eur_foil'] ?? '')
+                ? (card['prices']['eur_foil'] ?? ' --.--')
                 : '',
           }
         : {
-            'tcg': '',
-            'tcg_foil': '',
-            'cardmarket': '',
-            'cardmarket_foil': '',
+            'tcg': '--.--',
+            'tcg_foil': '--.--',
+            'cardmarket': '--.--',
+            'cardmarket_foil': '--.--',
           };
   }
+
+
 
   List<CardData> processQueryData() {
     final List<CardData> resultList = [];
@@ -112,6 +115,13 @@ class ScryfallRequestHandler {
           );
         },
       ).toList();
+    } else {
+      // print('reached alert dialog');
+      // AlertDialog(
+      //   content: Text(
+      //       'The search for the following text was not successful: \n $searchText'),
+      //   actions: [ElevatedButton(onPressed: () {}, child: Text('Okay'))],
+      // );
     }
 
     // print(resultList);
