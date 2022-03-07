@@ -24,32 +24,7 @@ class CardDisplay extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Stack(
-                  // alignment: Alignment.center ,
-                  children: [
-                    cardData.images[0].contains('http')
-                        ? Image.network(
-                            cardData.images[0],
-                            fit: BoxFit.cover,
-                            width: (mediaQuery.size.width -
-                                    mediaQuery.padding.horizontal) /
-                                2,
-                            height: (mediaQuery.size.height / 3),
-                          )
-                        : Image(image: AssetImage(cardData.images[0])),
-                    if (cardData.hasTwoSides)
-                      Positioned(
-                        left: 50,
-                        child: MaterialButton(
-                          onPressed: () {},
-                          child: const Icon(Icons.compare_arrows, size: 35, color: Colors.black87,),
-                          height: 50,
-                          shape: const CircleBorder(),
-                          color: const Color.fromRGBO(128, 128, 128, 0.5),
-                        ),
-                      ),
-                  ],
-                ),
+                CardImageDisplay(cardData: cardData, mediaQuery: mediaQuery),
 
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -100,6 +75,61 @@ class CardDisplay extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class CardImageDisplay extends StatefulWidget {
+  CardImageDisplay({
+    Key? key,
+    required this.cardData,
+    required this.mediaQuery,
+  }) : super(key: key);
+
+  final CardData cardData;
+  final MediaQueryData mediaQuery;
+  int _side = 0;
+
+  @override
+  State<CardImageDisplay> createState() => _CardImageDisplayState();
+}
+
+class _CardImageDisplayState extends State<CardImageDisplay> {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      // alignment: Alignment.center ,
+      children: [
+        widget.cardData.images[widget._side].contains('http')
+            ? Image.network(
+                widget.cardData.images[widget._side],
+                fit: BoxFit.cover,
+                width: (widget.mediaQuery.size.width -
+                        widget.mediaQuery.padding.horizontal) /
+                    2,
+                height: (widget.mediaQuery.size.height / 3),
+              )
+            : Image(image: AssetImage(widget.cardData.images[widget._side])),
+        if (widget.cardData.hasTwoSides)
+          Positioned(
+            left: (widget.mediaQuery.size.width -
+                widget.mediaQuery.padding.horizontal) /
+                2 / 2 - 50,
+            top: (widget.mediaQuery.size.height / 3) - 50 - 10,
+            child: MaterialButton(
+              onPressed: () {
+                setState(() {
+                  widget._side == 0 ? widget._side = 1 : widget._side = 0;
+                });
+
+              },
+              child: const Icon(Icons.compare_arrows, size: 35, color: Colors.black87,),
+              height: 50,
+              shape: const CircleBorder(),
+              color: const Color.fromRGBO(128, 128, 128, 0.5),
+            ),
+          ),
+      ],
     );
   }
 }
