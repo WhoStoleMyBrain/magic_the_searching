@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/card_detail_sreen.dart';
@@ -19,11 +20,19 @@ class CardSearchScreen extends StatelessWidget {
       builder: (bCtx) {
         return GestureDetector(
           onTap: () {},
-          child: EnterSearchTerm(),
-          behavior: HitTestBehavior.opaque,
+          child: EnterSearchTerm(
+            startSearchForCard: _startSearchForCard,
+          ),
+          // behavior: HitTestBehavior.opaque,
         );
       },
     );
+  }
+
+  void _startSearchForCard(String text) {
+    if (kDebugMode) {
+      print(text);
+    }
   }
 
   @override
@@ -64,6 +73,7 @@ class CardSearchScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(5.0),
               child: FloatingActionButton(
+                heroTag: 'search',
                 onPressed: () => _startEnterSearchTerm(context),
                 child: const Icon(Icons.search),
               ),
@@ -71,6 +81,7 @@ class CardSearchScreen extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.all(5.0),
               child: FloatingActionButton(
+                heroTag: 'camera',
                 onPressed: null,
                 child: Icon(Icons.camera_enhance),
               ),
