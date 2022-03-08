@@ -1,10 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:magic_the_searching/providers/card_data_provider.dart';
-import 'package:provider/provider.dart';
 
 import '../models/card_data.dart';
 
@@ -27,18 +23,11 @@ class ScryfallRequestHandler {
     final url = Uri.parse('$apiBasePath$queryBaseString$query');
     try {
       final response = await http.get(url);
-      // print(response.statusCode);
-      // print(response.headers);
-      // print(response.body);
-      responseData = json.decode(response.body);
-      if (response.statusCode != 200) {
-        // print(response.statusCode);
-        // print(response.headers);
-        // throw HttpException('message');
 
-      }
+      responseData = json.decode(response.body);
+      if (response.statusCode != 200) {}
     } catch (error) {
-      print(error);
+      // print(error);
     }
   }
 
@@ -56,11 +45,6 @@ class ScryfallRequestHandler {
         : (card.containsKey("card_faces")
             ? (card["card_faces"][0].containsKey("image_uris")
                 ? getMultiplePictures(card)
-
-                // card["card_faces"].forEach((cardFace) {
-                //   return cardFace["image_uris"]["normal"];
-                // })
-                // ] // card["card_faces"][0]["image_uris"]["normal"]
                 : [isshin])
             : [isshin]);
   }
@@ -89,16 +73,9 @@ class ScryfallRequestHandler {
           };
   }
 
-
-
   List<CardData> processQueryData() {
     final List<CardData> resultList = [];
-    // responseData["data"].forEach((key, value) {
-    //   resultList.add(CardData(id: id, name: name, text: text, image: image))
-    // });
-    // print(responseData["data"]);
-    // print(responseData["data"][0]["id"]);
-    // print(responseData["data"]);
+
     if (responseData["data"] != null) {
       responseData["data"].map(
         (result) {
@@ -115,18 +92,8 @@ class ScryfallRequestHandler {
           );
         },
       ).toList();
-    } else {
-      // print('reached alert dialog');
-      // AlertDialog(
-      //   content: Text(
-      //       'The search for the following text was not successful: \n $searchText'),
-      //   actions: [ElevatedButton(onPressed: () {}, child: Text('Okay'))],
-      // );
-    }
+    } else {}
 
-    // print(resultList);
-    // CardDataProvider().cards = resultList;
-    // return resultList;
     return resultList;
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/screens/card_detail_screen.dart';
 import 'package:provider/provider.dart';
+import './providers/handedness.dart';
+import './screens/card_detail_screen.dart';
 import './providers/card_data_provider.dart';
 import './screens/card_search_screen.dart';
 
@@ -18,6 +19,9 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => CardDataProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => Handedness(false),
         ),
       ],
       child: MaterialApp(
