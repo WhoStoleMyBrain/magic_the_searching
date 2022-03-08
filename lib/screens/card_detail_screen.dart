@@ -21,6 +21,7 @@ class CardDetailScreen extends StatelessWidget {
     const TextStyle textStyle = TextStyle(fontSize: 24,);
     return Scaffold(
         appBar: AppBar(
+          centerTitle: true,
           title: Text(cardData.name),
         ),
         body: InkWell(

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/screens/history_screen.dart';
 import 'package:provider/provider.dart';
 import './providers/handedness.dart';
-import './screens/card_detail_screen.dart';
 import './providers/card_data_provider.dart';
+import './providers/history.dart';
+import './screens/card_detail_screen.dart';
+
 import './screens/card_search_screen.dart';
 
 void main() {
@@ -23,6 +26,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => Handedness(false),
         ),
+        ChangeNotifierProvider(
+          create: (_) => History(),
+        ),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -31,6 +37,7 @@ class MyApp extends StatelessWidget {
         ),
         routes: {
           CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),
+          HistoryScreen.routeName: (ctx) => const HistoryScreen(),
         },
         home: const CardSearchScreen(),
       ),

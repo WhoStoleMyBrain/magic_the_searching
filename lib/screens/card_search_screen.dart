@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../helpers/scryfall_request_handler.dart';
 import '../providers/handedness.dart';
+import '../providers/card_data_provider.dart';
 import '../screens/card_detail_screen.dart';
+import '../screens/history_screen.dart';
 import '../widgets/card_display.dart';
 import '../widgets/enter_search_term.dart';
-import '../providers/card_data_provider.dart';
 
 enum HandedMode {
   left,
@@ -143,7 +144,9 @@ class _MyAppBarState extends State<MyAppBar> {
             );
           },
         ),
-        IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+        IconButton(onPressed: () {
+          Navigator.of(context).pushNamed(HistoryScreen.routeName);
+        }, icon: const Icon(Icons.history)),
       ],
     );
   }
