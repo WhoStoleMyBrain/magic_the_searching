@@ -23,7 +23,7 @@ class CardData {
     id = searchValues?["id"].toString() ?? '';
     name = searchValues?["name"].toString() ?? '';
     text = searchValues?["text"].toString() ?? '';
-    print(searchValues?["hasTwoSides"]);
+    // print(searchValues?["hasTwoSides"]);
     hasTwoSides = ((searchValues?["hasTwoSides"] ?? false) == '1') ? true : false;
     images = [
       imageValues?["frontImage"].toString() ?? '',

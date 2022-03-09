@@ -54,31 +54,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 Text('Matches for this search: ${history.data[i].matches}'),
             onTap: () async {
               String searchText = history.data[i].query;
-              var dbData = {
-                'user_searches':
-                    await DBHelper.getData('user_searches', searchText),
-                'search_images':
-                    await DBHelper.getData('search_images', searchText),
-                'search_prices':
-                    await DBHelper.getData('search_prices', searchText),
-              };
-              // var dbData = await DBHelper.getData('user_searches', searchText);
-              // print(dbData);
-              List<CardData> myData = [];
-              // print(dbData['user_searches']?[0]);
-              for (int i = 0; i < dbData['user_searches']!.length; i++) {
-                myData.add(
-                  CardData.fromMap(
-                    {
-                      'user_searches': dbData['user_searches']?[i] ?? {},
-                      'search_images': dbData['search_images']?[i] ?? {},
-                      'search_prices': dbData['search_prices']?[i] ?? {},
-                    },
-                  ),
-                );
-              }
-              print(myData[0].name);
-              cardDataProvider.cards = myData;
+              cardDataProvider.query = searchText;
+              cardDataProvider.processSearchQuery();
               Navigator.of(context).pop();
               // Navigator.of(context).pushReplacementNamed('/');
               //getData(String table, String searchText)

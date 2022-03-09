@@ -67,26 +67,18 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
 
   Future<void> _startSearchForCard(BuildContext ctx, String text) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    final scryfallRequestHandler = ScryfallRequestHandler(searchText: text);
-    scryfallRequestHandler.translateTextToQuery();
-    await scryfallRequestHandler.sendQueryRequest();
-    final queryResult = scryfallRequestHandler.processQueryData();
-    if (queryResult.isEmpty) {
+    cardDataProvider.query = text;
+    bool requestSuccessful = await cardDataProvider.processSearchQuery();
+    if (!requestSuccessful) {
       _showFailedQuery(ctx, text);
-    } else {
-      for (CardData card in queryResult) {
-        await DBHelper.insert('user_searches', card.toDB(card, text));
-        // print('${card.name} inserted to DB');
-      }
     }
-    cardDataProvider.cards = queryResult;
   }
 
   @override
   Widget build(BuildContext context) {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
     return Scaffold(
-      appBar: const MyAppBar(),
+      appBar: MyAppBar(),
       body: cardDataProvider.cards.isEmpty
           ? const Center(child: Text('No cards found. Try searching for some!'))
           : GridView.builder(
@@ -114,7 +106,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
 }
 
 class MyAppBar extends StatefulWidget with PreferredSizeWidget {
-  const MyAppBar({Key? key}) : super(key: key);
+  MyAppBar({Key? key}) : super(key: key);
 
   @override
   State<MyAppBar> createState() => _MyAppBarState();
@@ -125,13 +117,46 @@ class MyAppBar extends StatefulWidget with PreferredSizeWidget {
 
 class _MyAppBarState extends State<MyAppBar> {
   bool handedMode = false;
+  String title = '';
+
+  void setTitle() {
+    final cardDataProvider =
+        Provider.of<CardDataProvider>(context, listen: true);
+    setState(() {
+      title = cardDataProvider.query;
+    });
+    // print('title set to $title');
+  }
 
   @override
   Widget build(BuildContext context) {
     final handednessProvider = Provider.of<Handedness>(context, listen: false);
+    final cardDataProvider =
+        Provider.of<CardDataProvider>(context, listen: false);
+    setTitle();
     return AppBar(
-      title:
-          handedMode ? const Text('right-handed') : const Text('left-handed'),
+      leadingWidth: 48.0,
+      leading: handedMode
+          ? const Padding(
+              padding: EdgeInsets.all(4.0),
+              child: CircleAvatar(
+                child: Text('R'),
+                radius: 5.0,
+              ),
+            )
+          : const Padding(
+              padding: EdgeInsets.all(4.0),
+              child: CircleAvatar(child: Text('L')),
+            ),
+      title: (cardDataProvider.cards.isNotEmpty && title != '')
+          ? Text(
+              'Searched for: $title',
+              style: const TextStyle(fontSize: 18),
+            )
+          : const Text(
+              'No search performed yet',
+              style: TextStyle(fontSize: 18),
+            ),
       actions: [
         Switch(
           value: handedMode,

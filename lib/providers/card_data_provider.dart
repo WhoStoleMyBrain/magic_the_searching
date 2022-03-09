@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../helpers/scryfall_request_handler.dart';
+import '../helpers/db_helper.dart';
 import '../models/card_data.dart';
 
 class CardDataProvider with ChangeNotifier {
   List<CardData> _cards = [];
+  String query = '';
 
   List<CardData> get cards {
     return [..._cards];
@@ -12,8 +15,6 @@ class CardDataProvider with ChangeNotifier {
 
   set cards(List<CardData> queryData) {
     _cards = queryData;
-    // print('Cards changed');
-    // print(_cards);
     notifyListeners();
   }
 
@@ -21,49 +22,59 @@ class CardDataProvider with ChangeNotifier {
     return _cards.firstWhere((card) => card.id == id);
   }
 
-  void setDummyData() {
-    _cards = [
-      CardData(
-        id: '1',
-        name: 'black lotus',
-        text: 'Add 3 colored mana in any combination',
-        images: ['assets/images/black_lotus.jpg'],
-        hasTwoSides: false,
-        price: {
-          'tcg': '0.0',
-          'tcg_foil': '0.0',
-          'cardmarket': '0.0',
-          'cardmarket_foil': '0.0',
-        },
-      ),
-      CardData(
+  Future<bool> processSearchQuery() async {
+    var historyData = await DBHelper.getHistoryData();
+    var queries = historyData.map((e) => e['searchText']);
+    if (queries.contains(query)) {
+      print('loading from DB');
+      return _loadDataFromDB();
+    } else {
+      print('loading from scryfall');
+      return _requestDataFromScryfall();
+    }
+  }
 
-        id: '2',
-        name: 'tropical island',
-        text: 'Add G or B. Play this ability as an interrupt',
-        images: ['assets/images/tropical_island.jpg'],
-        hasTwoSides: false,
-        price: {
-          'tcg': '0.0',
-          'tcg_foil': '0.0',
-          'cardmarket': '0.0',
-          'cardmarket_foil': '0.0',
-        },
-      ),
-      CardData(
-        id: '3',
-        name: 'werebear',
-        text: 'He exercises his right to bear arms',
-        images: ['assets/images/werebear.jpg'],
-        hasTwoSides: false,
-        price: {
-          'tcg': '0.0',
-          'tcg_foil': '0.0',
-          'cardmarket': '0.0',
-          'cardmarket_foil': '0.0',
-        },
-      ),
-    ];
-    notifyListeners();
+  Future<bool> _loadDataFromDB() async {
+    var dbData = {
+      'user_searches': await DBHelper.getData('user_searches', query),
+      'search_images': await DBHelper.getData('search_images', query),
+      'search_prices': await DBHelper.getData('search_prices', query),
+    };
+    // var dbData = await DBHelper.getData('user_searches', searchText);
+    // print(dbData);
+    List<CardData> myData = [];
+    // print(dbData['user_searches']?[0]);
+    for (int i = 0; i < dbData['user_searches']!.length; i++) {
+      myData.add(
+        CardData.fromMap(
+          {
+            'user_searches': dbData['user_searches']?[i] ?? {},
+            'search_images': dbData['search_images']?[i] ?? {},
+            'search_prices': dbData['search_prices']?[i] ?? {},
+          },
+        ),
+      );
+    }
+    // print(myData[0].name);
+    cards = myData;
+    return true;
+  }
+
+  Future<bool> _requestDataFromScryfall() async {
+    final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
+    scryfallRequestHandler.translateTextToQuery();
+    await scryfallRequestHandler.sendQueryRequest();
+    final queryResult = scryfallRequestHandler.processQueryData();
+    if (queryResult.isEmpty) {
+      return false;
+    } else {
+      for (CardData card in queryResult) {
+        await DBHelper.insert('user_searches', card.toDB(card, query));
+        // print('${card.name} inserted to DB');
+      }
+    }
+    cards = queryResult;
+
+    return true;
   }
 }

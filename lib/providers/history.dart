@@ -30,7 +30,7 @@ class History with ChangeNotifier {
   Future<void> getDBData() async {
     List<HistoryObject> data = [];
     var historyData = await DBHelper.getHistoryData();
-    print(historyData.toString());
+    // print(historyData.toString());
     for (var historyElement in historyData) {
       data.add(
         HistoryObject(

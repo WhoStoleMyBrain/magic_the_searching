@@ -26,6 +26,7 @@ class ScryfallRequestHandler {
       final response = await http.get(url);
 
       responseData = json.decode(response.body);
+      // print(responseData);
       if (response.statusCode != 200) {}
     } catch (error) {
       // print(error);
@@ -46,8 +47,8 @@ class ScryfallRequestHandler {
         : (card.containsKey("card_faces")
             ? (card["card_faces"][0].containsKey("image_uris")
                 ? getMultiplePictures(card)
-                : [isshin])
-            : [isshin]);
+                : [isshinLocal, isshinLocal])
+            : [isshinLocal, isshinLocal]);
   }
 
   Map<String, String> addPrices(Map<String, dynamic> card) {
@@ -76,7 +77,6 @@ class ScryfallRequestHandler {
 
   List<CardData> processQueryData() {
     final List<CardData> resultList = [];
-
     if (responseData["data"] != null) {
       responseData["data"].map(
         (result) {
@@ -87,7 +87,7 @@ class ScryfallRequestHandler {
               name: result["name"] ?? '',
               text: result["oracle_text"] ?? '',
               images: findPictures(result),
-              hasTwoSides: result.containsKey("card_faces") ? true : false,
+              hasTwoSides: (result.containsKey("card_faces") && !result.containsKey("image_uris")) ? true : false,
               price: addPrices(result),
             ),
           );
