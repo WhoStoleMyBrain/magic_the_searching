@@ -11,18 +11,18 @@ class History with ChangeNotifier {
 
   void setDummyData() {
     _data = [
-      HistoryObject(query: 'demon', matches: '13'),
-      HistoryObject(query: 'Myojin', matches: '10'),
-      HistoryObject(query: 'island', matches: '44'),
-      HistoryObject(query: 'demon', matches: '13'),
-      HistoryObject(query: 'Myojin', matches: '10'),
-      HistoryObject(query: 'island', matches: '44'),
-      HistoryObject(query: 'demon', matches: '13'),
-      HistoryObject(query: 'Myojin', matches: '10'),
-      HistoryObject(query: 'island', matches: '44'),
-      HistoryObject(query: 'demon', matches: '13'),
-      HistoryObject(query: 'Myojin', matches: '10'),
-      HistoryObject(query: 'island', matches: '44'),
+      HistoryObject(query: 'demon', matches: '13', dateTime: DateTime.now()),
+      HistoryObject(query: 'Myojin', matches: '10', dateTime: DateTime.now()),
+      HistoryObject(query: 'island', matches: '44', dateTime: DateTime.now()),
+      HistoryObject(query: 'demon', matches: '13', dateTime: DateTime.now()),
+      HistoryObject(query: 'Myojin', matches: '10', dateTime: DateTime.now()),
+      HistoryObject(query: 'island', matches: '44', dateTime: DateTime.now()),
+      HistoryObject(query: 'demon', matches: '13', dateTime: DateTime.now()),
+      HistoryObject(query: 'Myojin', matches: '10', dateTime: DateTime.now()),
+      HistoryObject(query: 'island', matches: '44', dateTime: DateTime.now()),
+      HistoryObject(query: 'demon', matches: '13', dateTime: DateTime.now()),
+      HistoryObject(query: 'Myojin', matches: '10', dateTime: DateTime.now()),
+      HistoryObject(query: 'island', matches: '44', dateTime: DateTime.now()),
     ];
   }
 
@@ -36,9 +36,11 @@ class History with ChangeNotifier {
         HistoryObject(
           query: historyElement['searchText'].toString(),
           matches: historyElement['count'].toString(),
+          dateTime: DateTime.parse(historyElement['requestTime'].toString()),
         ),
       );
     }
+    // data = data.reversed.toList();
     _data = data;
     notifyListeners();
   }
@@ -47,6 +49,8 @@ class History with ChangeNotifier {
 class HistoryObject {
   String query;
   String matches;
+  DateTime dateTime;
 
-  HistoryObject({required this.query, required this.matches});
+  HistoryObject(
+      {required this.query, required this.matches, required this.dateTime});
 }

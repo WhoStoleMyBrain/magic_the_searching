@@ -89,6 +89,7 @@ class ScryfallRequestHandler {
               images: findPictures(result),
               hasTwoSides: (result.containsKey("card_faces") && !result.containsKey("image_uris")) ? true : false,
               price: addPrices(result),
+              dateTime: DateTime.now(),
             ),
           );
         },

@@ -52,6 +52,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             title: Text('Search term: ${history.data[i].query}'),
             subtitle:
                 Text('Matches for this search: ${history.data[i].matches}'),
+            trailing: Text(
+                '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
             onTap: () async {
               String searchText = history.data[i].query;
               cardDataProvider.query = searchText;

@@ -8,11 +8,11 @@ class DBHelper {
     return sql.openDatabase(path.join(dbPath, 'searches.db'),
         onCreate: (db, version) async {
       await db.execute(
-          'CREATE TABLE user_searches(searchText TEXT, id TEXT PRIMARY KEY, name TEXT, text TEXT, hasTwoSides BIT)');
+          'CREATE TABLE user_searches(searchText TEXT, id TEXT PRIMARY KEY, name TEXT, text TEXT, hasTwoSides BIT, requestTime DATETIME)');
       await db.execute(
-          'CREATE TABLE search_images(searchText TEXT, id TEXT PRIMARY KEY, frontImage TEXT, backImage TEXT)');
+          'CREATE TABLE search_images(searchText TEXT, id TEXT PRIMARY KEY, frontImage TEXT, backImage TEXT, requestTime DATETIME)');
       await db.execute(
-          'CREATE TABLE search_prices(searchText TEXT, id TEXT PRIMARY KEY, tcg TEXT, tcgFoil TEXT, cdm TEXT, cdmFoil TEXT)');
+          'CREATE TABLE search_prices(searchText TEXT, id TEXT PRIMARY KEY, tcg TEXT, tcgFoil TEXT, cdm TEXT, cdmFoil TEXT, requestTime DATETIME)');
       // await db.execute(
       //     'CREATE TABLE user_history(id TEXT PRIMARY KEY, name TEXT, text TEXT, hasTwoSides BIT)');
       // await db.execute(
@@ -25,7 +25,6 @@ class DBHelper {
   static Future<void> insert(
       String table, Map<String, Map<String, Object?>> data) async {
     final db = await DBHelper.database();
-    // insert correct data into user_searches
     db.insert('user_searches', data["user_searches"] ?? {},
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
     db.insert('search_images', data["search_images"] ?? {},
@@ -41,14 +40,15 @@ class DBHelper {
 
   static Future<List<Map<String, dynamic>>> getHistoryData() async {
     final db = await DBHelper.database();
-    var history = await db.rawQuery('SELECT searchText, COUNT(*) as count from user_searches GROUP BY searchText');
+    var history = await db.rawQuery('SELECT searchText, COUNT(*) as count, requestTime from user_searches GROUP BY searchText ORDER BY requestTime DESC');
     return history;
   }
-}
 
-// String id;
-// String name;
-// String text;
-// List<String> images;
-// bool hasTwoSides;
-// Map<String, dynamic> price;
+  static Future<void> cleanDB() async {
+    final db = await DBHelper.database();
+    await db.execute("DELETE FROM search_images WHERE requestTime <= datetime('now', '-7 day')");
+    await db.execute("DELETE FROM search_prices WHERE requestTime <= datetime('now', '-7 day')");
+    await db.execute("DELETE FROM user_searches WHERE requestTime <= datetime('now', '-7 day')");
+  }
+
+}
