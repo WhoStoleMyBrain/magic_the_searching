@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/screens/card_search_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 
@@ -10,6 +11,36 @@ class CardDetailScreen extends StatelessWidget {
   const CardDetailScreen({Key? key}) : super(key: key);
 
   // final CardData cardData;
+  Future<void> _showFailedQuery(BuildContext ctx, String query) async {
+    return showDialog<void>(
+      context: ctx,
+      builder: (bCtx) {
+        return AlertDialog(
+          title: const Text('No results found'),
+          content: SingleChildScrollView(
+              child: Text('No results matching \'$query\' found.')),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(bCtx).pop();
+                },
+                child: const Text('Okay'))
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _startSearchForVersions(BuildContext ctx, String text) async {
+    final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
+    cardDataProvider.query = text[0] == '!' ? text : '!' + text;
+    bool requestSuccessful = await cardDataProvider.processVersionsQuery();
+    if (!requestSuccessful) {
+      _showFailedQuery(ctx, text);
+      return;
+    }
+    Navigator.of(ctx).pushReplacementNamed('/');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +49,24 @@ class CardDetailScreen extends StatelessWidget {
         Provider.of<CardDataProvider>(context, listen: false).getCardById(id);
     final mediaQuery = MediaQuery.of(context);
     // const double fontSize = 20;
-    const TextStyle textStyle = TextStyle(fontSize: 24,);
+    const TextStyle textStyle = TextStyle(
+      fontSize: 24,
+    );
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
           title: Text(cardData.name),
+          actions: [
+            IconButton(
+              // on button press try to get all versions from the same card. on failed
+              // -> show error message, else: push card_search_screen after setting new
+              // data on cardDataProvider
+              onPressed: () {
+                _startSearchForVersions(context, cardData.name);
+              },
+              icon: const Icon(Icons.more_outlined),
+            )
+          ],
         ),
         body: InkWell(
           onTap: () {
@@ -46,8 +90,16 @@ class CardDetailScreen extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: const [
-                              Expanded(child: Text('Normal', style: textStyle,)),
-                              Expanded(child: Text('Foil', style: textStyle,)),
+                              Expanded(
+                                  child: Text(
+                                'Normal',
+                                style: textStyle,
+                              )),
+                              Expanded(
+                                  child: Text(
+                                'Foil',
+                                style: textStyle,
+                              )),
                             ],
                           ),
                           const Divider(
@@ -58,12 +110,16 @@ class CardDetailScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               Expanded(
-                                  child:
-                                      Text('TCG:  \$${cardData.price['tcg']}', style: textStyle,)),
+                                  child: Text(
+                                'TCG:  \$${cardData.price['tcg']}',
+                                style: textStyle,
+                              )),
                               // Expanded(child: Container()),
                               Expanded(
                                   child: Text(
-                                      'TCG:  \$${cardData.price['tcg_foil']}', style: textStyle,)),
+                                'TCG:  \$${cardData.price['tcg_foil']}',
+                                style: textStyle,
+                              )),
                             ],
                           ),
                           const SizedBox(
@@ -74,10 +130,14 @@ class CardDetailScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                   child: Text(
-                                      'CDM: €${cardData.price['cardmarket']}', style: textStyle,)),
+                                'CDM: €${cardData.price['cardmarket']}',
+                                style: textStyle,
+                              )),
                               Expanded(
                                   child: Text(
-                                      'CDM: €${cardData.price['cardmarket_foil']}', style: textStyle,)),
+                                'CDM: €${cardData.price['cardmarket_foil']}',
+                                style: textStyle,
+                              )),
                             ],
                           ),
                         ],

@@ -7,6 +7,7 @@ import '../models/card_data.dart';
 class ScryfallRequestHandler {
   static const String apiBasePath = 'https://api.scryfall.com';
   static const String queryBaseString = '/cards/search?';
+  static const String versionBaseString = '/cards/search?unique=art&';
   static const String isshin =
       'https://c1.scryfall.com/file/scryfall-cards/large/front/a/0/a062a004-984e-4b62-960c-af7288f7a3e9.jpg?1643846546';
   static const String isshinLocal = 'assets/images/isshin-two-heavens-as-one.jpg';
@@ -16,8 +17,22 @@ class ScryfallRequestHandler {
   ScryfallRequestHandler({required this.searchText});
 
   void translateTextToQuery() {
-    query = searchText.replaceAll(RegExp(' '), '+');
+    // query = searchText.replaceAll(RegExp(' '), '+');
+    query = Uri.encodeFull(searchText);
     query = 'q=' + query;
+  }
+
+  Future<void> sendVersionsRequest() async {
+    final url = Uri.parse('$apiBasePath$versionBaseString$query');
+    try {
+      final response = await http.get(url);
+
+      responseData = json.decode(response.body);
+      // print(responseData);
+      if (response.statusCode != 200) {}
+    } catch (error) {
+      // print(error);
+    }
   }
 
   Future<void> sendQueryRequest() async {

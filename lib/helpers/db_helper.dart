@@ -8,7 +8,7 @@ class DBHelper {
     return sql.openDatabase(path.join(dbPath, 'searches.db'),
         onCreate: (db, version) async {
       await db.execute(
-          'CREATE TABLE user_searches(searchText TEXT, id TEXT PRIMARY KEY, name TEXT, text TEXT, hasTwoSides BIT, requestTime DATETIME)');
+          'CREATE TABLE user_searches(searchText TEXT, id TEXT PRIMARY KEY, name TEXT, text TEXT, hasTwoSides BIT, requestTime DATETIME, isFromVersions BIT)');
       await db.execute(
           'CREATE TABLE search_images(searchText TEXT, id TEXT PRIMARY KEY, frontImage TEXT, backImage TEXT, requestTime DATETIME)');
       await db.execute(
@@ -33,9 +33,9 @@ class DBHelper {
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
-  static Future<List<Map<String, dynamic>>> getData(String table, String searchText) async {
+  static Future<List<Map<String, dynamic>>> getData(String table, String column, String searchText, ) async {
     final db = await DBHelper.database();
-    return db.query(table, where: 'searchText = ?', whereArgs: [searchText]);
+    return db.query(table, where: '$column = ?', whereArgs: [searchText]);
   }
 
   static Future<List<Map<String, dynamic>>> getHistoryData() async {
@@ -43,6 +43,17 @@ class DBHelper {
     var history = await db.rawQuery('SELECT searchText, COUNT(*) as count, requestTime from user_searches GROUP BY searchText ORDER BY requestTime DESC');
     return history;
   }
+
+  static Future<List<Map<String, dynamic>>> getVersionsData() async {
+    final db = await DBHelper.database();
+    var history = await db.rawQuery('SELECT name, searchText FROM user_searches WHERE user_searches.name = user_searches.searchText AND isFromVersions = 1');
+    return history;
+  }
+
+  // static Future<List<Map<String, dynamic>>> getVersions(String table, String searchText) async {
+  //   final db = await DBHelper.database();
+  //   return db.query(table, where: 'name = ?', whereArgs: [searchText]);
+  // }
 
   static Future<void> cleanDB() async {
     final db = await DBHelper.database();

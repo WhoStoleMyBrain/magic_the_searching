@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 class CardData {
   late String id;
   late String name;
@@ -44,7 +46,7 @@ class CardData {
     };
   }
 
-  Map<String, Map<String, Object?>> toDB(CardData cardData, String searchText) {
+  Map<String, Map<String, Object?>> toDB(CardData cardData, String searchText, bool isFromVersions) {
     var today = cardData.dateTime.toIso8601String();
     // var today = DateTime.now().subtract(const Duration(days: 9)).toIso8601String();
     final searchValues = {
@@ -54,6 +56,7 @@ class CardData {
       'text': cardData.text,
       'hasTwoSides': cardData.hasTwoSides ? 1 : 0,
       'requestTime': today,
+      'isFromVersions': isFromVersions ? 1 : 0,
       // 'requestTime': DateTime.now().subtract(const Duration(days: 9)).toIso8601String(),
     };
     final imageValues = {

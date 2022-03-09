@@ -8,6 +8,7 @@ import '../models/card_data.dart';
 class CardDataProvider with ChangeNotifier {
   List<CardData> _cards = [];
   String query = '';
+  String column = 'searchText';
 
   List<CardData> get cards {
     return [..._cards];
@@ -26,19 +27,36 @@ class CardDataProvider with ChangeNotifier {
     var historyData = await DBHelper.getHistoryData();
     var queries = historyData.map((e) => e['searchText']);
     if (queries.contains(query)) {
-      print('loading from DB');
+      // print('loading from DB');
       return _loadDataFromDB();
     } else {
-      print('loading from scryfall');
+      // print('loading from scryfall');
       return _requestDataFromScryfall();
+    }
+  }
+
+  Future<bool> processVersionsQuery() async {
+    var historyData = await DBHelper.getVersionsData();
+    var queries = historyData.map((e) => e['searchText']);
+    // print(queries);
+    if (queries.contains(query) && queries.length > 1) {
+      // if (false) {
+      // print('loading from DB');
+      return _loadDataFromDB();
+    } else {
+      // print('loading from scryfall');
+      return _requestVersionsFromScryfall();
     }
   }
 
   Future<bool> _loadDataFromDB() async {
     var dbData = {
-      'user_searches': await DBHelper.getData('user_searches', query),
-      'search_images': await DBHelper.getData('search_images', query),
-      'search_prices': await DBHelper.getData('search_prices', query),
+      'user_searches':
+          await DBHelper.getData('user_searches', 'searchText', query),
+      'search_images':
+          await DBHelper.getData('search_images', 'searchText', query),
+      'search_prices':
+          await DBHelper.getData('search_prices', 'searchText', query),
     };
     // var dbData = await DBHelper.getData('user_searches', searchText);
     // print(dbData);
@@ -69,7 +87,25 @@ class CardDataProvider with ChangeNotifier {
       return false;
     } else {
       for (CardData card in queryResult) {
-        await DBHelper.insert('user_searches', card.toDB(card, query));
+        await DBHelper.insert('user_searches', card.toDB(card, query, false));
+        // print('${card.name} inserted to DB');
+      }
+    }
+    cards = queryResult;
+    return true;
+  }
+
+  Future<bool> _requestVersionsFromScryfall() async {
+    final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
+    scryfallRequestHandler.translateTextToQuery();
+    await scryfallRequestHandler.sendVersionsRequest();
+    final queryResult = scryfallRequestHandler.processQueryData();
+    // print(queryResult);
+    if (queryResult.isEmpty) {
+      return false;
+    } else {
+      for (CardData card in queryResult) {
+        await DBHelper.insert('user_searches', card.toDB(card, query, true));
         // print('${card.name} inserted to DB');
       }
     }
@@ -77,4 +113,6 @@ class CardDataProvider with ChangeNotifier {
 
     return true;
   }
+
+  //sendVersionsRequest(String cardName)
 }

@@ -40,31 +40,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
       appBar: AppBar(
         title: const Text('Your past searches'),
       ),
-      body: ListView.builder(
-        itemCount: history.data.length,
-        itemBuilder: (ctx, i) {
-          return ListTile(
-            // minVerticalPadding: 10.0,
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 4.0,
-              horizontal: 24.0,
+      body: cardDataProvider.cards.isEmpty
+          ? const Center(
+              child: Text(
+                  'No data found in history. \nSearches are saved here for 7 days.'))
+          : ListView.builder(
+              itemCount: history.data.length,
+              itemBuilder: (ctx, i) {
+                return ListTile(
+                  // minVerticalPadding: 10.0,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 4.0,
+                    horizontal: 24.0,
+                  ),
+                  title: Text('Search term: ${history.data[i].query}'),
+                  subtitle: Text(
+                      'Matches for this search: ${history.data[i].matches}'),
+                  trailing: Text(
+                      '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
+                  onTap: () async {
+                    String searchText = history.data[i].query;
+                    cardDataProvider.query = searchText;
+                    cardDataProvider.processSearchQuery();
+                    Navigator.of(context).pop();
+                    // Navigator.of(context).pushReplacementNamed('/');
+                    //getData(String table, String searchText)
+                  },
+                );
+              },
             ),
-            title: Text('Search term: ${history.data[i].query}'),
-            subtitle:
-                Text('Matches for this search: ${history.data[i].matches}'),
-            trailing: Text(
-                '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
-            onTap: () async {
-              String searchText = history.data[i].query;
-              cardDataProvider.query = searchText;
-              cardDataProvider.processSearchQuery();
-              Navigator.of(context).pop();
-              // Navigator.of(context).pushReplacementNamed('/');
-              //getData(String table, String searchText)
-            },
-          );
-        },
-      ),
     );
   }
 }
