@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../helpers/db_helper.dart';
 import 'package:provider/provider.dart';
 import '../helpers/scryfall_request_handler.dart';
+import '../models/card_data.dart';
 import '../providers/handedness.dart';
 import '../providers/card_data_provider.dart';
 import '../screens/card_detail_screen.dart';
@@ -71,6 +73,11 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     final queryResult = scryfallRequestHandler.processQueryData();
     if (queryResult.isEmpty) {
       _showFailedQuery(ctx, text);
+    } else {
+      for (CardData card in queryResult) {
+        await DBHelper.insert('user_searches', card.toDB(card, text));
+        // print('${card.name} inserted to DB');
+      }
     }
     cardDataProvider.cards = queryResult;
   }
@@ -78,14 +85,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   @override
   Widget build(BuildContext context) {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
-    final handednessProvider = Provider.of<Handedness>(context);
-    // bool handedMode = false;
-    // Future.delayed(Duration.zero, () {
-    //   cardDataProvider.setDummyData();
-    // });
-
-    // final mediaQuery = MediaQuery.of(context);
-
     return Scaffold(
       appBar: const MyAppBar(),
       body: cardDataProvider.cards.isEmpty
@@ -131,7 +130,8 @@ class _MyAppBarState extends State<MyAppBar> {
   Widget build(BuildContext context) {
     final handednessProvider = Provider.of<Handedness>(context, listen: false);
     return AppBar(
-      title: handedMode ? const Text('right-handed') : const Text('left-handed'),
+      title:
+          handedMode ? const Text('right-handed') : const Text('left-handed'),
       actions: [
         Switch(
           value: handedMode,
@@ -144,9 +144,11 @@ class _MyAppBarState extends State<MyAppBar> {
             );
           },
         ),
-        IconButton(onPressed: () {
-          Navigator.of(context).pushNamed(HistoryScreen.routeName);
-        }, icon: const Icon(Icons.history)),
+        IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(HistoryScreen.routeName);
+            },
+            icon: const Icon(Icons.history)),
       ],
     );
   }

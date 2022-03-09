@@ -9,6 +9,7 @@ class ScryfallRequestHandler {
   static const String queryBaseString = '/cards/search?';
   static const String isshin =
       'https://c1.scryfall.com/file/scryfall-cards/large/front/a/0/a062a004-984e-4b62-960c-af7288f7a3e9.jpg?1643846546';
+  static const String isshinLocal = 'assets/images/isshin-two-heavens-as-one.jpg';
   final String searchText;
   String query = '';
   Map<String, dynamic> responseData = {};

@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         ),
         routes: {
           CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),
-          HistoryScreen.routeName: (ctx) => const HistoryScreen(),
+          HistoryScreen.routeName: (ctx) => HistoryScreen(),
         },
         home: const CardSearchScreen(),
       ),

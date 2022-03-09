@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/scryfall_request_handler.dart';
 import '../models/card_data.dart';
 
 class CardDisplay extends StatelessWidget {
@@ -88,7 +89,6 @@ class CardImageDisplay extends StatefulWidget {
   final CardData cardData;
   final MediaQueryData mediaQuery;
 
-
   @override
   State<CardImageDisplay> createState() => _CardImageDisplayState();
 }
@@ -109,21 +109,30 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                     2,
                 height: (widget.mediaQuery.size.height / 3),
               )
-            : Image(image: AssetImage(widget.cardData.images[_side])),
+            : widget.cardData.images[_side] == ''
+                ? const Image(
+                    image: AssetImage(ScryfallRequestHandler.isshinLocal),
+                  )
+                : Image(image: AssetImage(widget.cardData.images[_side])),
         if (widget.cardData.hasTwoSides)
           Positioned(
             left: (widget.mediaQuery.size.width -
-                widget.mediaQuery.padding.horizontal) /
-                2 / 2 - 50,
+                        widget.mediaQuery.padding.horizontal) /
+                    2 /
+                    2 -
+                50,
             top: (widget.mediaQuery.size.height / 3) - 50 - 10,
             child: MaterialButton(
               onPressed: () {
                 setState(() {
                   _side == 0 ? _side = 1 : _side = 0;
                 });
-
               },
-              child: const Icon(Icons.compare_arrows, size: 35, color: Colors.black87,),
+              child: const Icon(
+                Icons.compare_arrows,
+                size: 35,
+                color: Colors.black87,
+              ),
               height: 50,
               shape: const CircleBorder(),
               color: const Color.fromRGBO(128, 128, 128, 0.5),

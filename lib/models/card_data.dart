@@ -15,25 +15,28 @@ class CardData {
     required this.price,
   });
 
-  CardData.fromMap(Map<String, Map<String, Object>> map) {
-    final searchValues = map["search_values"];
-    final imageValues = map["imageValues"];
-    final priceValues = map["priceValues"];
-    id = searchValues!["id"].toString() ?? '';
-    name = searchValues["name"].toString() ?? '';
-    text = searchValues["text"].toString() ?? '';
-    hasTwoSides = searchValues["hasTwoSides"] == 1 ? true : false;
+  CardData.fromMap(Map<String, Map<String, dynamic>> map) {
+    final searchValues = map['user_searches'];
+    final imageValues = map["search_images"];
+    final priceValues = map["search_prices"];
+    // print(searchValues);
+    id = searchValues?["id"].toString() ?? '';
+    name = searchValues?["name"].toString() ?? '';
+    text = searchValues?["text"].toString() ?? '';
+    print(searchValues?["hasTwoSides"]);
+    hasTwoSides = ((searchValues?["hasTwoSides"] ?? false) == '1') ? true : false;
     images = [
-      imageValues!["frontImage"].toString(),
-      (imageValues["backImage"] != '' && imageValues["backImage"] != null)
-          ? imageValues["backImage"].toString()
+      imageValues?["frontImage"].toString() ?? '',
+      ((imageValues?["backImage"] ?? '') != '' && (imageValues?["backImage"]) != null)
+          ? imageValues!["backImage"].toString()
           : ''
     ];
+    // print(images);
     price = {
-      'tcg': priceValues!["tcg"],
-      'tcg_foil': priceValues["tcgFoil"],
-      'cardmarket': priceValues["cdm"],
-      'cardmarket_foil': priceValues["cdmFoil"],
+      'tcg': priceValues?["tcg"] ?? '--.--',
+      'tcg_foil': priceValues?["tcgFoil"] ?? '--.--',
+      'cardmarket': priceValues?["cdm"] ?? '--.--',
+      'cardmarket_foil': priceValues?["cdmFoil"] ?? '--.--',
     };
   }
 
