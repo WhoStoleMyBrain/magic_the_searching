@@ -5,30 +5,55 @@ import 'package:http/http.dart' as http;
 import '../models/card_data.dart';
 
 class ScryfallRequestHandler {
-  static const String apiBasePath = 'https://api.scryfall.com';
-  static const String queryBaseString = '/cards/search?';
-  static const String versionBaseString = '/cards/search?unique=art&';
+  static const String apiBasePath = 'api.scryfall.com';
+  static const String queryBaseString = '/cards/search';
+  static const String versionBaseString = '/cards/search';
   static const String isshin =
       'https://c1.scryfall.com/file/scryfall-cards/large/front/a/0/a062a004-984e-4b62-960c-af7288f7a3e9.jpg?1643846546';
-  static const String isshinLocal = 'assets/images/isshin-two-heavens-as-one.jpg';
-  final String searchText;
+  static const String isshinLocal =
+      'assets/images/isshin-two-heavens-as-one.jpg';
+  String searchText;
   String query = '';
   Map<String, dynamic> responseData = {};
   ScryfallRequestHandler({required this.searchText});
 
   void translateTextToQuery() {
     // query = searchText.replaceAll(RegExp(' '), '+');
-    query = Uri.encodeFull(searchText);
+    // query = Uri.encodeQueryComponent(searchText);
+    query = Uri.https('', searchText).toString();
     query = 'q=' + query;
+    // print(query);
+  }
+
+  void getRequestHttpsQuery() {
+    query = Uri.https(
+            apiBasePath, queryBaseString, { 'q': searchText,})
+        .toString();
+    // query = query.replaceAll(RegExp('%21'), '!');
+    // query = query.replaceAll(RegExp('%3F'), '');
+
+    // print('query:$query');
+  }
+  void getVersionsHttpsQuery() {
+    // searchText = searchText.contains(' ') ? '"$searchText"' : searchText;
+    // print('query:$query');
+    query = Uri.https(
+        apiBasePath, versionBaseString, { 'unique':'art', 'q': searchText.contains(' ') ? '!"${searchText.substring(1)}"' : searchText})
+        .toString();
+    // query = query.replaceAll(RegExp('%21'), '!');
+    // query = query.replaceAll(RegExp('%3F'), '');
+
+    // print('query:$query');
   }
 
   Future<void> sendVersionsRequest() async {
-    final url = Uri.parse('$apiBasePath$versionBaseString$query');
+    // final url = Uri.parse('$apiBasePath$versionBaseString$query');
+    final url = Uri.parse(query);
     try {
       final response = await http.get(url);
 
       responseData = json.decode(response.body);
-      // print(responseData);
+      // print(response.statusCode);
       if (response.statusCode != 200) {}
     } catch (error) {
       // print(error);
@@ -36,12 +61,13 @@ class ScryfallRequestHandler {
   }
 
   Future<void> sendQueryRequest() async {
-    final url = Uri.parse('$apiBasePath$queryBaseString$query');
+    // final url = Uri.parse('$apiBasePath$queryBaseString$query');
+    final url = Uri.parse(query);
     try {
       final response = await http.get(url);
 
       responseData = json.decode(response.body);
-      // print(responseData);
+      // print(response.headers);
       if (response.statusCode != 200) {}
     } catch (error) {
       // print(error);
@@ -102,7 +128,10 @@ class ScryfallRequestHandler {
               name: result["name"] ?? '',
               text: result["oracle_text"] ?? '',
               images: findPictures(result),
-              hasTwoSides: (result.containsKey("card_faces") && !result.containsKey("image_uris")) ? true : false,
+              hasTwoSides: (result.containsKey("card_faces") &&
+                      !result.containsKey("image_uris"))
+                  ? true
+                  : false,
               price: addPrices(result),
               dateTime: DateTime.now(),
             ),

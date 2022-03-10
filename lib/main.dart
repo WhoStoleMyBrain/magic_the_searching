@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
     // print(today.difference(dateTime).inDays);
     //today.difference(dateTime).inDays > 86400
     if (today.difference(dateTime).inDays > 7) {
-      print('clearing db...');
+      // print('clearing db...');
       await DBHelper.cleanDB();
       await prefs.setInt('lastDbCleaned', today.millisecondsSinceEpoch);
     }
@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
         ),
         routes: {
           CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),
-          HistoryScreen.routeName: (ctx) => HistoryScreen(),
+          HistoryScreen.routeName: (ctx) => const HistoryScreen(),
         },
         home: const CardSearchScreen(),
       ),

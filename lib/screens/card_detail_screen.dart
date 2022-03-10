@@ -1,5 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/screens/card_search_screen.dart';
+import 'package:magic_the_searching/helpers/camera_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 
@@ -52,6 +54,7 @@ class CardDetailScreen extends StatelessWidget {
     const TextStyle textStyle = TextStyle(
       fontSize: 24,
     );
+
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -82,67 +85,7 @@ class CardDetailScreen extends StatelessWidget {
                   children: [
                     CardImageDisplay(
                         cardData: cardData, mediaQuery: mediaQuery),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Expanded(
-                                  child: Text(
-                                'Normal',
-                                style: textStyle,
-                              )),
-                              Expanded(
-                                  child: Text(
-                                'Foil',
-                                style: textStyle,
-                              )),
-                            ],
-                          ),
-                          const Divider(
-                            color: Colors.black,
-                            thickness: 1,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Expanded(
-                                  child: Text(
-                                'TCG:  \$${cardData.price['tcg']}',
-                                style: textStyle,
-                              )),
-                              // Expanded(child: Container()),
-                              Expanded(
-                                  child: Text(
-                                'TCG:  \$${cardData.price['tcg_foil']}',
-                                style: textStyle,
-                              )),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 3,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                  child: Text(
-                                'CDM: €${cardData.price['cardmarket']}',
-                                style: textStyle,
-                              )),
-                              Expanded(
-                                  child: Text(
-                                'CDM: €${cardData.price['cardmarket_foil']}',
-                                style: textStyle,
-                              )),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    CardDetails(textStyle: textStyle, cardData: cardData),
                   ],
                 ),
               ),
@@ -168,44 +111,182 @@ class CardImageDisplay extends StatefulWidget {
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
+  var _hasLocalImage = false;
+  late File _storedImage;
+  // bool _isLoading = false;
+
+  Future<void> getLocalImage() async {
+    var fileExists =
+        await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
+    var localFile =
+        await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+    // print(fileExists);
+    // print(localFile.toString());
+    _storedImage = localFile;
+    _hasLocalImage = fileExists;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      // alignment: Alignment.center ,
-      children: [
-        widget.cardData.images[_side].contains('http')
-            ? Image.network(
-                widget.cardData.images[_side],
-                fit: BoxFit.cover,
-                width: (widget.mediaQuery.size.width -
-                    widget.mediaQuery.padding.horizontal),
-                height: (widget.mediaQuery.size.height * 2 / 3),
-              )
-            : Image(image: AssetImage(widget.cardData.images[_side])),
-        if (widget.cardData.hasTwoSides)
-          Positioned(
-            left: (widget.mediaQuery.size.width -
-                        widget.mediaQuery.padding.horizontal) /
-                    2 -
-                50,
-            top: (widget.mediaQuery.size.height * 2 / 3) - 70 - 10,
-            child: MaterialButton(
-              onPressed: () {
-                setState(() {
-                  _side == 0 ? _side = 1 : _side = 0;
-                });
-              },
-              child: const Icon(
-                Icons.compare_arrows,
-                size: 50,
-                color: Colors.black87,
+    return FutureBuilder(
+      future: getLocalImage(),
+      builder: (context, snapshot) {
+        // print('detail');
+        // print(_hasLocalImage);
+        // print(_storedImage.path);
+
+        return Stack(
+          // alignment: Alignment.center ,
+          children: [
+            // _isLoading ? const Center(child: CircularProgressIndicator(),) :
+            (snapshot.connectionState != ConnectionState.none)
+                ? _hasLocalImage
+                    ? Image.file(
+                        _storedImage,
+                        fit: BoxFit.cover,
+                        // fit: BoxFit.cover,
+                        width: (widget.mediaQuery.size.width -
+                            widget.mediaQuery.padding.horizontal),
+                        height: (widget.mediaQuery.size.height * 2 / 3),
+                      )
+                    : widget.cardData.images[_side].contains('http')
+                        ? Image.network(
+                            widget.cardData.images[_side],
+                            fit: BoxFit.cover,
+                            width: (widget.mediaQuery.size.width -
+                                widget.mediaQuery.padding.horizontal),
+                            height: (widget.mediaQuery.size.height * 2 / 3),
+                          )
+                        : Image(
+                            image: AssetImage(widget.cardData.images[_side]))
+                : const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+            if (widget.cardData.hasTwoSides)
+              Positioned(
+                left: (widget.mediaQuery.size.width -
+                            widget.mediaQuery.padding.horizontal) /
+                        2 -
+                    50,
+                top: (widget.mediaQuery.size.height * 2 / 3) - 70 - 10,
+                child: MaterialButton(
+                  onPressed: () {
+                    setState(() {
+                      _side == 0 ? _side = 1 : _side = 0;
+                    });
+                  },
+                  child: const Icon(
+                    Icons.compare_arrows,
+                    size: 50,
+                    color: Colors.black87,
+                  ),
+                  height: 70,
+                  shape: const CircleBorder(),
+                  color: const Color.fromRGBO(128, 128, 128, 0.5),
+                ),
               ),
-              height: 70,
-              shape: const CircleBorder(),
-              color: const Color.fromRGBO(128, 128, 128, 0.5),
-            ),
+            // if (_hasLocalImage)
+            //   Positioned(
+            //     left: (widget.mediaQuery.size.width -
+            //                 widget.mediaQuery.padding.horizontal) /
+            //             2 -
+            //         50,
+            //     top: (widget.mediaQuery.size.height * 2 / 3) - 70 - 10,
+            //     child: MaterialButton(
+            //       onPressed: () {
+            //         // setState(() {
+            //         //   _side == 0 ? _side = 1 : _side = 0;
+            //         // });
+            //       },
+            //       child: const Icon(
+            //         Icons.car_rental,
+            //         size: 50,
+            //         color: Colors.black87,
+            //       ),
+            //       height: 70,
+            //       shape: const CircleBorder(),
+            //       color: const Color.fromRGBO(128, 128, 128, 0.5),
+            //     ),
+            //   ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class CardDetails extends StatelessWidget {
+  const CardDetails({
+    Key? key,
+    required this.textStyle,
+    required this.cardData,
+  }) : super(key: key);
+
+  final TextStyle textStyle;
+  final CardData cardData;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: Text(
+                'Normal',
+                style: textStyle,
+              )),
+              Expanded(
+                  child: Text(
+                'Foil',
+                style: textStyle,
+              )),
+            ],
           ),
-      ],
+          const Divider(
+            color: Colors.black,
+            thickness: 1,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                  child: Text(
+                'TCG:  \$${cardData.price['tcg']}',
+                style: textStyle,
+              )),
+              // Expanded(child: Container()),
+              Expanded(
+                  child: Text(
+                'TCG:  \$${cardData.price['tcg_foil']}',
+                style: textStyle,
+              )),
+            ],
+          ),
+          const SizedBox(
+            height: 3,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: Text(
+                'CDM: €${cardData.price['cardmarket']}',
+                style: textStyle,
+              )),
+              Expanded(
+                  child: Text(
+                'CDM: €${cardData.price['cardmarket_foil']}',
+                style: textStyle,
+              )),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import '../helpers/db_helper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart' as sys_paths;
+import 'package:path/path.dart' as path;
+
 import 'package:provider/provider.dart';
-import '../helpers/scryfall_request_handler.dart';
-import '../models/card_data.dart';
+
 import '../providers/handedness.dart';
 import '../providers/card_data_provider.dart';
 import '../screens/card_detail_screen.dart';
@@ -123,7 +126,7 @@ class _MyAppBarState extends State<MyAppBar> {
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: true);
     setState(() {
-      title = cardDataProvider.query;
+      title = cardDataProvider.query.isNotEmpty ? (cardDataProvider.query[0] == '!' ? cardDataProvider.query.substring(1) : cardDataProvider.query) : '';
     });
     // print('title set to $title');
   }
@@ -190,6 +193,31 @@ class MyFloatingActionButtons extends StatefulWidget {
 }
 
 class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
+
+  late File _storedImage;
+
+  Future<void> _takePicture() async {
+    final picker = ImagePicker();
+    final imageFile = await picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 600,
+    );
+    if (imageFile == null) {
+      return;
+    }
+    setState(() {
+      _storedImage = File(imageFile.path);
+    });
+    final appDir = await sys_paths.getApplicationDocumentsDirectory();
+    final fileName = path.basename(imageFile.path);
+    final savedImage =
+    await File(imageFile.path).copy('${appDir.path}/${fileName}');
+    // print('appDir:$appDir');
+    // print('fileName:$fileName');
+    // print('savedImage:${savedImage.toString()}');
+    // widget.onSelectImage(savedImage);
+  }
+
   @override
   Widget build(BuildContext context) {
     final handednessProvider = Provider.of<Handedness>(context);
@@ -210,12 +238,12 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
               child: const Icon(Icons.search),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.all(5.0),
+          Padding(
+            padding: const EdgeInsets.all(5.0),
             child: FloatingActionButton(
               heroTag: 'camera',
-              onPressed: null,
-              child: Icon(Icons.camera_enhance),
+              onPressed: _takePicture,
+              child: const Icon(Icons.camera_enhance),
             ),
           ),
         ],

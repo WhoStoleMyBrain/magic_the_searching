@@ -80,7 +80,8 @@ class CardDataProvider with ChangeNotifier {
 
   Future<bool> _requestDataFromScryfall() async {
     final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
-    scryfallRequestHandler.translateTextToQuery();
+    // scryfallRequestHandler.translateTextToQuery();
+    scryfallRequestHandler.getRequestHttpsQuery();
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     if (queryResult.isEmpty) {
@@ -97,7 +98,8 @@ class CardDataProvider with ChangeNotifier {
 
   Future<bool> _requestVersionsFromScryfall() async {
     final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
-    scryfallRequestHandler.translateTextToQuery();
+    // scryfallRequestHandler.translateTextToQuery();
+    scryfallRequestHandler.getVersionsHttpsQuery();
     await scryfallRequestHandler.sendVersionsRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     // print(queryResult);
@@ -110,6 +112,7 @@ class CardDataProvider with ChangeNotifier {
       }
     }
     cards = queryResult;
+    // print(queryResult.length);
 
     return true;
   }
