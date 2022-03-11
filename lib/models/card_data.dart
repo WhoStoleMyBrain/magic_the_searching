@@ -27,8 +27,10 @@ class CardData {
     name = searchValues?["name"].toString() ?? '';
     text = searchValues?["text"].toString() ?? '';
     // print(searchValues?["hasTwoSides"]);
+    print(searchValues?["hasTwoSides"] ?? false);
+    print((searchValues?["hasTwoSides"] ?? false) == 1);
     hasTwoSides =
-        ((searchValues?["hasTwoSides"] ?? false) == '1') ? true : false;
+        ((searchValues?["hasTwoSides"] ?? false) == 1) ? true : false;
     dateTime = DateTime.parse(searchValues?["requestTime"].toString() ?? '');
     images = [
       imageValues?["frontImage"].toString() ?? '',
@@ -48,6 +50,7 @@ class CardData {
 
   Map<String, Map<String, Object?>> toDB(CardData cardData, String searchText, bool isFromVersions) {
     var today = cardData.dateTime.toIso8601String();
+
     // var today = DateTime.now().subtract(const Duration(days: 9)).toIso8601String();
     final searchValues = {
       'searchText': searchText,

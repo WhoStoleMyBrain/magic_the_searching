@@ -35,6 +35,7 @@ class CardDataProvider with ChangeNotifier {
     }
   }
 
+
   Future<bool> processVersionsQuery() async {
     var historyData = await DBHelper.getVersionsOrPrintsData();
     var queries = historyData.map((e) => e['searchText']);

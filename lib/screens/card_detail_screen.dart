@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import 'package:magic_the_searching/helpers/camera_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
@@ -71,50 +72,45 @@ class CardDetailScreen extends StatelessWidget {
     );
 
     return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          actions: [
-            TextButton(
-              onPressed: () {
-                _startSearchForPrints(context, cardData.name);
-              },
-              child: Text('All Prints',
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontSize: 20)),
-            ),
-            TextButton(
-              onPressed: () {
-                _startSearchForVersions(context, cardData.name);
-              },
-              child: Text('All Arts',
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontSize: 20)),
-            ),
-          ],
-        ),
-        body: InkWell(
-          onTap: () {
-            // cardTapped(context, cardData.id);
-          },
-          child: SizedBox(
-            height: mediaQuery.size.height,
-            child: Card(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CardImageDisplay(
-                        cardData: cardData, mediaQuery: mediaQuery),
-                    CardDetails(textStyle: textStyle, cardData: cardData),
-                  ],
-                ),
-              ),
+      appBar: AppBar(
+        centerTitle: true,
+        actions: [
+          TextButton(
+            onPressed: () {
+              _startSearchForPrints(context, cardData.name);
+            },
+            child: Text('All Prints',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontSize: 20)),
+          ),
+          TextButton(
+            onPressed: () {
+              _startSearchForVersions(context, cardData.name);
+            },
+            child: Text('All Arts',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontSize: 20)),
+          ),
+        ],
+      ),
+      body: SizedBox(
+        height: mediaQuery.size.height,
+        child: Card(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CardImageDisplay(cardData: cardData, mediaQuery: mediaQuery),
+                CardDetails(textStyle: textStyle, cardData: cardData),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
 
@@ -139,15 +135,26 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   // bool _isLoading = false;
 
   Future<void> getLocalImage() async {
+    late File localFile;
     var fileExists =
         await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
-    var localFile =
-        await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+    if (fileExists && widget.cardData.hasTwoSides && (_side == 1)) {
+      if (path.basename(widget.cardData.images[0]) ==
+          path.basename(widget.cardData.images[1])) {
+        localFile = await CameraHelper.saveFileLocally(
+            '${widget.cardData.images[_side]}back');
+      }
+    } else {
+      localFile =
+      await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+    }
+    // print(_side);
     // print(fileExists);
     // print(localFile.toString());
     _storedImage = localFile;
     _hasLocalImage = fileExists;
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -164,24 +171,34 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
             // _isLoading ? const Center(child: CircularProgressIndicator(),) :
             (snapshot.connectionState != ConnectionState.none)
                 ? _hasLocalImage
-                    ? Image.file(
-                        _storedImage,
-                        fit: BoxFit.cover,
-                        // fit: BoxFit.cover,
-                        width: (widget.mediaQuery.size.width -
-                            widget.mediaQuery.padding.horizontal),
-                        height: (widget.mediaQuery.size.height * 2 / 3),
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.file(
+                          _storedImage,
+                          fit: BoxFit.cover,
+                          // fit: BoxFit.cover,
+                          width: (widget.mediaQuery.size.width -
+                              widget.mediaQuery.padding.horizontal),
+                          height: (widget.mediaQuery.size.height * 2 / 3),
+                        ),
                       )
                     : widget.cardData.images[_side].contains('http')
-                        ? Image.network(
-                            widget.cardData.images[_side],
-                            fit: BoxFit.cover,
-                            width: (widget.mediaQuery.size.width -
-                                widget.mediaQuery.padding.horizontal),
-                            height: (widget.mediaQuery.size.height * 2 / 3),
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.network(
+                              widget.cardData.images[_side],
+                              fit: BoxFit.cover,
+                              width: (widget.mediaQuery.size.width -
+                                  widget.mediaQuery.padding.horizontal),
+                              height: (widget.mediaQuery.size.height * 2 / 3),
+                            ),
                           )
-                        : Image(
-                            image: AssetImage(widget.cardData.images[_side]))
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image(
+                                image:
+                                    AssetImage(widget.cardData.images[_side])),
+                          )
                 : const Center(
                     child: CircularProgressIndicator(),
                   ),
@@ -195,6 +212,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                 child: MaterialButton(
                   onPressed: () {
                     setState(() {
+                      getLocalImage();
                       _side == 0 ? _side = 1 : _side = 0;
                     });
                   },

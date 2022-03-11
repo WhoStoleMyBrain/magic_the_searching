@@ -8,6 +8,7 @@ class ScryfallRequestHandler {
   static const String apiBasePath = 'api.scryfall.com';
   static const String queryBaseString = '/cards/search';
   static const String versionBaseString = '/cards/search';
+  static const String refreshBaseString = '/cards';
   static const String isshin =
       'https://c1.scryfall.com/file/scryfall-cards/large/front/a/0/a062a004-984e-4b62-960c-af7288f7a3e9.jpg?1643846546';
   static const String isshinLocal =
@@ -17,17 +18,23 @@ class ScryfallRequestHandler {
   Map<String, dynamic> responseData = {};
   ScryfallRequestHandler({required this.searchText});
 
-  void translateTextToQuery() {
-    // query = searchText.replaceAll(RegExp(' '), '+');
-    // query = Uri.encodeQueryComponent(searchText);
-    query = Uri.https('', searchText).toString();
-    query = 'q=' + query;
-    // print(query);
-  }
+  // void translateTextToQuery() {
+  //   // query = searchText.replaceAll(RegExp(' '), '+');
+  //   // query = Uri.encodeQueryComponent(searchText);
+  //   query = Uri.https('', searchText).toString();
+  //   query = 'q=' + query;
+  //   // print(query);
+  // }
 
   void getRequestHttpsQuery() {
     query = Uri.https(
             apiBasePath, queryBaseString, { 'q': searchText,})
+        .toString();
+  }
+
+  void getRefreshPriceHttpsQuery() {
+    query = Uri.https(
+        apiBasePath, refreshBaseString, { '': searchText,})
         .toString();
   }
 

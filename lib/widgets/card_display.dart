@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/scryfall_request_handler.dart';
 import '../helpers/camera_helper.dart';
@@ -23,58 +24,13 @@ class CardDisplay extends StatelessWidget {
       child: SizedBox(
         height: mediaQuery.size.height,
         child: Card(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CardImageDisplay(cardData: cardData, mediaQuery: mediaQuery),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Expanded(child: Text('Normal')),
-                          Expanded(child: Text('Foil')),
-                        ],
-                      ),
-                      const Divider(
-                        color: Colors.black,
-                        thickness: 1,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Expanded(
-                              child: Text('TCG:  \$${cardData.price['tcg']}')),
-                          // Expanded(child: Container()),
-                          Expanded(
-                              child: Text(
-                                  'TCG:  \$${cardData.price['tcg_foil']}')),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 3,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                              child: Text(
-                                  'CDM: €${cardData.price['cardmarket']}')),
-                          Expanded(
-                              child: Text(
-                                  'CDM: €${cardData.price['cardmarket_foil']}')),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CardImageDisplay(cardData: cardData, mediaQuery: mediaQuery),
+              CardPriceDisplay(cardData: cardData),
+            ],
           ),
         ),
       ),
@@ -82,8 +38,106 @@ class CardDisplay extends StatelessWidget {
   }
 }
 
+class CardPriceDisplay extends StatelessWidget {
+  const CardPriceDisplay({
+    Key? key,
+    required this.cardData,
+  }) : super(key: key);
+
+  final CardData cardData;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      elevation: 5,
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Expanded(child: Text('Normal')),
+                Expanded(child: Text('Foil')),
+              ],
+            ),
+            const Divider(
+              color: Colors.black,
+              thickness: 1,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(
+                  child: Text(
+                    'TCG: \$${cardData.price['tcg']}',
+                    style: TextStyle(
+                      fontSize:
+                          (double.tryParse(cardData.price['tcg']) ?? 0) >= 100
+                              ? (12 - (double.tryParse(cardData.price['tcg']) ?? 0).toString().length + 5)
+                              : 12,
+                    ),
+                  ),
+                ),
+                // Expanded(child: Container()),
+                Expanded(
+                  child: Text(
+                    'TCG: \$${cardData.price['tcg_foil']}',
+                    style: TextStyle(
+                      fontSize:
+                          (double.tryParse(cardData.price['tcg_foil']) ?? 0) >=
+                                  100
+                              ? (12 - (double.tryParse(cardData.price['tcg_foil']) ?? 0).toString().length + 5)
+                              : 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 3,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'CDM: €${cardData.price['cardmarket']}',
+                    style: TextStyle(
+                      fontSize:
+                          (double.tryParse(cardData.price['cardmarket']) ??
+                                      0) >=
+                                  100
+                              ? (12 - (double.tryParse(cardData.price['cardmarket']) ?? 0).toString().length) + 5
+                              : 12,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'CDM: €${cardData.price['cardmarket_foil']}',
+                    style: TextStyle(
+                      fontSize:
+                          (double.tryParse(cardData.price['cardmarket_foil']) ??
+                                      0) >=
+                                  100
+                              ? (12 - (double.tryParse(cardData.price['cardmarket_foil']) ?? 0).toString().length) + 5
+                              : 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class CardImageDisplay extends StatefulWidget {
-  CardImageDisplay({
+  const CardImageDisplay({
     Key? key,
     required this.cardData,
     required this.mediaQuery,
@@ -92,7 +146,6 @@ class CardImageDisplay extends StatefulWidget {
   final CardData cardData;
   final MediaQueryData mediaQuery;
   static bool pictureLoaded = false;
-
 
   @override
   State<CardImageDisplay> createState() => _CardImageDisplayState();
@@ -105,13 +158,27 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   // bool pictureLoaded = false;
 
   Future<void> getLocalImage() async {
+    late File localFile;
     if (!CardImageDisplay.pictureLoaded) {
       var fileExists =
           await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
-      var localFile =
-          await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+      if (fileExists && widget.cardData.hasTwoSides && (_side == 1)) {
+        if (path.basename(widget.cardData.images[0]) ==
+            path.basename(widget.cardData.images[1])) {
+          localFile = await CameraHelper.saveFileLocally(
+              '${widget.cardData.images[_side]}back');
+        }
+      } else {
+        localFile =
+            await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+      }
+
       _storedImage = localFile;
       _hasLocalImage = fileExists;
+
+      print(_side);
+      print(_storedImage);
+      print(_hasLocalImage);
       // _hasLocalImage = false;
       CardImageDisplay.pictureLoaded = true;
     }
@@ -120,6 +187,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   @override
   Widget build(BuildContext context) {
     // nothing();
+    // print('display');
+    // print(_hasLocalImage);
+    // print(_storedImage.path);
     return FutureBuilder(
       future: getLocalImage(),
       builder: (context, snapshot) {
@@ -148,6 +218,8 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                 child: MaterialButton(
                   onPressed: () {
                     setState(() {
+                      CardImageDisplay.pictureLoaded = false;
+                      getLocalImage();
                       _side == 0 ? _side = 1 : _side = 0;
                     });
                   },
@@ -167,29 +239,45 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     );
   }
 
-  Image displayImage() {
+  Widget displayImage() {
+    // print(widget.cardData.images);
     return _hasLocalImage
-        ? Image.file(
-            _storedImage,
-            fit: BoxFit.cover,
-            width: (widget.mediaQuery.size.width -
-                    widget.mediaQuery.padding.horizontal) /
-                2,
-            height: (widget.mediaQuery.size.height / 3),
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.file(
+              _storedImage,
+              // fit: BoxFit.cover,
+              fit: BoxFit.contain,
+              width: (widget.mediaQuery.size.width -
+                      widget.mediaQuery.padding.horizontal) /
+                  2,
+              height: (widget.mediaQuery.size.height / 3),
+            ),
           )
         : widget.cardData.images[_side].contains('http')
-            ? Image.network(
-                widget.cardData.images[_side],
-                fit: BoxFit.cover,
-                width: (widget.mediaQuery.size.width -
-                        widget.mediaQuery.padding.horizontal) /
-                    2,
-                height: (widget.mediaQuery.size.height / 3),
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Image.network(
+                  widget.cardData.images[_side],
+                  // fit: BoxFit.cover,
+                  fit: BoxFit.contain,
+
+                  width: (widget.mediaQuery.size.width -
+                          widget.mediaQuery.padding.horizontal) /
+                      2,
+                  height: (widget.mediaQuery.size.height / 3),
+                ),
               )
             : widget.cardData.images[_side] == ''
-                ? const Image(
-                    image: AssetImage(ScryfallRequestHandler.isshinLocal),
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: const Image(
+                      image: AssetImage(ScryfallRequestHandler.isshinLocal),
+                    ),
                   )
-                : Image(image: AssetImage(widget.cardData.images[_side]));
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image(
+                        image: AssetImage(widget.cardData.images[_side])));
   }
 }

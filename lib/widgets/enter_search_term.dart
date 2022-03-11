@@ -33,6 +33,7 @@ class _EnterSearchTermState extends State<EnterSearchTerm> {
           child: Column(
             children: [
               TextField(
+                enableSuggestions: false,
                 decoration: const InputDecoration(labelText: 'Name of the card'),
                 controller: _searchTermController,
                 onSubmitted: (_) => _submitSearchText(),
