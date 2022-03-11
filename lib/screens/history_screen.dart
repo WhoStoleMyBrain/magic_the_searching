@@ -17,6 +17,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
+    // print('isInit start:$isInit');
     if (!isInit) {
       final history = Provider.of<History>(context, listen: false);
       // history.setDummyData();
@@ -25,6 +26,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         isInit = !isInit;
       });
     }
+    // print('isInit end:$isInit');
   }
 
   // @override
@@ -45,13 +47,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final history = Provider.of<History>(context);
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: false);
-    // history.setDummyData();
-    // history.getDBData();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your past searches'),
       ),
-      body: cardDataProvider.cards.isEmpty
+      // body: cardDataProvider.cards.isEmpty
+      body: history.data.isEmpty
           ? const Center(
               child: Text(
                   'No data found in history. \nSearches are saved here for 7 days.'))

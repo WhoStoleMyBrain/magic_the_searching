@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart' as sys_paths;
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart' as sys_paths;
 
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,7 @@ import '../providers/handedness.dart';
 import '../providers/card_data_provider.dart';
 import '../screens/card_detail_screen.dart';
 import '../screens/history_screen.dart';
-import '../widgets/card_display.dart';
+import '../widgets/card_display.dart' as card_display;
 import '../widgets/enter_search_term.dart';
 
 enum HandedMode {
@@ -70,6 +71,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
 
   Future<void> _startSearchForCard(BuildContext ctx, String text) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
+    card_display.CardImageDisplay.pictureLoaded = false;
     cardDataProvider.query = text;
     bool requestSuccessful = await cardDataProvider.processSearchQuery();
     if (!requestSuccessful) {
@@ -95,7 +97,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
               ),
               itemCount: cardDataProvider.cards.length,
               itemBuilder: (ctx, index) {
-                return CardDisplay(
+                return card_display.CardDisplay(
                   cardData: cardDataProvider.cards[index],
                   cardTapped: cardTapped,
                 );
@@ -103,6 +105,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
             ),
       floatingActionButton: MyFloatingActionButtons(
         startEnterSearchTerm: _startEnterSearchTerm,
+        startSearchForCard: _startSearchForCard,
       ),
     );
   }
@@ -126,7 +129,11 @@ class _MyAppBarState extends State<MyAppBar> {
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: true);
     setState(() {
-      title = cardDataProvider.query.isNotEmpty ? (cardDataProvider.query[0] == '!' ? cardDataProvider.query.substring(1) : cardDataProvider.query) : '';
+      title = cardDataProvider.query.isNotEmpty
+          ? (cardDataProvider.query[0] == '!'
+              ? cardDataProvider.query.substring(1)
+              : cardDataProvider.query)
+          : '';
     });
     // print('title set to $title');
   }
@@ -183,9 +190,13 @@ class _MyAppBarState extends State<MyAppBar> {
 }
 
 class MyFloatingActionButtons extends StatefulWidget {
-  const MyFloatingActionButtons({Key? key, required this.startEnterSearchTerm})
+  const MyFloatingActionButtons(
+      {Key? key,
+      required this.startEnterSearchTerm,
+      required this.startSearchForCard})
       : super(key: key);
   final Function startEnterSearchTerm;
+  final Function startSearchForCard;
 
   @override
   State<MyFloatingActionButtons> createState() =>
@@ -193,10 +204,18 @@ class MyFloatingActionButtons extends StatefulWidget {
 }
 
 class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
+  // late File _storedImage;
 
-  late File _storedImage;
+  TextDetector textDetector = GoogleMlKit.vision.textDetector();
+  bool isBusy = false;
 
-  Future<void> _takePicture() async {
+  @override
+  void dispose() async {
+    super.dispose();
+    await textDetector.close();
+  }
+
+  Future<void> _takePictureAndFireQuery(BuildContext ctx) async {
     final picker = ImagePicker();
     final imageFile = await picker.pickImage(
       source: ImageSource.camera,
@@ -205,17 +224,46 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
     if (imageFile == null) {
       return;
     }
-    setState(() {
-      _storedImage = File(imageFile.path);
-    });
+    // setState(() {
+    //   _storedImage = File(imageFile.path);
+    // });
+
     final appDir = await sys_paths.getApplicationDocumentsDirectory();
     final fileName = path.basename(imageFile.path);
     final savedImage =
-    await File(imageFile.path).copy('${appDir.path}/${fileName}');
+        await File(imageFile.path).copy('${appDir.path}/$fileName');
+    final recognisedText = await getCardNameFromImage(savedImage);
+    // widget.startEnterSearchTerm(recognisedText);
+    widget.startSearchForCard(ctx, recognisedText);
+
+    // print(recognisedText.toString());
     // print('appDir:$appDir');
     // print('fileName:$fileName');
     // print('savedImage:${savedImage.toString()}');
     // widget.onSelectImage(savedImage);
+  }
+
+  Future<String> getCardNameFromImage(File image) async {
+    isBusy = true;
+    final inputImage = InputImage.fromFile(image);
+    // final textDetector = GoogleMlKit.vision.textDetector();
+    final RecognisedText recognisedText =
+        await textDetector.processImage(inputImage);
+    for (TextBlock block in recognisedText.blocks) {
+      // final Rect rect = block.rect;
+      // final List<Offset> cornerPoints = block.cornerPoints;
+      final String text = block.text;
+      // final List<String> languages = block.recognizedLanguages;
+
+      for (TextLine line in block.lines) {
+        print(line.text);
+        for (TextElement element in line.elements) {
+          // Same getters as TextBlock
+        }
+      }
+    }
+    return recognisedText.blocks[0].lines[0].text;
+    // print(recognisedText.text);
   }
 
   @override
@@ -242,7 +290,9 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
             padding: const EdgeInsets.all(5.0),
             child: FloatingActionButton(
               heroTag: 'camera',
-              onPressed: _takePicture,
+              onPressed: () {
+                _takePictureAndFireQuery(context);
+              },
               child: const Icon(Icons.camera_enhance),
             ),
           ),

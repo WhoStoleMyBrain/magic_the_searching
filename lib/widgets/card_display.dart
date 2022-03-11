@@ -83,7 +83,7 @@ class CardDisplay extends StatelessWidget {
 }
 
 class CardImageDisplay extends StatefulWidget {
-  const CardImageDisplay({
+  CardImageDisplay({
     Key? key,
     required this.cardData,
     required this.mediaQuery,
@@ -91,6 +91,8 @@ class CardImageDisplay extends StatefulWidget {
 
   final CardData cardData;
   final MediaQueryData mediaQuery;
+  static bool pictureLoaded = false;
+
 
   @override
   State<CardImageDisplay> createState() => _CardImageDisplayState();
@@ -100,10 +102,10 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
   var _hasLocalImage = false;
   late File _storedImage;
-  bool _pictureLoaded = false;
+  // bool pictureLoaded = false;
 
   Future<void> getLocalImage() async {
-    if (!_pictureLoaded) {
+    if (!CardImageDisplay.pictureLoaded) {
       var fileExists =
           await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
       var localFile =
@@ -111,7 +113,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       _storedImage = localFile;
       _hasLocalImage = fileExists;
       // _hasLocalImage = false;
-      _pictureLoaded = true;
+      CardImageDisplay.pictureLoaded = true;
     }
   }
 
