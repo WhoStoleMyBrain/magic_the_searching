@@ -41,7 +41,9 @@ class CardDetailScreen extends StatelessWidget {
       _showFailedQuery(ctx, text);
       return;
     }
-    Navigator.of(ctx).pushReplacementNamed('/');
+    // Navigator.of(ctx).pushReplacementNamed('/');
+    Navigator.of(ctx).pop();
+    // Navigator.of(ctx).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
   }
 
   Future<void> _startSearchForPrints(BuildContext ctx, String text) async {
@@ -52,7 +54,9 @@ class CardDetailScreen extends StatelessWidget {
       _showFailedQuery(ctx, text);
       return;
     }
-    Navigator.of(ctx).pushReplacementNamed('/');
+    // Navigator.of(ctx).pushReplacementNamed('/');
+    Navigator.of(ctx).pop();
+    // Navigator.of(ctx).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
   }
 
   @override
@@ -69,7 +73,6 @@ class CardDetailScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          // title: Text(cardData.name),
           actions: [
             TextButton(
               onPressed: () {
@@ -89,15 +92,6 @@ class CardDetailScreen extends StatelessWidget {
                       color: Theme.of(context).colorScheme.onPrimary,
                       fontSize: 20)),
             ),
-            // IconButton(
-            //   // on button press try to get all versions from the same card. on failed
-            //   // -> show error message, else: push card_search_screen after setting new
-            //   // data on cardDataProvider
-            //   onPressed: () {
-            //     _startSearchForVersions(context, cardData.name);
-            //   },
-            //   icon: const Icon(Icons.more_outlined),
-            // )
           ],
         ),
         body: InkWell(

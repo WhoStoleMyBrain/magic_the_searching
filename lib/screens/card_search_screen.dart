@@ -146,23 +146,24 @@ class _MyAppBarState extends State<MyAppBar> {
     setTitle();
     return AppBar(
       leadingWidth: 48.0,
-      leading: handedMode
-          ? const Padding(
-              padding: EdgeInsets.all(4.0),
-              child: CircleAvatar(
-                child: Text('R'),
-                radius: 5.0,
-              ),
-            )
-          : const Padding(
-              padding: EdgeInsets.all(4.0),
-              child: CircleAvatar(child: Text('L')),
-            ),
+      // leading: handedMode
+      //     ? const Padding(
+      //         padding: EdgeInsets.all(4.0),
+      //         child: CircleAvatar(
+      //           child: Text('R'),
+      //           radius: 5.0,
+      //         ),
+      //       )
+      //     : const Padding(
+      //         padding: EdgeInsets.all(4.0),
+      //         child: CircleAvatar(child: Text('L')),
+      //       ),
       title: (cardDataProvider.cards.isNotEmpty && title != '')
           ? Text(
-              'Searched for: $title',
-              style: const TextStyle(fontSize: 18),
-            )
+                  'Searched for: $title',
+                  style: const TextStyle(fontSize: 18),
+                  maxLines: 2,
+                )
           : const Text(
               'No search performed yet',
               style: TextStyle(fontSize: 18),
