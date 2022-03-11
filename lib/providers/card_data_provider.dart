@@ -36,7 +36,7 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<bool> processVersionsQuery() async {
-    var historyData = await DBHelper.getVersionsData();
+    var historyData = await DBHelper.getVersionsOrPrintsData();
     var queries = historyData.map((e) => e['searchText']);
     // print(queries);
     if (queries.contains(query) && queries.length > 1) {
@@ -46,6 +46,20 @@ class CardDataProvider with ChangeNotifier {
     } else {
       // print('loading from scryfall');
       return _requestVersionsFromScryfall();
+    }
+  }
+
+  Future<bool> processPrintsQuery() async {
+    var historyData = await DBHelper.getVersionsOrPrintsData();
+    var queries = historyData.map((e) => e['searchText']);
+    // print(queries);
+    if (queries.contains(query) && queries.length > 1) {
+      // if (false) {
+      // print('loading from DB');
+      return _loadDataFromDB();
+    } else {
+      // print('loading from scryfall');
+      return _requestPrintsFromScryfall();
     }
   }
 
@@ -100,7 +114,28 @@ class CardDataProvider with ChangeNotifier {
     final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
     // scryfallRequestHandler.translateTextToQuery();
     scryfallRequestHandler.getVersionsHttpsQuery();
-    await scryfallRequestHandler.sendVersionsRequest();
+    await scryfallRequestHandler.sendQueryRequest();
+    final queryResult = scryfallRequestHandler.processQueryData();
+    // print(queryResult);
+    if (queryResult.isEmpty) {
+      return false;
+    } else {
+      for (CardData card in queryResult) {
+        await DBHelper.insert('user_searches', card.toDB(card, query, true));
+        // print('${card.name} inserted to DB');
+      }
+    }
+    cards = queryResult;
+    // print(queryResult.length);
+
+    return true;
+  }
+
+  Future<bool> _requestPrintsFromScryfall() async {
+    final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
+    // scryfallRequestHandler.translateTextToQuery();
+    scryfallRequestHandler.getPrintsHttpsQuery();
+    await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     // print(queryResult);
     if (queryResult.isEmpty) {

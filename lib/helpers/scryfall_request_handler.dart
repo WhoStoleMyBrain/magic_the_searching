@@ -29,45 +29,26 @@ class ScryfallRequestHandler {
     query = Uri.https(
             apiBasePath, queryBaseString, { 'q': searchText,})
         .toString();
-    // query = query.replaceAll(RegExp('%21'), '!');
-    // query = query.replaceAll(RegExp('%3F'), '');
-
-    // print('query:$query');
   }
+
   void getVersionsHttpsQuery() {
-    // searchText = searchText.contains(' ') ? '"$searchText"' : searchText;
-    // print('query:$query');
     query = Uri.https(
         apiBasePath, versionBaseString, { 'unique':'art', 'q': searchText.contains(' ') ? '!"${searchText.substring(1)}"' : searchText})
         .toString();
-    // query = query.replaceAll(RegExp('%21'), '!');
-    // query = query.replaceAll(RegExp('%3F'), '');
-
-    // print('query:$query');
   }
 
-  Future<void> sendVersionsRequest() async {
-    // final url = Uri.parse('$apiBasePath$versionBaseString$query');
-    final url = Uri.parse(query);
-    try {
-      final response = await http.get(url);
-
-      responseData = json.decode(response.body);
-      // print(response.statusCode);
-      if (response.statusCode != 200) {}
-    } catch (error) {
-      // print(error);
-    }
+  void getPrintsHttpsQuery() {
+    query = Uri.https(
+        apiBasePath, versionBaseString, { 'unique':'prints', 'q': searchText.contains(' ') ? '!"${searchText.substring(1)}"' : searchText})
+        .toString();
   }
 
   Future<void> sendQueryRequest() async {
-    // final url = Uri.parse('$apiBasePath$queryBaseString$query');
     final url = Uri.parse(query);
     try {
       final response = await http.get(url);
 
       responseData = json.decode(response.body);
-      // print(response.headers);
       if (response.statusCode != 200) {}
     } catch (error) {
       // print(error);

@@ -44,6 +44,17 @@ class CardDetailScreen extends StatelessWidget {
     Navigator.of(ctx).pushReplacementNamed('/');
   }
 
+  Future<void> _startSearchForPrints(BuildContext ctx, String text) async {
+    final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
+    cardDataProvider.query = text[0] == '!' ? text : '!' + text;
+    bool requestSuccessful = await cardDataProvider.processPrintsQuery();
+    if (!requestSuccessful) {
+      _showFailedQuery(ctx, text);
+      return;
+    }
+    Navigator.of(ctx).pushReplacementNamed('/');
+  }
+
   @override
   Widget build(BuildContext context) {
     final id = ModalRoute.of(context)?.settings.arguments as String;
@@ -58,17 +69,35 @@ class CardDetailScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: Text(cardData.name),
+          // title: Text(cardData.name),
           actions: [
-            IconButton(
-              // on button press try to get all versions from the same card. on failed
-              // -> show error message, else: push card_search_screen after setting new
-              // data on cardDataProvider
+            TextButton(
+              onPressed: () {
+                _startSearchForPrints(context, cardData.name);
+              },
+              child: Text('All Prints',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 20)),
+            ),
+            TextButton(
               onPressed: () {
                 _startSearchForVersions(context, cardData.name);
               },
-              icon: const Icon(Icons.more_outlined),
-            )
+              child: Text('All Arts',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 20)),
+            ),
+            // IconButton(
+            //   // on button press try to get all versions from the same card. on failed
+            //   // -> show error message, else: push card_search_screen after setting new
+            //   // data on cardDataProvider
+            //   onPressed: () {
+            //     _startSearchForVersions(context, cardData.name);
+            //   },
+            //   icon: const Icon(Icons.more_outlined),
+            // )
           ],
         ),
         body: InkWell(

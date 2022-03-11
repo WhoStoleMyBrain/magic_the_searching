@@ -44,7 +44,7 @@ class DBHelper {
     return history;
   }
 
-  static Future<List<Map<String, dynamic>>> getVersionsData() async {
+  static Future<List<Map<String, dynamic>>> getVersionsOrPrintsData() async {
     final db = await DBHelper.database();
     var history = await db.rawQuery('SELECT name, searchText FROM user_searches WHERE user_searches.name = user_searches.searchText AND isFromVersions = 1');
     return history;
