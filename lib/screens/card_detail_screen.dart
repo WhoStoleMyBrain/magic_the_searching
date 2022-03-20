@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/db_helper.dart';
+import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:path/path.dart' as path;
 import 'package:url_launcher/url_launcher.dart' as url;
 import 'package:magic_the_searching/helpers/camera_helper.dart';
@@ -34,32 +36,14 @@ class CardDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _startSearchForVersions(BuildContext ctx, String text) async {
+  Future<void> _startSearchForCards(BuildContext ctx, String text,
+      Function dbHelperFunction, Map<String, String> queryParameters) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     cardDataProvider.query = text;
-    bool requestSuccessful = await cardDataProvider.processVersionsQuery();
-    if (!requestSuccessful) {
-      _showFailedQuery(ctx, text);
-      return;
-    }
-    Navigator.of(ctx).pop();
-  }
-
-  Future<void> _startSearchForPrints(BuildContext ctx, String text) async {
-    final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    cardDataProvider.query = text;
-    bool requestSuccessful = await cardDataProvider.processPrintsQuery();
-    if (!requestSuccessful) {
-      _showFailedQuery(ctx, text);
-      return;
-    }
-    Navigator.of(ctx).pop();
-  }
-
-  Future<void> _startSearchForLanguages(BuildContext ctx, String text) async {
-    final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    cardDataProvider.query = text;
-    bool requestSuccessful = await cardDataProvider.processLanguagesQuery();
+    cardDataProvider.isStandardQuery = false;
+    cardDataProvider.dbHelperFunction = dbHelperFunction;
+    cardDataProvider.queryParameters = queryParameters;
+    bool requestSuccessful = await cardDataProvider.processQuery();
     if (!requestSuccessful) {
       _showFailedQuery(ctx, text);
       return;
@@ -81,36 +65,25 @@ class CardDetailScreen extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         actions: [
-          TextButton(
-            onPressed: () {
-              _startSearchForLanguages(context, cardData.name);
-            },
-            child: Text(
-              'All Languages',
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary, fontSize: 20),
-            ),
+          getRefinedSearchButton(
+            context,
+            cardData,
+            DBHelper.getHistoryData,
+            ScryfallQueryMaps.languagesMap,
+            'All Languages',
           ),
-          TextButton(
-            onPressed: () {
-              _startSearchForPrints(context, cardData.name);
-            },
-            child: Text(
-              'All Prints',
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary, fontSize: 20),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              _startSearchForVersions(context, cardData.name);
-            },
-            child: Text(
-              'All Arts',
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary, fontSize: 20),
-            ),
-          ),
+          getRefinedSearchButton(
+              context,
+              cardData,
+              DBHelper.getVersionsOrPrintsData,
+              ScryfallQueryMaps.printsMap,
+              'All Prints'),
+          getRefinedSearchButton(
+              context,
+              cardData,
+              DBHelper.getVersionsOrPrintsData,
+              ScryfallQueryMaps.versionMap,
+              'All Arts'),
         ],
       ),
       body: SizedBox(
@@ -127,6 +100,29 @@ class CardDetailScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  TextButton getRefinedSearchButton(
+      BuildContext context,
+      CardData cardData,
+      Function dbHelperFunction,
+      Map<String, String> queryMap,
+      String displayText) {
+    return TextButton(
+      onPressed: () {
+        _startSearchForCards(
+          context,
+          cardData.name,
+          dbHelperFunction,
+          queryMap,
+        );
+      },
+      child: Text(
+        displayText,
+        style: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimary, fontSize: 20),
       ),
     );
   }
@@ -202,33 +198,36 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                 : const Center(
                     child: CircularProgressIndicator(),
                   ),
-            if (widget.cardData.hasTwoSides)
-              Positioned(
-                left: (widget.mediaQuery.size.width -
-                            widget.mediaQuery.padding.horizontal) /
-                        2 -
-                    50,
-                top: (widget.mediaQuery.size.height * 2 / 3) - 70 - 10,
-                child: MaterialButton(
-                  onPressed: () {
-                    setState(() {
-                      getLocalImage();
-                      _side == 0 ? _side = 1 : _side = 0;
-                    });
-                  },
-                  child: const Icon(
-                    Icons.compare_arrows,
-                    size: 50,
-                    color: Colors.black87,
-                  ),
-                  height: 70,
-                  shape: const CircleBorder(),
-                  color: const Color.fromRGBO(128, 128, 128, 0.5),
-                ),
-              ),
+            if (widget.cardData.hasTwoSides) getFlipButton(),
           ],
         );
       },
+    );
+  }
+
+  Positioned getFlipButton() {
+    return Positioned(
+      left: (widget.mediaQuery.size.width -
+                  widget.mediaQuery.padding.horizontal) /
+              2 -
+          50,
+      top: (widget.mediaQuery.size.height * 2 / 3) - 70 - 10,
+      child: MaterialButton(
+        onPressed: () {
+          setState(() {
+            getLocalImage();
+            _side == 0 ? _side = 1 : _side = 0;
+          });
+        },
+        child: const Icon(
+          Icons.compare_arrows,
+          size: 50,
+          color: Colors.black87,
+        ),
+        height: 70,
+        shape: const CircleBorder(),
+        color: const Color.fromRGBO(128, 128, 128, 0.5),
+      ),
     );
   }
 }
@@ -272,17 +271,8 @@ class CardDetails extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Expanded(
-                  child: Text(
-                'TCG:  \$${cardData.price['tcg']}',
-                style: textStyle,
-              )),
-              // Expanded(child: Container()),
-              Expanded(
-                  child: Text(
-                'TCG:  \$${cardData.price['tcg_foil']}',
-                style: textStyle,
-              )),
+              buildSinglePriceItem('TCG', 'tcg', '\$'),
+              buildSinglePriceItem('TCG', 'tcg_foil', '\$'),
             ],
           ),
           const SizedBox(
@@ -291,16 +281,8 @@ class CardDetails extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                  child: Text(
-                'CDM: €${cardData.price['cardmarket']}',
-                style: textStyle,
-              )),
-              Expanded(
-                  child: Text(
-                'CDM: €${cardData.price['cardmarket_foil']}',
-                style: textStyle,
-              )),
+              buildSinglePriceItem('CDM', 'cardmarket', '€'),
+              buildSinglePriceItem('CDM', 'cardmarket_foil', '€'),
             ],
           ),
           const SizedBox(
@@ -315,6 +297,15 @@ class CardDetails extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Expanded buildSinglePriceItem(String name, String mapKey, String currency) {
+    return Expanded(
+      child: Text(
+        '$name:  $currency${cardData.price[mapKey]}',
+        style: textStyle,
       ),
     );
   }

@@ -7,8 +7,8 @@ import '../models/card_data.dart';
 class ScryfallRequestHandler {
   static const String apiBasePath = 'api.scryfall.com';
   static const String queryBaseString = '/cards/search';
-  static const String versionBaseString = '/cards/search';
-  static const String refreshBaseString = '/cards';
+  // static const String versionBaseString = '/cards/search';
+  // static const String refreshBaseString = '/cards';
   static const String isshin =
       'https://c1.scryfall.com/file/scryfall-cards/large/front/a/0/a062a004-984e-4b62-960c-af7288f7a3e9.jpg?1643846546';
   static const String isshinLocal =
@@ -25,43 +25,9 @@ class ScryfallRequestHandler {
             : 'l:${languages[0]} $searchText';
   }
 
-  void setQueryLanguages() {}
-
-  void getRequestHttpsQuery() {
-    query = Uri.https(apiBasePath, queryBaseString, {
-      'include_multilingual': 'true',
-      'lang': 'any',
-      'q': searchText,
-    }).toString();
-  }
-
-  void getLanguagesHttpsQuery() {
-    query = Uri.https(apiBasePath, queryBaseString, {
-      'include_multilingual': 'true',
-      'lang': 'any',
-      'unique': 'prints',
-      'q': searchText,
-    }).toString();
-  }
-
-  void getRefreshPriceHttpsQuery() {
-    query = Uri.https(apiBasePath, refreshBaseString, {
-      '': searchText,
-    }).toString();
-  }
-
-  void getVersionsHttpsQuery() {
-    query = Uri.https(apiBasePath, versionBaseString, {
-      'unique': 'art',
-      'q': searchText,
-    }).toString();
-  }
-
-  void getPrintsHttpsQuery() {
-    query = Uri.https(apiBasePath, versionBaseString, {
-      'unique': 'prints',
-      'q': searchText,
-    }).toString();
+  void setHttpsQuery(Map<String, String> queryMap) {
+    queryMap['q'] = searchText;
+    query = Uri.https(apiBasePath, queryBaseString, queryMap).toString();
   }
 
   Future<void> sendQueryRequest() async {

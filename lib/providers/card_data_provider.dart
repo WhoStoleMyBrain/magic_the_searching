@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
 import '../helpers/scryfall_request_handler.dart';
 import '../helpers/db_helper.dart';
@@ -11,6 +12,9 @@ class CardDataProvider with ChangeNotifier {
   String query = '';
   String column = 'searchText';
   bool isLoading = false;
+  bool isStandardQuery = true;
+  late Function dbHelperFunction;
+  Map<String, String> queryParameters = {};
 
   List<CardData> get cards {
     return [..._cards];
@@ -26,48 +30,14 @@ class CardDataProvider with ChangeNotifier {
     return cards.firstWhere((card) => card.id == id);
   }
 
-  Future<bool> processSearchQuery() async {
+  Future<bool> processQuery() async {
     isLoading = true;
-    var historyData = await DBHelper.getHistoryData();
+    var historyData = await dbHelperFunction();
     var queries = historyData.map((e) => e['searchText']);
     if (queries.contains(query)) {
       return _loadDataFromDB();
     } else {
       return _requestDataFromScryfall();
-    }
-  }
-
-  Future<bool> processLanguagesQuery() async {
-    print(query);
-    isLoading = true;
-    var historyData = await DBHelper.getHistoryData();
-    var queries = historyData.map((e) => e['searchText']);
-    if (queries.contains(query) && false) {
-      return _loadDataFromDB();
-    } else {
-      return _requestLanguagesFromScryfall();
-    }
-  }
-
-  Future<bool> processVersionsQuery() async {
-    isLoading = true;
-    var historyData = await DBHelper.getVersionsOrPrintsData();
-    var queries = historyData.map((e) => e['searchText']);
-    if (queries.contains(query) && queries.length > 1) {
-      return _loadDataFromDB();
-    } else {
-      return _requestVersionsFromScryfall();
-    }
-  }
-
-  Future<bool> processPrintsQuery() async {
-    isLoading = true;
-    var historyData = await DBHelper.getVersionsOrPrintsData();
-    var queries = historyData.map((e) => e['searchText']);
-    if (queries.contains(query) && queries.length > 1) {
-      return _loadDataFromDB();
-    } else {
-      return _requestPrintsFromScryfall();
     }
   }
 
@@ -99,7 +69,7 @@ class CardDataProvider with ChangeNotifier {
   Future<bool> _requestDataFromScryfall() async {
     final scryfallRequestHandler =
         ScryfallRequestHandler(searchText: query, languages: languages);
-    scryfallRequestHandler.getRequestHttpsQuery();
+    scryfallRequestHandler.setHttpsQuery(queryParameters);
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     if (queryResult.isEmpty) {
@@ -107,62 +77,8 @@ class CardDataProvider with ChangeNotifier {
       return false;
     } else {
       for (CardData card in queryResult) {
-        await DBHelper.insert('user_searches', card.toDB(card, query, false));
-      }
-    }
-    cards = queryResult;
-    return true;
-  }
-
-  Future<bool> _requestVersionsFromScryfall() async {
-    final scryfallRequestHandler =
-        ScryfallRequestHandler(searchText: query, languages: languages);
-    print(scryfallRequestHandler.query);
-    scryfallRequestHandler.getVersionsHttpsQuery();
-    await scryfallRequestHandler.sendQueryRequest();
-    final queryResult = scryfallRequestHandler.processQueryData();
-    if (queryResult.isEmpty) {
-      cards = [];
-      return false;
-    } else {
-      for (CardData card in queryResult) {
-        await DBHelper.insert('user_searches', card.toDB(card, query, true));
-      }
-    }
-    cards = queryResult;
-    return true;
-  }
-
-  Future<bool> _requestLanguagesFromScryfall() async {
-    final scryfallRequestHandler =
-        ScryfallRequestHandler(searchText: query, languages: languages);
-    scryfallRequestHandler.getLanguagesHttpsQuery();
-    await scryfallRequestHandler.sendQueryRequest();
-    final queryResult = scryfallRequestHandler.processQueryData();
-    if (queryResult.isEmpty) {
-      cards = [];
-      return false;
-    } else {
-      for (CardData card in queryResult) {
-        await DBHelper.insert('user_searches', card.toDB(card, query, true));
-      }
-    }
-    cards = queryResult;
-    return true;
-  }
-
-  Future<bool> _requestPrintsFromScryfall() async {
-    final scryfallRequestHandler =
-        ScryfallRequestHandler(searchText: query, languages: languages);
-    scryfallRequestHandler.getPrintsHttpsQuery();
-    await scryfallRequestHandler.sendQueryRequest();
-    final queryResult = scryfallRequestHandler.processQueryData();
-    if (queryResult.isEmpty) {
-      cards = [];
-      return false;
-    } else {
-      for (CardData card in queryResult) {
-        await DBHelper.insert('user_searches', card.toDB(card, query, true));
+        await DBHelper.insert(
+            'user_searches', card.toDB(card, query, !isStandardQuery));
       }
     }
     cards = queryResult;
