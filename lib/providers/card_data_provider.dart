@@ -7,6 +7,7 @@ import '../models/card_data.dart';
 
 class CardDataProvider with ChangeNotifier {
   List<CardData> _cards = [];
+  List<String> languages = [];
   String query = '';
   String column = 'searchText';
   bool isLoading = false;
@@ -22,7 +23,10 @@ class CardDataProvider with ChangeNotifier {
   }
 
   CardData getCardById(String id) {
-    return _cards.firstWhere((card) => card.id == id);
+    // print(cards);
+    // return CardData();
+    // return cards.isEmpty ? null : cards.firstWhere((card) => card.id == id);
+    return cards.firstWhere((card) => card.id == id);
   }
 
   Future<bool> processSearchQuery() async {
@@ -51,7 +55,6 @@ class CardDataProvider with ChangeNotifier {
       return _requestLanguagesFromScryfall();
     }
   }
-
 
   Future<bool> processVersionsQuery() async {
     isLoading = true;
@@ -113,13 +116,16 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<bool> _requestDataFromScryfall() async {
-    final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
+    final scryfallRequestHandler =
+        ScryfallRequestHandler(searchText: query, languages: languages);
     // scryfallRequestHandler.translateTextToQuery();
     print(scryfallRequestHandler.query);
     scryfallRequestHandler.getRequestHttpsQuery();
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     if (queryResult.isEmpty) {
+      // isLoading = false;
+      cards = [];
       return false;
     } else {
       for (CardData card in queryResult) {
@@ -132,7 +138,8 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<bool> _requestVersionsFromScryfall() async {
-    final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
+    final scryfallRequestHandler =
+        ScryfallRequestHandler(searchText: query, languages: languages);
     // scryfallRequestHandler.translateTextToQuery();
     print(scryfallRequestHandler.query);
     scryfallRequestHandler.getVersionsHttpsQuery();
@@ -140,6 +147,8 @@ class CardDataProvider with ChangeNotifier {
     final queryResult = scryfallRequestHandler.processQueryData();
     // print(queryResult);
     if (queryResult.isEmpty) {
+      cards = [];
+      // isLoading = false;
       return false;
     } else {
       for (CardData card in queryResult) {
@@ -154,7 +163,8 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<bool> _requestLanguagesFromScryfall() async {
-    final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
+    final scryfallRequestHandler =
+        ScryfallRequestHandler(searchText: query, languages: languages);
     // scryfallRequestHandler.translateTextToQuery();
     scryfallRequestHandler.getLanguagesHttpsQuery();
     print(scryfallRequestHandler.query);
@@ -162,6 +172,8 @@ class CardDataProvider with ChangeNotifier {
     final queryResult = scryfallRequestHandler.processQueryData();
     // print(queryResult);
     if (queryResult.isEmpty) {
+      // isLoading = false;
+      cards = [];
       return false;
     } else {
       for (CardData card in queryResult) {
@@ -176,13 +188,16 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<bool> _requestPrintsFromScryfall() async {
-    final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
+    final scryfallRequestHandler =
+        ScryfallRequestHandler(searchText: query, languages: languages);
     // scryfallRequestHandler.translateTextToQuery();
     scryfallRequestHandler.getPrintsHttpsQuery();
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     // print(queryResult);
     if (queryResult.isEmpty) {
+      // isLoading = false;
+      cards = [];
       return false;
     } else {
       for (CardData card in queryResult) {

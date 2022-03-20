@@ -37,7 +37,8 @@ class CardDetailScreen extends StatelessWidget {
 
   Future<void> _startSearchForVersions(BuildContext ctx, String text) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    cardDataProvider.query = text[0] == '!' ? text : '!' + text;
+    // cardDataProvider.query = text[0] == '!' ? text : '!' + text;
+    cardDataProvider.query = text;
     bool requestSuccessful = await cardDataProvider.processVersionsQuery();
     if (!requestSuccessful) {
       _showFailedQuery(ctx, text);
@@ -48,7 +49,8 @@ class CardDetailScreen extends StatelessWidget {
 
   Future<void> _startSearchForPrints(BuildContext ctx, String text) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    cardDataProvider.query = text[0] == '!' ? text : '!' + text;
+    // cardDataProvider.query = text[0] == '!' ? text : '!' + text;
+    cardDataProvider.query = text;
     bool requestSuccessful = await cardDataProvider.processPrintsQuery();
     if (!requestSuccessful) {
       _showFailedQuery(ctx, text);
@@ -59,7 +61,8 @@ class CardDetailScreen extends StatelessWidget {
 
   Future<void> _startSearchForLanguages(BuildContext ctx, String text) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    cardDataProvider.query = text[0] == '!' ? text : '!' + text;
+    // cardDataProvider.query = text[0] == '!' ? text : '!' + text;
+    cardDataProvider.query = text;
     bool requestSuccessful = await cardDataProvider.processLanguagesQuery();
     if (!requestSuccessful) {
       _showFailedQuery(ctx, text);
@@ -71,7 +74,7 @@ class CardDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final id = ModalRoute.of(context)?.settings.arguments as String;
-    final cardData =
+    final CardData cardData =
         Provider.of<CardDataProvider>(context, listen: false).getCardById(id);
     final mediaQuery = MediaQuery.of(context);
     // const double fontSize = 20;

@@ -15,8 +15,21 @@ class ScryfallRequestHandler {
       'assets/images/isshin-two-heavens-as-one.jpg';
   String searchText;
   String query = '';
+  List<String> languages = [];
   Map<String, dynamic> responseData = {};
-  ScryfallRequestHandler({required this.searchText});
+  ScryfallRequestHandler({required this.searchText, required this.languages}) {
+    // print('(l:${languages.join(' or l:')})');
+    // searchText =
+    //     searchText.contains(' ') ? '!"${searchText.substring(1)}"' : searchText;
+    searchText = languages.isEmpty
+        ? searchText
+        : languages.length > 1
+            ? '(l:${languages.join(' or l:')}) $searchText'
+            : 'l:${languages[0]} $searchText';
+    print(searchText);
+  }
+
+  void setQueryLanguages() {}
 
   void getRequestHttpsQuery() {
     query = Uri.https(apiBasePath, queryBaseString, {
@@ -24,50 +37,40 @@ class ScryfallRequestHandler {
       'lang': 'any',
       'q': searchText,
     }).toString();
-    // print(query);
+    print(query);
   }
 
   void getLanguagesHttpsQuery() {
     query = Uri.https(apiBasePath, queryBaseString, {
       'include_multilingual': 'true',
-      // 'lang': 'any',
+      'lang': 'any',
       'unique': 'prints',
-      'q': searchText.contains(' ')
-          ? '!"${searchText.substring(1)}"'
-          : searchText
+      'q': searchText,
     }).toString();
-    // print(query);
+    print(query);
   }
 
   void getRefreshPriceHttpsQuery() {
     query = Uri.https(apiBasePath, refreshBaseString, {
       '': searchText,
     }).toString();
-    // print(query);
   }
 
   void getVersionsHttpsQuery() {
     query = Uri.https(apiBasePath, versionBaseString, {
       'unique': 'art',
-      'q': searchText.contains(' ')
-          ? '!"${searchText.substring(1)}"'
-          : searchText
+      'q': searchText,
     }).toString();
-    // print(query);
+    print(query);
   }
 
   void getPrintsHttpsQuery() {
     query = Uri.https(apiBasePath, versionBaseString, {
       'unique': 'prints',
-      // 'include_multilingual': 'true',
-      // 'lang': 'any',
-      'q': searchText.contains(' ')
-          ? '!"${searchText.substring(1)}"'
-          : searchText
+      'q': searchText,
     }).toString();
-    // print(query);
+    print(query);
   }
-
 
   Future<void> sendQueryRequest() async {
     final url = Uri.parse(query);
@@ -76,9 +79,7 @@ class ScryfallRequestHandler {
 
       responseData = json.decode(response.body);
       if (response.statusCode != 200) {}
-    } catch (error) {
-      // print(error);
-    }
+    } catch (error) {}
   }
 
   List<String> getMultiplePictures(card) {

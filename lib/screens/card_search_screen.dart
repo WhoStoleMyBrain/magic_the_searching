@@ -29,6 +29,33 @@ class CardSearchScreen extends StatefulWidget {
 }
 
 class _CardSearchScreenState extends State<CardSearchScreen> {
+  ScrollController _scrollController =
+      ScrollController(keepScrollOffset: false, initialScrollOffset: 0);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // _scrollController. = 0;
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _scrollController.dispose();
+  }
+
+  // @override
+  // void initState() {
+  //   TODO: implement initState
+  // super.initState();
+  // addItemIntoLisT(1);
+  //
+  // _scrollController = new ScrollController(initialScrollOffset: 5.0)
+  //   ..addListener(_scrollListener);
+  // }
+
   void cardTapped(BuildContext ctx, String id) {
     Navigator.of(ctx).pushNamed(CardDetailScreen.routeName, arguments: id);
   }
@@ -40,8 +67,9 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         return GestureDetector(
           onTap: () {},
           child: EnterSearchTerm(
-            startSearchForCard: (text) {
-              return _startSearchForCard(ctx, text);
+            startSearchForCard: (text, langs) {
+              print(langs);
+              return _startSearchForCard(ctx, text, langs);
             },
           ),
           // behavior: HitTestBehavior.opaque,
@@ -70,10 +98,12 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     );
   }
 
-  Future<void> _startSearchForCard(BuildContext ctx, String text) async {
+  Future<void> _startSearchForCard(
+      BuildContext ctx, String text, List<String> languages) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     card_display.CardImageDisplay.pictureLoaded = false;
     cardDataProvider.query = text;
+    cardDataProvider.languages = languages;
     bool requestSuccessful = await cardDataProvider.processSearchQuery();
     if (!requestSuccessful) {
       _showFailedQuery(ctx, text);
@@ -93,32 +123,36 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
           : cardDataProvider.cards.isEmpty
               ? const Center(
                   child: Text('No cards found. Try searching for some!'))
-              : GridView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    mainAxisExtent:
-                        (mediaQuery.size.height - mediaQuery.padding.top - 15) /
-                            2,
-                    // childAspectRatio: 4 / 8,
-                    // mainAxisExtent: 1,
-                  ),
-                  itemCount: cardDataProvider.cards.length,
-                  itemBuilder: (ctx, index) {
-                    return card_display.CardDisplay(
-                      cardData: cardDataProvider.cards[index],
-                      cardTapped: cardTapped,
-                      key: UniqueKey(),
-                    );
-                  },
-                ),
+              : myGridView(mediaQuery, cardDataProvider),
       floatingActionButton: MyFloatingActionButtons(
         startEnterSearchTerm: _startEnterSearchTerm,
         startSearchForCard: _startSearchForCard,
       ),
+    );
+  }
+
+  GridView myGridView(
+      MediaQueryData mediaQuery, CardDataProvider cardDataProvider) {
+    return GridView.builder(
+      key: UniqueKey(),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        mainAxisExtent:
+            (mediaQuery.size.height - mediaQuery.padding.top - 15) / 2,
+        // childAspectRatio: 4 / 8,
+        // mainAxisExtent: 1,
+      ),
+      itemCount: cardDataProvider.cards.length,
+      itemBuilder: (ctx, index) {
+        return card_display.CardDisplay(
+          cardData: cardDataProvider.cards[index],
+          cardTapped: cardTapped,
+          key: UniqueKey(),
+        );
+      },
     );
   }
 }
@@ -230,8 +264,29 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
     final savedImage =
         await File(imageFile.path).copy('${appDir.path}/$fileName');
     final recognisedText = await getCardNameFromImage(savedImage);
+    final cardLanguage = await getLanguageFromCardName(recognisedText);
+    final List<String> languages;
+    languages = cardLanguage != 'en' ? ['en', cardLanguage] : ['en'];
 
-    widget.startSearchForCard(ctx, recognisedText);
+    widget.startSearchForCard(ctx, recognisedText, languages);
+  }
+
+  Future<String> getLanguageFromCardName(String cardName) async {
+    try {
+      final String response =
+          await languageIdentifier.identifyLanguage(cardName);
+      print('lang: $response; text: $cardName');
+      return response;
+    } on PlatformException catch (pe) {
+      if (pe.code == languageIdentifier.errorCodeNoLanguageIdentified) {
+        // no language detected
+        print('no language detected');
+        return '';
+      }
+      return '';
+      // print('error...');
+      // other plugin error
+    }
   }
 
   Future<String> getCardNameFromImage(File image) async {
@@ -239,42 +294,6 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
     final inputImage = InputImage.fromFile(image);
     final RecognisedText recognisedText =
         await textDetector.processImage(inputImage);
-
-    //final languageIdentifier = LanguageIdentifier();
-
-    for (TextBlock block in recognisedText.blocks) {
-      final Rect rect = block.rect;
-      final List<Offset> cornerPoints = block.cornerPoints;
-      final String text = block.text;
-      final List<String> languages = block.recognizedLanguages;
-      // print('langs: $languages');
-
-
-      for (TextLine line in block.lines) {
-        // Same getters as TextBlock
-        try {
-          final String response = await languageIdentifier.identifyLanguage(line.text);
-          // print('res:$response');
-          print('lang: $response; text: ${line.text}');
-        } on PlatformException catch (pe) {
-          if (pe.code == languageIdentifier.errorCodeNoLanguageIdentified) {
-            // no language detected
-            print('no language detected');
-          }
-          // print('error...');
-          // other plugin error
-        }
-        // print(line.text);
-        // print(line.recognizedLanguages);
-
-        for (TextElement element in line.elements) {
-          // Same getters as TextBlock
-          // print(element.text);
-          // print(element.text);
-          // print(element.);
-        }
-      }
-    }
     return recognisedText.blocks[0].lines[0].text;
   }
 
