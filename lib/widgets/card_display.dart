@@ -25,7 +25,7 @@ class CardDisplay extends StatelessWidget {
         height: mediaQuery.size.height,
         child: Card(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               CardImageDisplay(cardData: cardData, mediaQuery: mediaQuery),
@@ -49,7 +49,7 @@ class CardPriceDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 5,
+      elevation: 0,
       child: Container(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -69,38 +69,9 @@ class CardPriceDisplay extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Expanded(
-                  child: Text(
-                    'TCG: \$${cardData.price['tcg']}',
-                    style: TextStyle(
-                      fontSize:
-                          (double.tryParse(cardData.price['tcg']) ?? 0) >= 100
-                              ? (12 -
-                                  (double.tryParse(cardData.price['tcg']) ?? 0)
-                                      .toString()
-                                      .length +
-                                  5)
-                              : 12,
-                    ),
-                  ),
-                ),
+                buildSinglePriceItem('TCG', 'tcg', '\$'),
+                buildSinglePriceItem('TCG', 'tcg_foil', '\$'),
                 // Expanded(child: Container()),
-                Expanded(
-                  child: Text(
-                    'TCG: \$${cardData.price['tcg_foil']}',
-                    style: TextStyle(
-                      fontSize: (double.tryParse(cardData.price['tcg_foil']) ??
-                                  0) >=
-                              100
-                          ? (12 -
-                              (double.tryParse(cardData.price['tcg_foil']) ?? 0)
-                                  .toString()
-                                  .length +
-                              5)
-                          : 12,
-                    ),
-                  ),
-                ),
               ],
             ),
             const SizedBox(
@@ -109,50 +80,32 @@ class CardPriceDisplay extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Text(
-                    'CDM: €${cardData.price['cardmarket']}',
-                    style: TextStyle(
-                      fontSize: (double.tryParse(
-                                      cardData.price['cardmarket']) ??
-                                  0) >=
-                              100
-                          ? (12 -
-                                  (double.tryParse(
-                                              cardData.price['cardmarket']) ??
-                                          0)
-                                      .toString()
-                                      .length) +
-                              5
-                          : 12,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'CDM: €${cardData.price['cardmarket_foil']}',
-                    style: TextStyle(
-                      fontSize:
-                          (double.tryParse(cardData.price['cardmarket_foil']) ??
-                                      0) >=
-                                  100
-                              ? (12 -
-                                      (double.tryParse(cardData
-                                                  .price['cardmarket_foil']) ??
-                                              0)
-                                          .toString()
-                                          .length) +
-                                  5
-                              : 12,
-                    ),
-                  ),
-                ),
+                buildSinglePriceItem('CDM', 'cardmarket', '€'),
+                buildSinglePriceItem('CDM', 'cardmarket_foil', '€'),
               ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  Expanded buildSinglePriceItem(String name, String mapKey, String currency) {
+    return Expanded(
+                child: Text(
+                  '$name: $currency${cardData.price[mapKey]}',
+                  style: TextStyle(
+                    fontSize:
+                        (double.tryParse(cardData.price[mapKey]) ?? 0) >= 100
+                            ? (12 -
+                                (double.tryParse(cardData.price[mapKey]) ?? 0)
+                                    .toString()
+                                    .length +
+                                5)
+                            : 12,
+                  ),
+                ),
+              );
   }
 }
 
@@ -266,11 +219,11 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     // print(widget.cardData.images);
     return _hasLocalImage
         ? ClipRRect(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(10),
             child: Image.file(
               _storedImage,
               // fit: BoxFit.cover,
-              fit: BoxFit.contain,
+              fit: BoxFit.cover,
               width: (widget.mediaQuery.size.width -
                       widget.mediaQuery.padding.horizontal) /
                   2,
@@ -279,11 +232,11 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           )
         : widget.cardData.images[_side].contains('http')
             ? ClipRRect(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(10),
                 child: Image.network(
                   widget.cardData.images[_side],
                   // fit: BoxFit.cover,
-                  fit: BoxFit.contain,
+                  fit: BoxFit.cover,
 
                   width: (widget.mediaQuery.size.width -
                           widget.mediaQuery.padding.horizontal) /
@@ -293,14 +246,18 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
               )
             : widget.cardData.images[_side] == ''
                 ? ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(10),
                     child: const Image(
                       image: AssetImage(ScryfallRequestHandler.isshinLocal),
                     ),
                   )
                 : ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(10),
                     child: Image(
-                        image: AssetImage(widget.cardData.images[_side])));
+                      image: AssetImage(
+                        widget.cardData.images[_side],
+                      ),
+                    ),
+                  );
   }
 }

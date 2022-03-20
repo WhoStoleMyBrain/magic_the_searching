@@ -79,7 +79,7 @@ class CardDetailScreen extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     // const double fontSize = 20;
     const TextStyle textStyle = TextStyle(
-      fontSize: 24,
+      fontSize: 20,
     );
 
     return Scaffold(
@@ -196,9 +196,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                           _storedImage,
                           fit: BoxFit.cover,
                           // fit: BoxFit.cover,
-                          width: (widget.mediaQuery.size.width -
-                              widget.mediaQuery.padding.horizontal),
-                          height: (widget.mediaQuery.size.height * 2 / 3),
+                          // width: (widget.mediaQuery.size.width -
+                          //     widget.mediaQuery.padding.horizontal),
+                          // height: (widget.mediaQuery.size.height * 2 / 3),
                         ),
                       )
                     : widget.cardData.images[_side].contains('http')
@@ -207,9 +207,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                             child: Image.network(
                               widget.cardData.images[_side],
                               fit: BoxFit.cover,
-                              width: (widget.mediaQuery.size.width -
-                                  widget.mediaQuery.padding.horizontal),
-                              height: (widget.mediaQuery.size.height * 2 / 3),
+                              // width: (widget.mediaQuery.size.width -
+                              //     widget.mediaQuery.padding.horizontal),
+                              // height: (widget.mediaQuery.size.height * 2 / 3),
                             ),
                           )
                         : ClipRRect(
@@ -245,29 +245,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                   color: const Color.fromRGBO(128, 128, 128, 0.5),
                 ),
               ),
-            // if (_hasLocalImage)
-            //   Positioned(
-            //     left: (widget.mediaQuery.size.width -
-            //                 widget.mediaQuery.padding.horizontal) /
-            //             2 -
-            //         50,
-            //     top: (widget.mediaQuery.size.height * 2 / 3) - 70 - 10,
-            //     child: MaterialButton(
-            //       onPressed: () {
-            //         // setState(() {
-            //         //   _side == 0 ? _side = 1 : _side = 0;
-            //         // });
-            //       },
-            //       child: const Icon(
-            //         Icons.car_rental,
-            //         size: 50,
-            //         color: Colors.black87,
-            //       ),
-            //       height: 70,
-            //       shape: const CircleBorder(),
-            //       color: const Color.fromRGBO(128, 128, 128, 0.5),
-            //     ),
-            //   ),
           ],
         );
       },
@@ -345,28 +322,30 @@ class CardDetails extends StatelessWidget {
               )),
             ],
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              TextButton(
-                  onPressed: () {
-                    _launchURL(cardData.links['scryfall'] ?? '');
-                  },
-                  child: const Text('Open on Scryfall')),
-              TextButton(
-                  onPressed: () {
-                    _launchURL(cardData.links['cardmarket'] ?? '');
-                  },
-                  child: const Text('Open on Cardmarket')),
-              TextButton(
-                  onPressed: () {
-                    _launchURL(cardData.links['tcg'] ?? '');
-                  },
-                  child: const Text('Open on TCGPlayer')),
+              getLinkButton('Scryfall', 'scryfall'),
+              getLinkButton('Cardmarket', 'cardmarket'),
+              getLinkButton('TCGPlayer', 'tcg'),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  TextButton getLinkButton(String name, String mapKey) {
+    return TextButton(
+      onPressed: () {
+        _launchURL(cardData.links[mapKey] ?? '');
+      },
+      child: Text(
+        'Open on $name',
+        style: textStyle,
       ),
     );
   }
