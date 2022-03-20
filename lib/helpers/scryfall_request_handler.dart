@@ -18,15 +18,11 @@ class ScryfallRequestHandler {
   List<String> languages = [];
   Map<String, dynamic> responseData = {};
   ScryfallRequestHandler({required this.searchText, required this.languages}) {
-    // print('(l:${languages.join(' or l:')})');
-    // searchText =
-    //     searchText.contains(' ') ? '!"${searchText.substring(1)}"' : searchText;
     searchText = languages.isEmpty
         ? searchText
         : languages.length > 1
             ? '(l:${languages.join(' or l:')}) $searchText'
             : 'l:${languages[0]} $searchText';
-    print(searchText);
   }
 
   void setQueryLanguages() {}
@@ -37,7 +33,6 @@ class ScryfallRequestHandler {
       'lang': 'any',
       'q': searchText,
     }).toString();
-    print(query);
   }
 
   void getLanguagesHttpsQuery() {
@@ -47,7 +42,6 @@ class ScryfallRequestHandler {
       'unique': 'prints',
       'q': searchText,
     }).toString();
-    print(query);
   }
 
   void getRefreshPriceHttpsQuery() {
@@ -61,7 +55,6 @@ class ScryfallRequestHandler {
       'unique': 'art',
       'q': searchText,
     }).toString();
-    print(query);
   }
 
   void getPrintsHttpsQuery() {
@@ -69,7 +62,6 @@ class ScryfallRequestHandler {
       'unique': 'prints',
       'q': searchText,
     }).toString();
-    print(query);
   }
 
   Future<void> sendQueryRequest() async {
@@ -154,7 +146,6 @@ class ScryfallRequestHandler {
     if (responseData["data"] != null) {
       responseData["data"].map(
         (result) {
-          // print(result);
           resultList.add(
             CardData(
               id: result["id"] ?? '',

@@ -17,30 +17,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    // print('isInit start:$isInit');
     if (!isInit) {
       final history = Provider.of<History>(context, listen: false);
-      // history.setDummyData();
       setState(() {
         history.getDBData();
         isInit = !isInit;
       });
     }
-    // print('isInit end:$isInit');
   }
-
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   if (!isInit) {
-  //     final history = Provider.of<History>(context, listen: false);
-  //     // history.setDummyData();
-  //     setState(() {
-  //       history.getDBData();
-  //       isInit = !isInit;
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +35,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       appBar: AppBar(
         title: const Text('Your past searches'),
       ),
-      // body: cardDataProvider.cards.isEmpty
       body: history.data.isEmpty
           ? const Center(
               child: Text(
@@ -60,7 +43,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
               itemCount: history.data.length,
               itemBuilder: (ctx, i) {
                 return ListTile(
-                  // minVerticalPadding: 10.0,
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 4.0,
                     horizontal: 24.0,
@@ -76,8 +58,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     cardDataProvider.query = searchText;
                     await cardDataProvider.processSearchQuery();
                     Navigator.of(context).pop();
-                    // Navigator.of(context).pushReplacementNamed('/');
-                    //getData(String table, String searchText)
                   },
                 );
               },

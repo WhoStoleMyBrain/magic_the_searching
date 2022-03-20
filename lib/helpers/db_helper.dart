@@ -1,4 +1,3 @@
-import 'package:magic_the_searching/models/card_data.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 

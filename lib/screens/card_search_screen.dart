@@ -29,33 +29,6 @@ class CardSearchScreen extends StatefulWidget {
 }
 
 class _CardSearchScreenState extends State<CardSearchScreen> {
-  ScrollController _scrollController =
-      ScrollController(keepScrollOffset: false, initialScrollOffset: 0);
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    // _scrollController. = 0;
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    _scrollController.dispose();
-  }
-
-  // @override
-  // void initState() {
-  //   TODO: implement initState
-  // super.initState();
-  // addItemIntoLisT(1);
-  //
-  // _scrollController = new ScrollController(initialScrollOffset: 5.0)
-  //   ..addListener(_scrollListener);
-  // }
-
   void cardTapped(BuildContext ctx, String id) {
     Navigator.of(ctx).pushNamed(CardDetailScreen.routeName, arguments: id);
   }
@@ -67,12 +40,10 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         return GestureDetector(
           onTap: () {},
           child: EnterSearchTerm(
-            startSearchForCard: (text, langs) {
-              print(langs);
-              return _startSearchForCard(ctx, text, langs);
+            startSearchForCard: (text, languages) {
+              return _startSearchForCard(ctx, text, languages);
             },
           ),
-          // behavior: HitTestBehavior.opaque,
         );
       },
     );
@@ -88,10 +59,11 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
               child: Text('No results matching \'$query\' found.')),
           actions: [
             TextButton(
-                onPressed: () {
-                  Navigator.of(bCtx).pop();
-                },
-                child: const Text('Okay'))
+              onPressed: () {
+                Navigator.of(bCtx).pop();
+              },
+              child: const Text('Okay'),
+            )
           ],
         );
       },
@@ -142,8 +114,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         crossAxisSpacing: 10,
         mainAxisExtent:
             (mediaQuery.size.height - mediaQuery.padding.top - 35) / 2,
-        // childAspectRatio: 4 / 8,
-        // mainAxisExtent: 1,
       ),
       itemCount: cardDataProvider.cards.length,
       itemBuilder: (ctx, index) {
@@ -174,14 +144,15 @@ class _MyAppBarState extends State<MyAppBar> {
   void setTitle() {
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: true);
-    setState(() {
-      title = cardDataProvider.query.isNotEmpty
-          ? (cardDataProvider.query[0] == '!'
-              ? cardDataProvider.query.substring(1)
-              : cardDataProvider.query)
-          : '';
-    });
-    // print('title set to $title');
+    setState(
+      () {
+        title = cardDataProvider.query.isNotEmpty
+            ? (cardDataProvider.query[0] == '!'
+                ? cardDataProvider.query.substring(1)
+                : cardDataProvider.query)
+            : '';
+      },
+    );
   }
 
   @override
@@ -191,7 +162,6 @@ class _MyAppBarState extends State<MyAppBar> {
         Provider.of<CardDataProvider>(context, listen: false);
     setTitle();
     return AppBar(
-      // leadingWidth: 48.0,
       title: (cardDataProvider.cards.isNotEmpty && title != '')
           ? Text(
               'Searched for: $title',
@@ -284,8 +254,6 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
         return '';
       }
       return '';
-      // print('error...');
-      // other plugin error
     }
   }
 

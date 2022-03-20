@@ -28,12 +28,9 @@ class _EnterSearchTermState extends State<EnterSearchTerm> {
     } on PlatformException catch (pe) {
       if (pe.code == languageIdentifier.errorCodeNoLanguageIdentified) {
         // no language detected
-        print('no language detected');
         languages.add('');
       }
       languages.add('');
-      // print('error...');
-      // other plugin error
     }
     if (!languages.contains('en')) {
       languages.add('en');

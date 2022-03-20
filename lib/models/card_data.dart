@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class CardData {
   late String id;
   late String name;
@@ -25,13 +23,9 @@ class CardData {
     final imageValues = map["search_images"];
     final priceValues = map["search_prices"];
     final linksValues = map["search_links"];
-    // print(searchValues);
     id = searchValues?["id"].toString() ?? '';
     name = searchValues?["name"].toString() ?? '';
     text = searchValues?["text"].toString() ?? '';
-    // print(searchValues?["hasTwoSides"]);
-    // print(searchValues?["hasTwoSides"] ?? false);
-    // print((searchValues?["hasTwoSides"] ?? false) == 1);
     hasTwoSides = ((searchValues?["hasTwoSides"] ?? false) == 1) ? true : false;
     dateTime = DateTime.parse(searchValues?["requestTime"].toString() ?? '');
     images = [
@@ -41,7 +35,6 @@ class CardData {
           ? imageValues!["backImage"].toString()
           : ''
     ];
-    // print(images);
     price = {
       'tcg': priceValues?["tcg"] ?? '--.--',
       'tcg_foil': priceValues?["tcgFoil"] ?? '--.--',
@@ -58,8 +51,6 @@ class CardData {
   Map<String, Map<String, Object?>> toDB(
       CardData cardData, String searchText, bool isFromVersions) {
     var today = cardData.dateTime.toIso8601String();
-
-    // var today = DateTime.now().subtract(const Duration(days: 9)).toIso8601String();
     final searchValues = {
       'searchText': searchText,
       'id': cardData.id,
@@ -68,7 +59,6 @@ class CardData {
       'hasTwoSides': cardData.hasTwoSides ? 1 : 0,
       'requestTime': today,
       'isFromVersions': isFromVersions ? 1 : 0,
-      // 'requestTime': DateTime.now().subtract(const Duration(days: 9)).toIso8601String(),
     };
     final imageValues = {
       'searchText': searchText,

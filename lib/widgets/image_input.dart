@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart' as sys_paths;
 class ImageInput extends StatefulWidget {
   final Function onSelectImage;
 
-  ImageInput(this.onSelectImage);
+  const ImageInput(this.onSelectImage, {Key? key}) : super(key:key);
   @override
   State<ImageInput> createState() => _ImageInputState();
 }
@@ -66,7 +66,6 @@ class _ImageInputState extends State<ImageInput> {
             style: TextButton.styleFrom(
                 primary: Theme.of(context).colorScheme.primary),
             onPressed: _takePicture,
-            // child: child,
           ),
         ),
       ],

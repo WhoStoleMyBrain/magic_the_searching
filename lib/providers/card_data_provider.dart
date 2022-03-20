@@ -23,9 +23,6 @@ class CardDataProvider with ChangeNotifier {
   }
 
   CardData getCardById(String id) {
-    // print(cards);
-    // return CardData();
-    // return cards.isEmpty ? null : cards.firstWhere((card) => card.id == id);
     return cards.firstWhere((card) => card.id == id);
   }
 
@@ -34,10 +31,8 @@ class CardDataProvider with ChangeNotifier {
     var historyData = await DBHelper.getHistoryData();
     var queries = historyData.map((e) => e['searchText']);
     if (queries.contains(query)) {
-      // print('loading from DB');
       return _loadDataFromDB();
     } else {
-      // print('loading from scryfall');
       return _requestDataFromScryfall();
     }
   }
@@ -48,10 +43,8 @@ class CardDataProvider with ChangeNotifier {
     var historyData = await DBHelper.getHistoryData();
     var queries = historyData.map((e) => e['searchText']);
     if (queries.contains(query) && false) {
-      // print('loading from DB');
       return _loadDataFromDB();
     } else {
-      // print('loading from scryfall');
       return _requestLanguagesFromScryfall();
     }
   }
@@ -60,13 +53,9 @@ class CardDataProvider with ChangeNotifier {
     isLoading = true;
     var historyData = await DBHelper.getVersionsOrPrintsData();
     var queries = historyData.map((e) => e['searchText']);
-    // print(queries);
     if (queries.contains(query) && queries.length > 1) {
-      // if (false) {
-      // print('loading from DB');
       return _loadDataFromDB();
     } else {
-      // print('loading from scryfall');
       return _requestVersionsFromScryfall();
     }
   }
@@ -75,13 +64,9 @@ class CardDataProvider with ChangeNotifier {
     isLoading = true;
     var historyData = await DBHelper.getVersionsOrPrintsData();
     var queries = historyData.map((e) => e['searchText']);
-    // print(queries);
     if (queries.contains(query) && queries.length > 1) {
-      // if (false) {
-      // print('loading from DB');
       return _loadDataFromDB();
     } else {
-      // print('loading from scryfall');
       return _requestPrintsFromScryfall();
     }
   }
@@ -95,10 +80,7 @@ class CardDataProvider with ChangeNotifier {
       'search_prices':
           await DBHelper.getData('search_prices', 'searchText', query),
     };
-    // var dbData = await DBHelper.getData('user_searches', searchText);
-    // print(dbData);
     List<CardData> myData = [];
-    // print(dbData['user_searches']?[0]);
     for (int i = 0; i < dbData['user_searches']!.length; i++) {
       myData.add(
         CardData.fromMap(
@@ -110,7 +92,6 @@ class CardDataProvider with ChangeNotifier {
         ),
       );
     }
-    // print(myData[0].name);
     cards = myData;
     return true;
   }
@@ -118,19 +99,15 @@ class CardDataProvider with ChangeNotifier {
   Future<bool> _requestDataFromScryfall() async {
     final scryfallRequestHandler =
         ScryfallRequestHandler(searchText: query, languages: languages);
-    // scryfallRequestHandler.translateTextToQuery();
-    print(scryfallRequestHandler.query);
     scryfallRequestHandler.getRequestHttpsQuery();
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     if (queryResult.isEmpty) {
-      // isLoading = false;
       cards = [];
       return false;
     } else {
       for (CardData card in queryResult) {
         await DBHelper.insert('user_searches', card.toDB(card, query, false));
-        // print('${card.name} inserted to DB');
       }
     }
     cards = queryResult;
@@ -140,76 +117,55 @@ class CardDataProvider with ChangeNotifier {
   Future<bool> _requestVersionsFromScryfall() async {
     final scryfallRequestHandler =
         ScryfallRequestHandler(searchText: query, languages: languages);
-    // scryfallRequestHandler.translateTextToQuery();
     print(scryfallRequestHandler.query);
     scryfallRequestHandler.getVersionsHttpsQuery();
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
-    // print(queryResult);
     if (queryResult.isEmpty) {
       cards = [];
-      // isLoading = false;
       return false;
     } else {
       for (CardData card in queryResult) {
         await DBHelper.insert('user_searches', card.toDB(card, query, true));
-        // print('${card.name} inserted to DB');
       }
     }
     cards = queryResult;
-    // print(queryResult.length);
-
     return true;
   }
 
   Future<bool> _requestLanguagesFromScryfall() async {
     final scryfallRequestHandler =
         ScryfallRequestHandler(searchText: query, languages: languages);
-    // scryfallRequestHandler.translateTextToQuery();
     scryfallRequestHandler.getLanguagesHttpsQuery();
-    print(scryfallRequestHandler.query);
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
-    // print(queryResult);
     if (queryResult.isEmpty) {
-      // isLoading = false;
       cards = [];
       return false;
     } else {
       for (CardData card in queryResult) {
         await DBHelper.insert('user_searches', card.toDB(card, query, true));
-        // print('${card.name} inserted to DB');
       }
     }
     cards = queryResult;
-    // print(queryResult.length);
-
     return true;
   }
 
   Future<bool> _requestPrintsFromScryfall() async {
     final scryfallRequestHandler =
         ScryfallRequestHandler(searchText: query, languages: languages);
-    // scryfallRequestHandler.translateTextToQuery();
     scryfallRequestHandler.getPrintsHttpsQuery();
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
-    // print(queryResult);
     if (queryResult.isEmpty) {
-      // isLoading = false;
       cards = [];
       return false;
     } else {
       for (CardData card in queryResult) {
         await DBHelper.insert('user_searches', card.toDB(card, query, true));
-        // print('${card.name} inserted to DB');
       }
     }
     cards = queryResult;
-    // print(queryResult.length);
-
     return true;
   }
-
-  //sendVersionsRequest(String cardName)
 }

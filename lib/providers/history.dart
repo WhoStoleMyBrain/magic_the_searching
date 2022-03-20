@@ -9,28 +9,9 @@ class History with ChangeNotifier {
     return [..._data];
   }
 
-  void setDummyData() {
-    _data = [
-      HistoryObject(query: 'demon', matches: '13', dateTime: DateTime.now()),
-      HistoryObject(query: 'Myojin', matches: '10', dateTime: DateTime.now()),
-      HistoryObject(query: 'island', matches: '44', dateTime: DateTime.now()),
-      HistoryObject(query: 'demon', matches: '13', dateTime: DateTime.now()),
-      HistoryObject(query: 'Myojin', matches: '10', dateTime: DateTime.now()),
-      HistoryObject(query: 'island', matches: '44', dateTime: DateTime.now()),
-      HistoryObject(query: 'demon', matches: '13', dateTime: DateTime.now()),
-      HistoryObject(query: 'Myojin', matches: '10', dateTime: DateTime.now()),
-      HistoryObject(query: 'island', matches: '44', dateTime: DateTime.now()),
-      HistoryObject(query: 'demon', matches: '13', dateTime: DateTime.now()),
-      HistoryObject(query: 'Myojin', matches: '10', dateTime: DateTime.now()),
-      HistoryObject(query: 'island', matches: '44', dateTime: DateTime.now()),
-    ];
-  }
-
-  //List<HistoryObject>
   Future<void> getDBData() async {
     List<HistoryObject> data = [];
     var historyData = await DBHelper.getHistoryData();
-    // print(historyData.toString());
     for (var historyElement in historyData) {
       data.add(
         HistoryObject(
@@ -40,7 +21,6 @@ class History with ChangeNotifier {
         ),
       );
     }
-    // data = data.reversed.toList();
     _data = data;
     notifyListeners();
   }

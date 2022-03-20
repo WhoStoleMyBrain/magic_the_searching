@@ -92,20 +92,19 @@ class CardPriceDisplay extends StatelessWidget {
 
   Expanded buildSinglePriceItem(String name, String mapKey, String currency) {
     return Expanded(
-                child: Text(
-                  '$name: $currency${cardData.price[mapKey]}',
-                  style: TextStyle(
-                    fontSize:
-                        (double.tryParse(cardData.price[mapKey]) ?? 0) >= 100
-                            ? (12 -
-                                (double.tryParse(cardData.price[mapKey]) ?? 0)
-                                    .toString()
-                                    .length +
-                                5)
-                            : 12,
-                  ),
-                ),
-              );
+      child: Text(
+        '$name: $currency${cardData.price[mapKey]}',
+        style: TextStyle(
+          fontSize: (double.tryParse(cardData.price[mapKey]) ?? 0) >= 100
+              ? (12 -
+                  (double.tryParse(cardData.price[mapKey]) ?? 0)
+                      .toString()
+                      .length +
+                  5)
+              : 12,
+        ),
+      ),
+    );
   }
 }
 
@@ -135,7 +134,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     if (!CardImageDisplay.pictureLoaded) {
       var fileExists =
           await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
-      // print(fileExists);
       if (fileExists && widget.cardData.hasTwoSides && (_side == 1)) {
         if (path.basename(widget.cardData.images[0]) ==
             path.basename(widget.cardData.images[1])) {
@@ -151,25 +149,15 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       }
       _storedImage = localFile;
       _hasLocalImage = fileExists;
-
-      // print(_side);
-      // print(_storedImage);
-      // print(_hasLocalImage);
-      // _hasLocalImage = false;
       CardImageDisplay.pictureLoaded = true;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // nothing();
-    // print('display');
-    // print(_hasLocalImage);
-    // print(_storedImage.path);
     return FutureBuilder(
       future: getLocalImage(),
       builder: (context, snapshot) {
-        // print(snapshot);
         return Stack(
           children: [
             (snapshot.connectionState == ConnectionState.done)
@@ -216,13 +204,11 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   }
 
   Widget displayImage() {
-    // print(widget.cardData.images);
     return _hasLocalImage
         ? ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.file(
               _storedImage,
-              // fit: BoxFit.cover,
               fit: BoxFit.cover,
               width: (widget.mediaQuery.size.width -
                       widget.mediaQuery.padding.horizontal) /
@@ -235,9 +221,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
                   widget.cardData.images[_side],
-                  // fit: BoxFit.cover,
                   fit: BoxFit.cover,
-
                   width: (widget.mediaQuery.size.width -
                           widget.mediaQuery.padding.horizontal) /
                       2,

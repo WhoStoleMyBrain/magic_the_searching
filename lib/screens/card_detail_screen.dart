@@ -13,8 +13,6 @@ class CardDetailScreen extends StatelessWidget {
   static const routeName = '/card-detail';
 
   const CardDetailScreen({Key? key}) : super(key: key);
-
-  // final CardData cardData;
   Future<void> _showFailedQuery(BuildContext ctx, String query) async {
     return showDialog<void>(
       context: ctx,
@@ -25,10 +23,11 @@ class CardDetailScreen extends StatelessWidget {
               child: Text('No results matching \'$query\' found.')),
           actions: [
             TextButton(
-                onPressed: () {
-                  Navigator.of(bCtx).pop();
-                },
-                child: const Text('Okay'))
+              onPressed: () {
+                Navigator.of(bCtx).pop();
+              },
+              child: const Text('Okay'),
+            )
           ],
         );
       },
@@ -37,7 +36,6 @@ class CardDetailScreen extends StatelessWidget {
 
   Future<void> _startSearchForVersions(BuildContext ctx, String text) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    // cardDataProvider.query = text[0] == '!' ? text : '!' + text;
     cardDataProvider.query = text;
     bool requestSuccessful = await cardDataProvider.processVersionsQuery();
     if (!requestSuccessful) {
@@ -49,7 +47,6 @@ class CardDetailScreen extends StatelessWidget {
 
   Future<void> _startSearchForPrints(BuildContext ctx, String text) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    // cardDataProvider.query = text[0] == '!' ? text : '!' + text;
     cardDataProvider.query = text;
     bool requestSuccessful = await cardDataProvider.processPrintsQuery();
     if (!requestSuccessful) {
@@ -61,7 +58,6 @@ class CardDetailScreen extends StatelessWidget {
 
   Future<void> _startSearchForLanguages(BuildContext ctx, String text) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    // cardDataProvider.query = text[0] == '!' ? text : '!' + text;
     cardDataProvider.query = text;
     bool requestSuccessful = await cardDataProvider.processLanguagesQuery();
     if (!requestSuccessful) {
@@ -77,7 +73,6 @@ class CardDetailScreen extends StatelessWidget {
     final CardData cardData =
         Provider.of<CardDataProvider>(context, listen: false).getCardById(id);
     final mediaQuery = MediaQuery.of(context);
-    // const double fontSize = 20;
     const TextStyle textStyle = TextStyle(
       fontSize: 20,
     );
@@ -90,28 +85,31 @@ class CardDetailScreen extends StatelessWidget {
             onPressed: () {
               _startSearchForLanguages(context, cardData.name);
             },
-            child: Text('All Languages',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontSize: 20)),
+            child: Text(
+              'All Languages',
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary, fontSize: 20),
+            ),
           ),
           TextButton(
             onPressed: () {
               _startSearchForPrints(context, cardData.name);
             },
-            child: Text('All Prints',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontSize: 20)),
+            child: Text(
+              'All Prints',
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary, fontSize: 20),
+            ),
           ),
           TextButton(
             onPressed: () {
               _startSearchForVersions(context, cardData.name);
             },
-            child: Text('All Arts',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontSize: 20)),
+            child: Text(
+              'All Arts',
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary, fontSize: 20),
+            ),
           ),
         ],
       ),
@@ -152,7 +150,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
   var _hasLocalImage = false;
   late File _storedImage;
-  // bool _isLoading = false;
 
   Future<void> getLocalImage() async {
     late File localFile;
@@ -168,9 +165,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       localFile =
           await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
     }
-    // print(_side);
-    // print(fileExists);
-    // print(localFile.toString());
     _storedImage = localFile;
     _hasLocalImage = fileExists;
   }
@@ -180,14 +174,8 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     return FutureBuilder(
       future: getLocalImage(),
       builder: (context, snapshot) {
-        // print('detail');
-        // print(_hasLocalImage);
-        // print(_storedImage.path);
-
         return Stack(
-          // alignment: Alignment.center ,
           children: [
-            // _isLoading ? const Center(child: CircularProgressIndicator(),) :
             (snapshot.connectionState != ConnectionState.none)
                 ? _hasLocalImage
                     ? ClipRRect(
@@ -195,10 +183,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                         child: Image.file(
                           _storedImage,
                           fit: BoxFit.cover,
-                          // fit: BoxFit.cover,
-                          // width: (widget.mediaQuery.size.width -
-                          //     widget.mediaQuery.padding.horizontal),
-                          // height: (widget.mediaQuery.size.height * 2 / 3),
                         ),
                       )
                     : widget.cardData.images[_side].contains('http')
@@ -207,16 +191,13 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                             child: Image.network(
                               widget.cardData.images[_side],
                               fit: BoxFit.cover,
-                              // width: (widget.mediaQuery.size.width -
-                              //     widget.mediaQuery.padding.horizontal),
-                              // height: (widget.mediaQuery.size.height * 2 / 3),
                             ),
                           )
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(15),
                             child: Image(
-                                image:
-                                    AssetImage(widget.cardData.images[_side])),
+                              image: AssetImage(widget.cardData.images[_side]),
+                            ),
                           )
                 : const Center(
                     child: CircularProgressIndicator(),
@@ -350,7 +331,7 @@ class CardDetails extends StatelessWidget {
     );
   }
 
-  Future<void> _launchURL(String Webpage) async {
-    if (!await url.launch(Webpage)) throw 'Could not launch $Webpage';
+  Future<void> _launchURL(String webpage) async {
+    if (!await url.launch(webpage)) throw 'Could not launch $webpage';
   }
 }

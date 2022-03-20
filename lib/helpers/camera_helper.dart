@@ -11,7 +11,6 @@ class CameraHelper {
     // final savedImage =
     //     await File(url).copy('${appDir.path}/$fileName');
     bool file = await File(fullPath).exists();
-    // print(file);
     return file;
   }
 
@@ -32,11 +31,4 @@ class CameraHelper {
     // final savedImage = await File(name).copy('${appDir.path}/${fileName}');
     return savedImage;
   }
-
-  // Future<void> downloadImageFromUrl(String fileUrl) async {
-  //   var url = Uri.parse(fileUrl);
-  //   var response = await http.get(url);
-  //
-  // }
-
 }
