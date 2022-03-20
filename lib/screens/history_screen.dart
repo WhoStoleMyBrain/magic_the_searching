@@ -14,14 +14,21 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   bool isInit = false;
 
+  void setInitToTrue() {
+    setState(() {
+      isInit = true;
+      // print(isInit);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     if (!isInit) {
       final history = Provider.of<History>(context, listen: false);
       setState(() {
-        history.getDBData();
-        isInit = !isInit;
+        history.getDBData(setInitToTrue);
+        // isInit = !isInit;
       });
     }
   }
@@ -35,33 +42,37 @@ class _HistoryScreenState extends State<HistoryScreen> {
       appBar: AppBar(
         title: const Text('Your past searches'),
       ),
-      body: history.data.isEmpty
-          ? const Center(
-              child: Text(
-                  'No data found in history. \nSearches are saved here for 7 days.'))
-          : ListView.builder(
-              itemCount: history.data.length,
-              itemBuilder: (ctx, i) {
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 4.0,
-                    horizontal: 24.0,
-                  ),
-                  title: Text(
-                      'Search term: ${history.data[i].query[0] == '!' ? history.data[i].query.substring(1) : history.data[i].query}'),
-                  subtitle: Text(
-                      'Matches for this search: ${history.data[i].matches}'),
-                  trailing: Text(
-                      '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
-                  onTap: () async {
-                    String searchText = history.data[i].query;
-                    cardDataProvider.query = searchText;
-                    await cardDataProvider.processSearchQuery();
-                    Navigator.of(context).pop();
+      body: !isInit
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : history.data.isEmpty
+              ? const Center(
+                  child: Text(
+                      'No data found in history. \nSearches are saved here for 7 days.'))
+              : ListView.builder(
+                  itemCount: history.data.length,
+                  itemBuilder: (ctx, i) {
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 4.0,
+                        horizontal: 24.0,
+                      ),
+                      title: Text(
+                          'Search term: ${history.data[i].query[0] == '!' ? history.data[i].query.substring(1) : history.data[i].query}'),
+                      subtitle: Text(
+                          'Matches for this search: ${history.data[i].matches}'),
+                      trailing: Text(
+                          '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
+                      onTap: () async {
+                        String searchText = history.data[i].query;
+                        cardDataProvider.query = searchText;
+                        await cardDataProvider.processSearchQuery();
+                        Navigator.of(context).pop();
+                      },
+                    );
                   },
-                );
-              },
-            ),
+                ),
     );
   }
 }

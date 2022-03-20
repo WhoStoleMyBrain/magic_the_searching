@@ -245,12 +245,9 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
     try {
       final String response =
           await languageIdentifier.identifyLanguage(cardName);
-      print('lang: $response; text: $cardName');
       return response;
     } on PlatformException catch (pe) {
       if (pe.code == languageIdentifier.errorCodeNoLanguageIdentified) {
-        // no language detected
-        print('no language detected');
         return '';
       }
       return '';
