@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:path/path.dart' as path;
@@ -85,26 +86,35 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     final mediaQuery = MediaQuery.of(context);
     return Scaffold(
       appBar: MyAppBar(),
-      body: cardDataProvider.cards.isEmpty
-          ? const Center(child: Text('No cards found. Try searching for some!'))
-          : GridView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                mainAxisExtent: (mediaQuery.size.height - mediaQuery.padding.top - 15) / 2,
-                // childAspectRatio: 4 / 8,
-                // mainAxisExtent: 1,
-              ),
-              itemCount: cardDataProvider.cards.length,
-              itemBuilder: (ctx, index) {
-                return card_display.CardDisplay(
-                  cardData: cardDataProvider.cards[index],
-                  cardTapped: cardTapped,
-                );
-              },
-            ),
+      body: cardDataProvider.isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : cardDataProvider.cards.isEmpty
+              ? const Center(
+                  child: Text('No cards found. Try searching for some!'))
+              : GridView.builder(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    mainAxisExtent:
+                        (mediaQuery.size.height - mediaQuery.padding.top - 15) /
+                            2,
+                    // childAspectRatio: 4 / 8,
+                    // mainAxisExtent: 1,
+                  ),
+                  itemCount: cardDataProvider.cards.length,
+                  itemBuilder: (ctx, index) {
+                    return card_display.CardDisplay(
+                      cardData: cardDataProvider.cards[index],
+                      cardTapped: cardTapped,
+                      key: UniqueKey(),
+                    );
+                  },
+                ),
       floatingActionButton: MyFloatingActionButtons(
         startEnterSearchTerm: _startEnterSearchTerm,
         startSearchForCard: _startSearchForCard,
@@ -150,10 +160,10 @@ class _MyAppBarState extends State<MyAppBar> {
       // leadingWidth: 48.0,
       title: (cardDataProvider.cards.isNotEmpty && title != '')
           ? Text(
-                  'Searched for: $title',
-                  style: const TextStyle(fontSize: 18),
-                  maxLines: 2,
-                )
+              'Searched for: $title',
+              style: const TextStyle(fontSize: 18),
+              maxLines: 2,
+            )
           : const Text(
               'No search performed yet',
               style: TextStyle(fontSize: 18),
@@ -195,8 +205,8 @@ class MyFloatingActionButtons extends StatefulWidget {
 }
 
 class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
-
   TextDetector textDetector = GoogleMlKit.vision.textDetector();
+  LanguageIdentifier languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
   bool isBusy = false;
 
   @override
@@ -215,7 +225,6 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
       return;
     }
 
-
     final appDir = await sys_paths.getApplicationDocumentsDirectory();
     final fileName = path.basename(imageFile.path);
     final savedImage =
@@ -223,7 +232,6 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
     final recognisedText = await getCardNameFromImage(savedImage);
 
     widget.startSearchForCard(ctx, recognisedText);
-
   }
 
   Future<String> getCardNameFromImage(File image) async {
@@ -231,6 +239,42 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
     final inputImage = InputImage.fromFile(image);
     final RecognisedText recognisedText =
         await textDetector.processImage(inputImage);
+
+    //final languageIdentifier = LanguageIdentifier();
+
+    for (TextBlock block in recognisedText.blocks) {
+      final Rect rect = block.rect;
+      final List<Offset> cornerPoints = block.cornerPoints;
+      final String text = block.text;
+      final List<String> languages = block.recognizedLanguages;
+      // print('langs: $languages');
+
+
+      for (TextLine line in block.lines) {
+        // Same getters as TextBlock
+        try {
+          final String response = await languageIdentifier.identifyLanguage(line.text);
+          // print('res:$response');
+          print('lang: $response; text: ${line.text}');
+        } on PlatformException catch (pe) {
+          if (pe.code == languageIdentifier.errorCodeNoLanguageIdentified) {
+            // no language detected
+            print('no language detected');
+          }
+          // print('error...');
+          // other plugin error
+        }
+        // print(line.text);
+        // print(line.recognizedLanguages);
+
+        for (TextElement element in line.elements) {
+          // Same getters as TextBlock
+          // print(element.text);
+          // print(element.text);
+          // print(element.);
+        }
+      }
+    }
     return recognisedText.blocks[0].lines[0].text;
   }
 

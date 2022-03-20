@@ -9,6 +9,7 @@ class CardDataProvider with ChangeNotifier {
   List<CardData> _cards = [];
   String query = '';
   String column = 'searchText';
+  bool isLoading = false;
 
   List<CardData> get cards {
     return [..._cards];
@@ -16,6 +17,7 @@ class CardDataProvider with ChangeNotifier {
 
   set cards(List<CardData> queryData) {
     _cards = queryData;
+    isLoading = false;
     notifyListeners();
   }
 
@@ -24,6 +26,7 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<bool> processSearchQuery() async {
+    isLoading = true;
     var historyData = await DBHelper.getHistoryData();
     var queries = historyData.map((e) => e['searchText']);
     if (queries.contains(query)) {
@@ -35,8 +38,23 @@ class CardDataProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> processLanguagesQuery() async {
+    print(query);
+    isLoading = true;
+    var historyData = await DBHelper.getHistoryData();
+    var queries = historyData.map((e) => e['searchText']);
+    if (queries.contains(query) && false) {
+      // print('loading from DB');
+      return _loadDataFromDB();
+    } else {
+      // print('loading from scryfall');
+      return _requestLanguagesFromScryfall();
+    }
+  }
+
 
   Future<bool> processVersionsQuery() async {
+    isLoading = true;
     var historyData = await DBHelper.getVersionsOrPrintsData();
     var queries = historyData.map((e) => e['searchText']);
     // print(queries);
@@ -51,6 +69,7 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<bool> processPrintsQuery() async {
+    isLoading = true;
     var historyData = await DBHelper.getVersionsOrPrintsData();
     var queries = historyData.map((e) => e['searchText']);
     // print(queries);
@@ -96,6 +115,7 @@ class CardDataProvider with ChangeNotifier {
   Future<bool> _requestDataFromScryfall() async {
     final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
     // scryfallRequestHandler.translateTextToQuery();
+    print(scryfallRequestHandler.query);
     scryfallRequestHandler.getRequestHttpsQuery();
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
@@ -114,7 +134,30 @@ class CardDataProvider with ChangeNotifier {
   Future<bool> _requestVersionsFromScryfall() async {
     final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
     // scryfallRequestHandler.translateTextToQuery();
+    print(scryfallRequestHandler.query);
     scryfallRequestHandler.getVersionsHttpsQuery();
+    await scryfallRequestHandler.sendQueryRequest();
+    final queryResult = scryfallRequestHandler.processQueryData();
+    // print(queryResult);
+    if (queryResult.isEmpty) {
+      return false;
+    } else {
+      for (CardData card in queryResult) {
+        await DBHelper.insert('user_searches', card.toDB(card, query, true));
+        // print('${card.name} inserted to DB');
+      }
+    }
+    cards = queryResult;
+    // print(queryResult.length);
+
+    return true;
+  }
+
+  Future<bool> _requestLanguagesFromScryfall() async {
+    final scryfallRequestHandler = ScryfallRequestHandler(searchText: query);
+    // scryfallRequestHandler.translateTextToQuery();
+    scryfallRequestHandler.getLanguagesHttpsQuery();
+    print(scryfallRequestHandler.query);
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     // print(queryResult);

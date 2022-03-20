@@ -65,4 +65,8 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // ...
+    // Use this dependency to bundle the model with your app
+    implementation 'com.google.mlkit:language-id:17.0.3'
+
 }

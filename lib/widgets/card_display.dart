@@ -75,7 +75,11 @@ class CardPriceDisplay extends StatelessWidget {
                     style: TextStyle(
                       fontSize:
                           (double.tryParse(cardData.price['tcg']) ?? 0) >= 100
-                              ? (12 - (double.tryParse(cardData.price['tcg']) ?? 0).toString().length + 5)
+                              ? (12 -
+                                  (double.tryParse(cardData.price['tcg']) ?? 0)
+                                      .toString()
+                                      .length +
+                                  5)
                               : 12,
                     ),
                   ),
@@ -85,11 +89,15 @@ class CardPriceDisplay extends StatelessWidget {
                   child: Text(
                     'TCG: \$${cardData.price['tcg_foil']}',
                     style: TextStyle(
-                      fontSize:
-                          (double.tryParse(cardData.price['tcg_foil']) ?? 0) >=
-                                  100
-                              ? (12 - (double.tryParse(cardData.price['tcg_foil']) ?? 0).toString().length + 5)
-                              : 12,
+                      fontSize: (double.tryParse(cardData.price['tcg_foil']) ??
+                                  0) >=
+                              100
+                          ? (12 -
+                              (double.tryParse(cardData.price['tcg_foil']) ?? 0)
+                                  .toString()
+                                  .length +
+                              5)
+                          : 12,
                     ),
                   ),
                 ),
@@ -105,12 +113,18 @@ class CardPriceDisplay extends StatelessWidget {
                   child: Text(
                     'CDM: €${cardData.price['cardmarket']}',
                     style: TextStyle(
-                      fontSize:
-                          (double.tryParse(cardData.price['cardmarket']) ??
-                                      0) >=
-                                  100
-                              ? (12 - (double.tryParse(cardData.price['cardmarket']) ?? 0).toString().length) + 5
-                              : 12,
+                      fontSize: (double.tryParse(
+                                      cardData.price['cardmarket']) ??
+                                  0) >=
+                              100
+                          ? (12 -
+                                  (double.tryParse(
+                                              cardData.price['cardmarket']) ??
+                                          0)
+                                      .toString()
+                                      .length) +
+                              5
+                          : 12,
                     ),
                   ),
                 ),
@@ -122,7 +136,13 @@ class CardPriceDisplay extends StatelessWidget {
                           (double.tryParse(cardData.price['cardmarket_foil']) ??
                                       0) >=
                                   100
-                              ? (12 - (double.tryParse(cardData.price['cardmarket_foil']) ?? 0).toString().length) + 5
+                              ? (12 -
+                                      (double.tryParse(cardData
+                                                  .price['cardmarket_foil']) ??
+                                              0)
+                                          .toString()
+                                          .length) +
+                                  5
                               : 12,
                     ),
                   ),
@@ -162,23 +182,26 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     if (!CardImageDisplay.pictureLoaded) {
       var fileExists =
           await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
+      // print(fileExists);
       if (fileExists && widget.cardData.hasTwoSides && (_side == 1)) {
         if (path.basename(widget.cardData.images[0]) ==
             path.basename(widget.cardData.images[1])) {
           localFile = await CameraHelper.saveFileLocally(
               '${widget.cardData.images[_side]}back');
+        } else {
+          localFile =
+              await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
         }
       } else {
         localFile =
             await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
       }
-
       _storedImage = localFile;
       _hasLocalImage = fileExists;
 
-      print(_side);
-      print(_storedImage);
-      print(_hasLocalImage);
+      // print(_side);
+      // print(_storedImage);
+      // print(_hasLocalImage);
       // _hasLocalImage = false;
       CardImageDisplay.pictureLoaded = true;
     }

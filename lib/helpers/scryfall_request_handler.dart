@@ -18,37 +18,56 @@ class ScryfallRequestHandler {
   Map<String, dynamic> responseData = {};
   ScryfallRequestHandler({required this.searchText});
 
-  // void translateTextToQuery() {
-  //   // query = searchText.replaceAll(RegExp(' '), '+');
-  //   // query = Uri.encodeQueryComponent(searchText);
-  //   query = Uri.https('', searchText).toString();
-  //   query = 'q=' + query;
-  //   // print(query);
-  // }
-
   void getRequestHttpsQuery() {
-    query = Uri.https(
-            apiBasePath, queryBaseString, { 'q': searchText,})
-        .toString();
+    query = Uri.https(apiBasePath, queryBaseString, {
+      'include_multilingual': 'true',
+      'lang': 'any',
+      'q': searchText,
+    }).toString();
+    // print(query);
+  }
+
+  void getLanguagesHttpsQuery() {
+    query = Uri.https(apiBasePath, queryBaseString, {
+      'include_multilingual': 'true',
+      // 'lang': 'any',
+      'unique': 'prints',
+      'q': searchText.contains(' ')
+          ? '!"${searchText.substring(1)}"'
+          : searchText
+    }).toString();
+    // print(query);
   }
 
   void getRefreshPriceHttpsQuery() {
-    query = Uri.https(
-        apiBasePath, refreshBaseString, { '': searchText,})
-        .toString();
+    query = Uri.https(apiBasePath, refreshBaseString, {
+      '': searchText,
+    }).toString();
+    // print(query);
   }
 
   void getVersionsHttpsQuery() {
-    query = Uri.https(
-        apiBasePath, versionBaseString, { 'unique':'art', 'q': searchText.contains(' ') ? '!"${searchText.substring(1)}"' : searchText})
-        .toString();
+    query = Uri.https(apiBasePath, versionBaseString, {
+      'unique': 'art',
+      'q': searchText.contains(' ')
+          ? '!"${searchText.substring(1)}"'
+          : searchText
+    }).toString();
+    // print(query);
   }
 
   void getPrintsHttpsQuery() {
-    query = Uri.https(
-        apiBasePath, versionBaseString, { 'unique':'prints', 'q': searchText.contains(' ') ? '!"${searchText.substring(1)}"' : searchText})
-        .toString();
+    query = Uri.https(apiBasePath, versionBaseString, {
+      'unique': 'prints',
+      // 'include_multilingual': 'true',
+      // 'lang': 'any',
+      'q': searchText.contains(' ')
+          ? '!"${searchText.substring(1)}"'
+          : searchText
+    }).toString();
+    // print(query);
   }
+
 
   Future<void> sendQueryRequest() async {
     final url = Uri.parse(query);
@@ -104,6 +123,31 @@ class ScryfallRequestHandler {
           };
   }
 
+  Map<String, String> addLinks(Map<String, dynamic> card) {
+    final Map<String, String> linksValues = {};
+    if (card.containsKey('scryfall_uri')) {
+      linksValues['scryfall'] = card['scryfall_uri'];
+    } else {
+      linksValues['scryfall'] = '';
+    }
+    if (card.containsKey('purchase_uris')) {
+      if (card['purchase_uris'].containsKey('tcgplayer')) {
+        linksValues['tcg'] = card['purchase_uris']['tcgplayer'];
+      } else {
+        linksValues['tcg'] = '';
+      }
+      if (card['purchase_uris'].containsKey('cardmarket')) {
+        linksValues['cardmarket'] = card['purchase_uris']['cardmarket'];
+      } else {
+        linksValues['cardmarket'] = '';
+      }
+    } else {
+      linksValues['tcg'] = '';
+      linksValues['cardmarket'] = '';
+    }
+    return linksValues;
+  }
+
   List<CardData> processQueryData() {
     final List<CardData> resultList = [];
     if (responseData["data"] != null) {
@@ -122,6 +166,7 @@ class ScryfallRequestHandler {
                   : false,
               price: addPrices(result),
               dateTime: DateTime.now(),
+              links: addLinks(result),
             ),
           );
         },

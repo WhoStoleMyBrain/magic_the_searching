@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:url_launcher/url_launcher.dart' as url;
 import 'package:magic_the_searching/helpers/camera_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
@@ -42,9 +43,7 @@ class CardDetailScreen extends StatelessWidget {
       _showFailedQuery(ctx, text);
       return;
     }
-    // Navigator.of(ctx).pushReplacementNamed('/');
     Navigator.of(ctx).pop();
-    // Navigator.of(ctx).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
   }
 
   Future<void> _startSearchForPrints(BuildContext ctx, String text) async {
@@ -55,9 +54,18 @@ class CardDetailScreen extends StatelessWidget {
       _showFailedQuery(ctx, text);
       return;
     }
-    // Navigator.of(ctx).pushReplacementNamed('/');
     Navigator.of(ctx).pop();
-    // Navigator.of(ctx).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
+  }
+
+  Future<void> _startSearchForLanguages(BuildContext ctx, String text) async {
+    final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
+    cardDataProvider.query = text[0] == '!' ? text : '!' + text;
+    bool requestSuccessful = await cardDataProvider.processLanguagesQuery();
+    if (!requestSuccessful) {
+      _showFailedQuery(ctx, text);
+      return;
+    }
+    Navigator.of(ctx).pop();
   }
 
   @override
@@ -75,6 +83,15 @@ class CardDetailScreen extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         actions: [
+          TextButton(
+            onPressed: () {
+              _startSearchForLanguages(context, cardData.name);
+            },
+            child: Text('All Languages',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontSize: 20)),
+          ),
           TextButton(
             onPressed: () {
               _startSearchForPrints(context, cardData.name);
@@ -146,7 +163,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       }
     } else {
       localFile =
-      await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+          await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
     }
     // print(_side);
     // print(fileExists);
@@ -154,7 +171,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     _storedImage = localFile;
     _hasLocalImage = fileExists;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -326,8 +342,33 @@ class CardDetails extends StatelessWidget {
               )),
             ],
           ),
+          const SizedBox(height: 10,),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              TextButton(
+                  onPressed: () {
+                    _launchURL(cardData.links['scryfall'] ?? '');
+                  },
+                  child: const Text('Open on Scryfall')),
+              TextButton(
+                  onPressed: () {
+                    _launchURL(cardData.links['cardmarket'] ?? '');
+                  },
+                  child: const Text('Open on Cardmarket')),
+              TextButton(
+                  onPressed: () {
+                    _launchURL(cardData.links['tcg'] ?? '');
+                  },
+                  child: const Text('Open on TCGPlayer')),
+            ],
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _launchURL(String Webpage) async {
+    if (!await url.launch(Webpage)) throw 'Could not launch $Webpage';
   }
 }

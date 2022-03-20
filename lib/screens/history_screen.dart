@@ -74,7 +74,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   onTap: () async {
                     String searchText = history.data[i].query;
                     cardDataProvider.query = searchText;
-                    cardDataProvider.processSearchQuery();
+                    await cardDataProvider.processSearchQuery();
                     Navigator.of(context).pop();
                     // Navigator.of(context).pushReplacementNamed('/');
                     //getData(String table, String searchText)

@@ -13,12 +13,8 @@ class DBHelper {
           'CREATE TABLE search_images(searchText TEXT, id TEXT PRIMARY KEY, frontImage TEXT, backImage TEXT, requestTime DATETIME)');
       await db.execute(
           'CREATE TABLE search_prices(searchText TEXT, id TEXT PRIMARY KEY, tcg TEXT, tcgFoil TEXT, cdm TEXT, cdmFoil TEXT, requestTime DATETIME)');
-      // await db.execute(
-      //     'CREATE TABLE user_history(id TEXT PRIMARY KEY, name TEXT, text TEXT, hasTwoSides BIT)');
-      // await db.execute(
-      //     'CREATE TABLE history_images(id TEXT PRIMARY KEY, frontImage TEXT, backImage TEXT)');
-      // await db.execute(
-      //     'CREATE TABLE history_prices(id TEXT PRIMARY KEY, tcg TEXT, tcgFoil TEXT, cdm TEXT, cdmFoil TEXT)');
+      await db.execute(
+          'CREATE TABLE search_links(searchText TEXT, id TEXT PRIMARY KEY, tcg TEXT, cardmarket TEXT, scryfall TEXT, requestTime DATETIME)');
     }, version: 1);
   }
 
@@ -30,6 +26,8 @@ class DBHelper {
     db.insert('search_images', data["search_images"] ?? {},
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
     db.insert('search_prices', data["search_prices"] ?? {},
+        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    db.insert('search_links', data["search_links"] ?? {},
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
@@ -50,16 +48,12 @@ class DBHelper {
     return history;
   }
 
-  // static Future<List<Map<String, dynamic>>> getVersions(String table, String searchText) async {
-  //   final db = await DBHelper.database();
-  //   return db.query(table, where: 'name = ?', whereArgs: [searchText]);
-  // }
-
   static Future<void> cleanDB() async {
     final db = await DBHelper.database();
     await db.execute("DELETE FROM search_images WHERE requestTime <= datetime('now', '-7 day')");
     await db.execute("DELETE FROM search_prices WHERE requestTime <= datetime('now', '-7 day')");
     await db.execute("DELETE FROM user_searches WHERE requestTime <= datetime('now', '-7 day')");
+    await db.execute("DELETE FROM search_links WHERE requestTime <= datetime('now', '-7 day')");
   }
 
 }
