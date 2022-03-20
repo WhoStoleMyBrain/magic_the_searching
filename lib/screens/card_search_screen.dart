@@ -1,20 +1,13 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart' as sys_paths;
 
 import 'package:provider/provider.dart';
 
+import '../helpers/process_image_taking.dart';
+import '../helpers/search_start_helper.dart';
 import '../providers/handedness.dart';
 import '../providers/card_data_provider.dart';
-import '../screens/card_detail_screen.dart';
 import '../screens/history_screen.dart';
 import '../widgets/card_display.dart' as card_display;
-import '../widgets/enter_search_term.dart';
 
 enum HandedMode {
   left,
@@ -29,59 +22,6 @@ class CardSearchScreen extends StatefulWidget {
 }
 
 class _CardSearchScreenState extends State<CardSearchScreen> {
-  void cardTapped(BuildContext ctx, String id) {
-    Navigator.of(ctx).pushNamed(CardDetailScreen.routeName, arguments: id);
-  }
-
-  void _startEnterSearchTerm(BuildContext ctx) {
-    showModalBottomSheet(
-      context: ctx,
-      builder: (bCtx) {
-        return GestureDetector(
-          onTap: () {},
-          child: EnterSearchTerm(
-            startSearchForCard: (text, languages) {
-              return _startSearchForCard(ctx, text, languages);
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _showFailedQuery(BuildContext ctx, String query) async {
-    return showDialog<void>(
-      context: ctx,
-      builder: (bCtx) {
-        return AlertDialog(
-          title: const Text('No results found'),
-          content: SingleChildScrollView(
-              child: Text('No results matching \'$query\' found.')),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(bCtx).pop();
-              },
-              child: const Text('Okay'),
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _startSearchForCard(
-      BuildContext ctx, String text, List<String> languages) async {
-    final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    card_display.CardImageDisplay.pictureLoaded = false;
-    cardDataProvider.query = text;
-    cardDataProvider.languages = languages;
-    bool requestSuccessful = await cardDataProvider.processSearchQuery();
-    if (!requestSuccessful) {
-      _showFailedQuery(ctx, text);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
@@ -96,10 +36,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
               ? const Center(
                   child: Text('No cards found. Try searching for some!'))
               : myGridView(mediaQuery, cardDataProvider),
-      floatingActionButton: MyFloatingActionButtons(
-        startEnterSearchTerm: _startEnterSearchTerm,
-        startSearchForCard: _startSearchForCard,
-      ),
+      floatingActionButton: const MyFloatingActionButtons(),
     );
   }
 
@@ -119,7 +56,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
       itemBuilder: (ctx, index) {
         return card_display.CardDisplay(
           cardData: cardDataProvider.cards[index],
-          cardTapped: cardTapped,
           key: UniqueKey(),
         );
       },
@@ -195,71 +131,18 @@ class _MyAppBarState extends State<MyAppBar> {
 }
 
 class MyFloatingActionButtons extends StatefulWidget {
-  const MyFloatingActionButtons(
-      {Key? key,
-      required this.startEnterSearchTerm,
-      required this.startSearchForCard})
-      : super(key: key);
-  final Function startEnterSearchTerm;
-  final Function startSearchForCard;
-
+  const MyFloatingActionButtons({Key? key}) : super(key: key);
   @override
   State<MyFloatingActionButtons> createState() =>
       _MyFloatingActionButtonsState();
 }
 
 class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
-  TextDetector textDetector = GoogleMlKit.vision.textDetector();
-  LanguageIdentifier languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
   bool isBusy = false;
 
   @override
   void dispose() async {
     super.dispose();
-    await textDetector.close();
-  }
-
-  Future<void> _takePictureAndFireQuery(BuildContext ctx) async {
-    final picker = ImagePicker();
-    final imageFile = await picker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 600,
-    );
-    if (imageFile == null) {
-      return;
-    }
-
-    final appDir = await sys_paths.getApplicationDocumentsDirectory();
-    final fileName = path.basename(imageFile.path);
-    final savedImage =
-        await File(imageFile.path).copy('${appDir.path}/$fileName');
-    final recognisedText = await getCardNameFromImage(savedImage);
-    final cardLanguage = await getLanguageFromCardName(recognisedText);
-    final List<String> languages;
-    languages = cardLanguage != 'en' ? ['en', cardLanguage] : ['en'];
-
-    widget.startSearchForCard(ctx, recognisedText, languages);
-  }
-
-  Future<String> getLanguageFromCardName(String cardName) async {
-    try {
-      final String response =
-          await languageIdentifier.identifyLanguage(cardName);
-      return response;
-    } on PlatformException catch (pe) {
-      if (pe.code == languageIdentifier.errorCodeNoLanguageIdentified) {
-        return '';
-      }
-      return '';
-    }
-  }
-
-  Future<String> getCardNameFromImage(File image) async {
-    isBusy = true;
-    final inputImage = InputImage.fromFile(image);
-    final RecognisedText recognisedText =
-        await textDetector.processImage(inputImage);
-    return recognisedText.blocks[0].lines[0].text;
   }
 
   @override
@@ -278,7 +161,7 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
             padding: const EdgeInsets.all(5.0),
             child: FloatingActionButton(
               heroTag: 'search',
-              onPressed: () => widget.startEnterSearchTerm(context),
+              onPressed: () => SearchStartHelper.startEnterSearchTerm(context),
               child: const Icon(Icons.search),
             ),
           ),
@@ -287,7 +170,7 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
             child: FloatingActionButton(
               heroTag: 'camera',
               onPressed: () {
-                _takePictureAndFireQuery(context);
+                ProcessImageTaking.takePictureAndFireQuery(context);
               },
               child: const Icon(Icons.camera_enhance),
             ),
@@ -297,3 +180,4 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
     );
   }
 }
+

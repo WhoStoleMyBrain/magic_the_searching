@@ -5,14 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/scryfall_request_handler.dart';
 import '../helpers/camera_helper.dart';
 import '../models/card_data.dart';
+import '../screens/card_detail_screen.dart';
 
 class CardDisplay extends StatelessWidget {
   final CardData cardData;
-  final Function cardTapped;
 
   const CardDisplay(
-      {Key? key, required this.cardData, required this.cardTapped})
+      {Key? key, required this.cardData})
       : super(key: key);
+
+  void cardTapped(BuildContext ctx, String id) {
+    Navigator.of(ctx).pushNamed(CardDetailScreen.routeName, arguments: id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,6 +156,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       CardImageDisplay.pictureLoaded = true;
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
