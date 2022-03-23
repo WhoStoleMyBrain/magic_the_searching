@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
+import '../helpers/internet_usage_helper.dart';
 import '../helpers/scryfall_request_handler.dart';
 import '../helpers/db_helper.dart';
 import '../models/card_data.dart';
@@ -34,7 +34,7 @@ class CardDataProvider with ChangeNotifier {
     isLoading = true;
     var historyData = await dbHelperFunction();
     var queries = historyData.map((e) => e['searchText']);
-    if (queries.contains(query)) {
+    if (queries.contains(query) && false) {
       return _loadDataFromDB();
     } else {
       return _requestDataFromScryfall();
@@ -66,10 +66,35 @@ class CardDataProvider with ChangeNotifier {
     return true;
   }
 
+  Future<void> internetUsage() async {
+    final internetUsageStats = InternetUsageHelper();
+    internetUsageStats.endDate = DateTime.now();
+    await internetUsageStats.updateInternetUsage();
+    const myPackageName = 'com.example.magic_the_searching';
+    print(DateTime.now());
+
+    final networkInfos = await internetUsageStats.networkInfos;
+    final double newBytesReceived = double.parse(networkInfos
+            .firstWhere((element) => element.packageName == myPackageName)
+            .rxTotalBytes ??
+        '');
+    final double newBytesTransferred = double.parse(networkInfos
+            .firstWhere((element) => element.packageName == myPackageName)
+            .txTotalBytes ??
+        '');
+    print('newMB-R: ${(newBytesReceived / 1024 / 1024).toStringAsFixed(0)}, '
+        'oldMB-R: ${(internetUsageStats.startBytesReceived / 1024 / 1024).toStringAsFixed(0)}, '
+        'difference: ${((newBytesReceived - internetUsageStats.startBytesReceived) / 1024 / 1024).toStringAsFixed(0)}');
+    print(
+        'newMB-T: ${(newBytesTransferred / 1024 / 1024).toStringAsFixed(0)}, '
+        'oldMB-T: ${(internetUsageStats.startBytesTransferred / 1024 / 1024).toStringAsFixed(0)}, '
+        'difference: ${((newBytesTransferred - internetUsageStats.startBytesTransferred) / 1024 / 1024).toStringAsFixed(0)}');
+  }
+
   Future<bool> _requestDataFromScryfall() async {
     final scryfallRequestHandler =
         ScryfallRequestHandler(searchText: query, languages: languages);
-    scryfallRequestHandler.setHttpsQuery(queryParameters);
+    scryfallRequestHandler.setHttpsQuery(queryParameters, isStandardQuery);
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     if (queryResult.isEmpty) {
@@ -82,6 +107,7 @@ class CardDataProvider with ChangeNotifier {
       }
     }
     cards = queryResult;
+    internetUsage();
     return true;
   }
 }

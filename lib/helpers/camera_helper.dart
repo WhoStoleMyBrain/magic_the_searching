@@ -29,6 +29,7 @@ class CameraHelper {
     File savedImage = File('${appDir.path}/$fileName');
     savedImage.writeAsBytesSync(response.bodyBytes);
     // final savedImage = await File(name).copy('${appDir.path}/${fileName}');
+    print('Saving: filename: $fileName, url: $url');
     return savedImage;
   }
 }

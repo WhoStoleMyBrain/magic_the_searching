@@ -1,4 +1,5 @@
 class ScryfallQueryMaps {
+
   static Map<String, String> searchMap = {
     'include_multilingual': 'true',
     'lang': 'any',

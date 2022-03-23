@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
+import 'package:magic_the_searching/helpers/internet_usage_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './providers/handedness.dart';
@@ -20,25 +21,15 @@ class MyApp extends StatelessWidget {
     final prefs = await SharedPreferences.getInstance();
 
     DateTime today = DateTime.now();
-    // await prefs.setInt('lastDbCleaned',
-    //     today.subtract(const Duration(days: 9)).millisecondsSinceEpoch);
     int timestamp = prefs.getInt('lastDbCleaned') ?? 0;
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    // print('timestamp:$timestamp');
-    // print('today:${today}');
-    // print(today.difference(dateTime).inDays);
-    //today.difference(dateTime).inDays > 86400
     if (today.difference(dateTime).inDays > 7) {
       // print('clearing db...');
       await DBHelper.cleanDB();
       await prefs.setInt('lastDbCleaned', today.millisecondsSinceEpoch);
     }
-    // if (dateTime.year != today.year || dateTime.month != today.month || dateTime.day != today.day) {
-    //
-    // }
   }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     cleanDB();
@@ -52,6 +43,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => History(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => InternetUsageHelper(),
         ),
       ],
       child: MaterialApp(

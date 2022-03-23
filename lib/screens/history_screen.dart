@@ -35,6 +35,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
+  void _selectHistoryItem(
+      History history, CardDataProvider cardDataProvider, int index) async {
+    String searchText = history.data[index].query;
+    cardDataProvider.query = searchText;
+    cardDataProvider.isStandardQuery = true;
+    cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
+    cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
+    await cardDataProvider.processQuery();
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final history = Provider.of<History>(context);
@@ -45,7 +56,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: const Text('Your past searches'),
       ),
       body: !isInit
-          ? Center(
+          ? const Center(
               child: CircularProgressIndicator(),
             )
           : history.data.isEmpty
@@ -66,16 +77,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           'Matches for this search: ${history.data[i].matches}'),
                       trailing: Text(
                           '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
-                      onTap: () async {
-                        String searchText = history.data[i].query;
-                        cardDataProvider.query = searchText;
-                        cardDataProvider.isStandardQuery = true;
-                        cardDataProvider.dbHelperFunction =
-                            DBHelper.getHistoryData;
-                        cardDataProvider.queryParameters =
-                            ScryfallQueryMaps.searchMap;
-                        await cardDataProvider.processQuery();
-                        Navigator.of(context).pop();
+                      onTap: () {
+                        _selectHistoryItem(history, cardDataProvider, i);
                       },
                     );
                   },

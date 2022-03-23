@@ -26,6 +26,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   Widget build(BuildContext context) {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
     final mediaQuery = MediaQuery.of(context);
+
     return Scaffold(
       appBar: MyAppBar(),
       body: cardDataProvider.isLoading
@@ -51,7 +52,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         crossAxisSpacing: 10,
         mainAxisExtent:
             // (mediaQuery.size.height - mediaQuery.padding.top - 35) / 2,
-        (mediaQuery.size.height - mediaQuery.padding.top - 15) / 2,
+            (mediaQuery.size.height - mediaQuery.padding.top - 15) / 2,
       ),
       itemCount: cardDataProvider.cards.length,
       itemBuilder: (ctx, index) {
@@ -181,4 +182,3 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
     );
   }
 }
-
