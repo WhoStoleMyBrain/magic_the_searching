@@ -4,14 +4,18 @@ import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/scryfall_request_handler.dart';
 import '../helpers/camera_helper.dart';
-import '../models/card_data.dart';
 import '../screens/card_detail_screen.dart';
+import '../scryfall_api_json_serialization/card_info.dart';
+import '../scryfall_api_json_serialization/image_uris.dart';
 
 class CardDisplay extends StatelessWidget {
-  final CardData cardData;
+  // final CardData cardData;
+  final CardInfo cardInfo;
 
   const CardDisplay(
-      {Key? key, required this.cardData})
+      // {Key? key, required this.cardData})
+      {Key? key,
+      required this.cardInfo})
       : super(key: key);
 
   void cardTapped(BuildContext ctx, String id) {
@@ -23,7 +27,7 @@ class CardDisplay extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     return InkWell(
       onTap: () {
-        cardTapped(context, cardData.id);
+        cardTapped(context, cardInfo.id);
       },
       child: SizedBox(
         height: mediaQuery.size.height,
@@ -32,8 +36,8 @@ class CardDisplay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CardImageDisplay(cardData: cardData, mediaQuery: mediaQuery),
-              CardPriceDisplay(cardData: cardData),
+              CardImageDisplay(cardInfo: cardInfo, mediaQuery: mediaQuery),
+              CardPriceDisplay(cardInfo: cardInfo),
             ],
           ),
         ),
@@ -45,10 +49,10 @@ class CardDisplay extends StatelessWidget {
 class CardPriceDisplay extends StatelessWidget {
   const CardPriceDisplay({
     Key? key,
-    required this.cardData,
+    required this.cardInfo,
   }) : super(key: key);
 
-  final CardData cardData;
+  final CardInfo cardInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -97,13 +101,11 @@ class CardPriceDisplay extends StatelessWidget {
   Expanded buildSinglePriceItem(String name, String mapKey, String currency) {
     return Expanded(
       child: Text(
-        '$name: $currency${cardData.price[mapKey]}',
+        '$name: $currency${cardInfo.prices?.usd}',
         style: TextStyle(
-          fontSize: (double.tryParse(cardData.price[mapKey]) ?? 0) >= 100
+          fontSize: (double.parse(cardInfo.prices?.usd ?? '0')) >= 100
               ? (12 -
-                  (double.tryParse(cardData.price[mapKey]) ?? 0)
-                      .toString()
-                      .length +
+                  (double.parse(cardInfo.prices?.usd ?? '')).toString().length +
                   5)
               : 12,
         ),
@@ -115,11 +117,11 @@ class CardPriceDisplay extends StatelessWidget {
 class CardImageDisplay extends StatefulWidget {
   const CardImageDisplay({
     Key? key,
-    required this.cardData,
+    required this.cardInfo,
     required this.mediaQuery,
   }) : super(key: key);
 
-  final CardData cardData;
+  final CardInfo cardInfo;
   final MediaQueryData mediaQuery;
   static bool pictureLoaded = false;
 
@@ -134,29 +136,41 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   // bool pictureLoaded = false;
 
   Future<void> getLocalImage() async {
+    //rewrite logic: if has cardFaces -> twosided, if not: onesided.
     late File localFile;
     if (!CardImageDisplay.pictureLoaded) {
-      var fileExists =
-          await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
-      if (fileExists && widget.cardData.hasTwoSides && (_side == 1)) {
-        if (path.basename(widget.cardData.images[0]) ==
-            path.basename(widget.cardData.images[1])) {
-          localFile = await CameraHelper.saveFileLocally(
-              '${widget.cardData.images[_side]}back');
+      if (widget.cardInfo.hasTwoSides) {
+        var fileExists = await CameraHelper.doesLocalFileExist(
+            widget.cardInfo.cardFaces?[_side]?.normal ?? '');
+        if (fileExists && _side == 1) {
+          if (path.basename(
+                  widget.cardInfo.cardFaces?[0]?.normal.toString() ?? '') ==
+              path.basename(
+                  widget.cardInfo.cardFaces?[1]?.normal.toString() ?? '')) {
+            localFile = await CameraHelper.saveFileLocally(
+                '${widget.cardInfo.cardFaces?[1]?.normal.toString()}back');
+          } else {
+            localFile = await CameraHelper.saveFileLocally(
+                '${widget.cardInfo.cardFaces?[1]?.normal.toString()}');
+          }
         } else {
-          localFile =
-              await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+          var fileExists = await CameraHelper.doesLocalFileExist(
+              widget.cardInfo.imageUris?.normal ?? '');
+          if (fileExists) {
+            localFile = await CameraHelper.saveFileLocally(
+                widget.cardInfo.imageUris?.normal ?? '');
+          }
+          // else {
+          //   localFile = await CameraHelper.saveFileLocally(
+          //       widget.cardInfo.imageUris?.normal ?? '');
+          // }
         }
-      } else {
-        localFile =
-            await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+        _storedImage = localFile;
+        _hasLocalImage = fileExists;
+        CardImageDisplay.pictureLoaded = true;
       }
-      _storedImage = localFile;
-      _hasLocalImage = fileExists;
-      CardImageDisplay.pictureLoaded = true;
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +190,8 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                       child: CircularProgressIndicator(),
                     ),
                   ),
-            if (widget.cardData.hasTwoSides)
+            if (widget.cardInfo.hasTwoSides &&
+                (widget.cardInfo.imageUris == null))
               Positioned(
                 left: (widget.mediaQuery.size.width -
                             widget.mediaQuery.padding.horizontal) /
@@ -221,32 +236,40 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
               height: (widget.mediaQuery.size.height / 3),
             ),
           )
-        : widget.cardData.images[_side].contains('http')
+        : displayNonLocalImage();
+  }
+
+  Widget displayNonLocalImage() {
+    List<ImageLinks?>? localImages =
+        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris == null))
+            ? widget.cardInfo.cardFaces
+            : [widget.cardInfo.imageUris];
+    return localImages?[_side]?.normal?.contains('http') ?? false
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.network(
+              localImages?[_side]?.normal ?? '',
+              fit: BoxFit.cover,
+              width: (widget.mediaQuery.size.width -
+                      widget.mediaQuery.padding.horizontal) /
+                  2,
+              height: (widget.mediaQuery.size.height / 3),
+            ),
+          )
+        : localImages?[_side]?.normal == ''
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  widget.cardData.images[_side],
-                  fit: BoxFit.cover,
-                  width: (widget.mediaQuery.size.width -
-                          widget.mediaQuery.padding.horizontal) /
-                      2,
-                  height: (widget.mediaQuery.size.height / 3),
+                child: const Image(
+                  image: AssetImage(ScryfallRequestHandler.isshinLocal),
                 ),
               )
-            : widget.cardData.images[_side] == ''
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: const Image(
-                      image: AssetImage(ScryfallRequestHandler.isshinLocal),
-                    ),
-                  )
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image(
-                      image: AssetImage(
-                        widget.cardData.images[_side],
-                      ),
-                    ),
-                  );
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image(
+                  image: AssetImage(
+                    localImages?[_side]?.normal ?? '',
+                  ),
+                ),
+              );
   }
 }

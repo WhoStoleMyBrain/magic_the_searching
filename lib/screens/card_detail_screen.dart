@@ -9,7 +9,11 @@ import 'package:magic_the_searching/helpers/camera_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 
-import '../models/card_data.dart';
+import '../helpers/scryfall_request_handler.dart';
+import '../scryfall_api_json_serialization/card_info.dart';
+import '../scryfall_api_json_serialization/image_uris.dart';
+
+// import '../models/card_data.dart';
 
 class CardDetailScreen extends StatelessWidget {
   static const routeName = '/card-detail';
@@ -54,7 +58,7 @@ class CardDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final id = ModalRoute.of(context)?.settings.arguments as String;
-    final CardData cardData =
+    final CardInfo cardInfo =
         Provider.of<CardDataProvider>(context, listen: false).getCardById(id);
     final mediaQuery = MediaQuery.of(context);
     const TextStyle textStyle = TextStyle(
@@ -67,20 +71,20 @@ class CardDetailScreen extends StatelessWidget {
         actions: [
           getRefinedSearchButton(
             context,
-            cardData,
+            cardInfo,
             DBHelper.getHistoryData,
             ScryfallQueryMaps.languagesMap,
             'All Languages',
           ),
           getRefinedSearchButton(
               context,
-              cardData,
+              cardInfo,
               DBHelper.getVersionsOrPrintsData,
               ScryfallQueryMaps.printsMap,
               'All Prints'),
           getRefinedSearchButton(
               context,
-              cardData,
+              cardInfo,
               DBHelper.getVersionsOrPrintsData,
               ScryfallQueryMaps.versionMap,
               'All Arts'),
@@ -94,8 +98,8 @@ class CardDetailScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CardImageDisplay(cardData: cardData, mediaQuery: mediaQuery),
-                CardDetails(textStyle: textStyle, cardData: cardData),
+                CardImageDisplay(cardInfo: cardInfo, mediaQuery: mediaQuery),
+                CardDetails(textStyle: textStyle, cardInfo: cardInfo),
               ],
             ),
           ),
@@ -106,7 +110,7 @@ class CardDetailScreen extends StatelessWidget {
 
   TextButton getRefinedSearchButton(
       BuildContext context,
-      CardData cardData,
+      CardInfo cardInfo,
       Function dbHelperFunction,
       Map<String, String> queryMap,
       String displayText) {
@@ -114,7 +118,7 @@ class CardDetailScreen extends StatelessWidget {
       onPressed: () {
         _startSearchForCards(
           context,
-          cardData.name,
+          cardInfo.name ?? '',
           dbHelperFunction,
           queryMap,
         );
@@ -131,11 +135,11 @@ class CardDetailScreen extends StatelessWidget {
 class CardImageDisplay extends StatefulWidget {
   const CardImageDisplay({
     Key? key,
-    required this.cardData,
+    required this.cardInfo,
     required this.mediaQuery,
   }) : super(key: key);
 
-  final CardData cardData;
+  final CardInfo cardInfo;
   final MediaQueryData mediaQuery;
 
   @override
@@ -147,22 +151,56 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   var _hasLocalImage = false;
   late File _storedImage;
 
+  // Future<void> getLocalImage2() async {
+  //   late File localFile;
+  //   var fileExists =
+  //       await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
+  //   if (fileExists && widget.cardData.hasTwoSides && (_side == 1)) {
+  //     if (path.basename(widget.cardData.images[0]) ==
+  //         path.basename(widget.cardData.images[1])) {
+  //       localFile = await CameraHelper.saveFileLocally(
+  //           '${widget.cardData.images[_side]}back');
+  //     }
+  //   } else {
+  //     localFile =
+  //         await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+  //   }
+  //   _storedImage = localFile;
+  //   _hasLocalImage = fileExists;
+  // }
+
   Future<void> getLocalImage() async {
+    //rewrite logic: if has cardFaces -> twosided, if not: onesided.
     late File localFile;
-    var fileExists =
-        await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
-    if (fileExists && widget.cardData.hasTwoSides && (_side == 1)) {
-      if (path.basename(widget.cardData.images[0]) ==
-          path.basename(widget.cardData.images[1])) {
-        localFile = await CameraHelper.saveFileLocally(
-            '${widget.cardData.images[_side]}back');
+    if (widget.cardInfo.hasTwoSides) {
+      var fileExists = await CameraHelper.doesLocalFileExist(
+          widget.cardInfo.cardFaces?[_side]?.normal ?? '');
+      if (fileExists && _side == 1) {
+        if (path.basename(
+                widget.cardInfo.cardFaces?[0]?.normal.toString() ?? '') ==
+            path.basename(
+                widget.cardInfo.cardFaces?[1]?.normal.toString() ?? '')) {
+          localFile = await CameraHelper.saveFileLocally(
+              '${widget.cardInfo.cardFaces?[1]?.normal.toString()}back');
+        } else {
+          localFile = await CameraHelper.saveFileLocally(
+              '${widget.cardInfo.cardFaces?[1]?.normal.toString()}');
+        }
+      } else {
+        var fileExists = await CameraHelper.doesLocalFileExist(
+            widget.cardInfo.imageUris?.normal ?? '');
+        if (fileExists) {
+          localFile = await CameraHelper.saveFileLocally(
+              widget.cardInfo.imageUris?.normal ?? '');
+        }
+        // else {
+        //   localFile = await CameraHelper.saveFileLocally(
+        //       widget.cardInfo.imageUris?.normal ?? '');
+        // }
       }
-    } else {
-      localFile =
-          await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
+      _storedImage = localFile;
+      _hasLocalImage = fileExists;
     }
-    _storedImage = localFile;
-    _hasLocalImage = fileExists;
   }
 
   @override
@@ -173,36 +211,56 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
         return Stack(
           children: [
             (snapshot.connectionState != ConnectionState.none)
-                ? _hasLocalImage
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.file(
-                          _storedImage,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : widget.cardData.images[_side].contains('http')
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: Image.network(
-                              widget.cardData.images[_side],
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(15),
-                            child: Image(
-                              image: AssetImage(widget.cardData.images[_side]),
-                            ),
-                          )
+                ? displayImage()
                 : const Center(
                     child: CircularProgressIndicator(),
                   ),
-            if (widget.cardData.hasTwoSides) getFlipButton(),
+            if (widget.cardInfo.hasTwoSides  && (widget.cardInfo.imageUris == null)) getFlipButton(),
           ],
         );
       },
     );
+  }
+
+  Widget displayImage() {
+    return _hasLocalImage
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.file(
+              _storedImage,
+              fit: BoxFit.cover,
+            ),
+          )
+        : displayNonLocalImage();
+  }
+
+  Widget displayNonLocalImage() {
+    List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris == null))
+        ? widget.cardInfo.cardFaces
+        : [widget.cardInfo.imageUris];
+    return localImages?[_side]?.normal?.contains('http') ?? false
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.network(
+              localImages?[_side]?.normal ?? '',
+              fit: BoxFit.cover,
+            ),
+          )
+        : localImages?[_side]?.normal == ''
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: const Image(
+                  image: AssetImage(ScryfallRequestHandler.isshinLocal),
+                ),
+              )
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Image(
+                  image: AssetImage(
+                    localImages?[_side]?.normal ?? '',
+                  ),
+                ),
+              );
   }
 
   Positioned getFlipButton() {
@@ -236,11 +294,11 @@ class CardDetails extends StatelessWidget {
   const CardDetails({
     Key? key,
     required this.textStyle,
-    required this.cardData,
+    required this.cardInfo,
   }) : super(key: key);
 
   final TextStyle textStyle;
-  final CardData cardData;
+  final CardInfo cardInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -304,7 +362,7 @@ class CardDetails extends StatelessWidget {
   Expanded buildSinglePriceItem(String name, String mapKey, String currency) {
     return Expanded(
       child: Text(
-        '$name:  $currency${cardData.price[mapKey]}',
+        '$name:  $currency${cardInfo.prices?.usd}',
         style: textStyle,
       ),
     );
@@ -313,7 +371,8 @@ class CardDetails extends StatelessWidget {
   TextButton getLinkButton(String name, String mapKey) {
     return TextButton(
       onPressed: () {
-        _launchURL(cardData.links[mapKey] ?? '');
+        // _launchURL(cardInfo.purchaseUris?.cardmarket ?? '');
+        _launchURL(cardInfo.scryfallUri ?? '');
       },
       child: Text(
         'Open on $name',

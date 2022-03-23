@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../helpers/database_loader.dart';
 import '../helpers/internet_usage_helper.dart';
 import '../helpers/scryfall_request_handler.dart';
 import '../helpers/db_helper.dart';
 import '../models/card_data.dart';
+import '../scryfall_api_json_serialization/card_info.dart';
 
 class CardDataProvider with ChangeNotifier {
-  List<CardData> _cards = [];
+  // List<CardData> _cards = [];
+  List<CardInfo> _cards = [];
   List<String> languages = [];
   String query = '';
   String column = 'searchText';
@@ -16,17 +19,27 @@ class CardDataProvider with ChangeNotifier {
   late Function dbHelperFunction;
   Map<String, String> queryParameters = {};
 
-  List<CardData> get cards {
-    return [..._cards];
-  }
+  // List<CardData> get cards {
+  //   return [..._cards];
+  // }
 
-  set cards(List<CardData> queryData) {
+  set cards(List<CardInfo> queryData) {
     _cards = queryData;
     isLoading = false;
     notifyListeners();
   }
 
-  CardData getCardById(String id) {
+  List<CardInfo> get cards {
+    return [..._cards];
+  }
+
+  // set cards(List<CardData> queryData) {
+  //   _cards = queryData;
+  //   isLoading = false;
+  //   notifyListeners();
+  // }
+
+  CardInfo getCardById(String id) {
     return cards.firstWhere((card) => card.id == id);
   }
 
@@ -50,17 +63,17 @@ class CardDataProvider with ChangeNotifier {
       'search_prices':
           await DBHelper.getData('search_prices', 'searchText', query),
     };
-    List<CardData> myData = [];
+    List<CardInfo> myData = [];
     for (int i = 0; i < dbData['user_searches']!.length; i++) {
-      myData.add(
-        CardData.fromMap(
-          {
-            'user_searches': dbData['user_searches']?[i] ?? {},
-            'search_images': dbData['search_images']?[i] ?? {},
-            'search_prices': dbData['search_prices']?[i] ?? {},
-          },
-        ),
-      );
+      myData.add(CardInfo.fromJson(dbData));
+      // CardData.fromMap(
+      //   {
+      //     'user_searches': dbData['user_searches']?[i] ?? {},
+      //     'search_images': dbData['search_images']?[i] ?? {},
+      //     'search_prices': dbData['search_prices']?[i] ?? {},
+      //   },
+      // ),
+      // );
     }
     cards = myData;
     return true;
@@ -85,8 +98,7 @@ class CardDataProvider with ChangeNotifier {
     print('newMB-R: ${(newBytesReceived / 1024 / 1024).toStringAsFixed(0)}, '
         'oldMB-R: ${(internetUsageStats.startBytesReceived / 1024 / 1024).toStringAsFixed(0)}, '
         'difference: ${((newBytesReceived - internetUsageStats.startBytesReceived) / 1024 / 1024).toStringAsFixed(0)}');
-    print(
-        'newMB-T: ${(newBytesTransferred / 1024 / 1024).toStringAsFixed(0)}, '
+    print('newMB-T: ${(newBytesTransferred / 1024 / 1024).toStringAsFixed(0)}, '
         'oldMB-T: ${(internetUsageStats.startBytesTransferred / 1024 / 1024).toStringAsFixed(0)}, '
         'difference: ${((newBytesTransferred - internetUsageStats.startBytesTransferred) / 1024 / 1024).toStringAsFixed(0)}');
   }
@@ -98,16 +110,29 @@ class CardDataProvider with ChangeNotifier {
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     if (queryResult.isEmpty) {
+      print('request not successful');
       cards = [];
       return false;
     } else {
-      for (CardData card in queryResult) {
-        await DBHelper.insert(
-            'user_searches', card.toDB(card, query, !isStandardQuery));
+      for (CardInfo card in queryResult) {
+        // await DBHelper.insert(
+        // 'user_searches', card.toDB(card, query, !isStandardQuery));
+        // 'user_searches', card.toJson();
       }
     }
     cards = queryResult;
     internetUsage();
     return true;
+  }
+
+  Future<void> loadDataFromLocalDB() async {
+    final List dataBaseList = await DatabaseLoader.readDataFromDBFile(
+        DatabaseLoader.cardDatabasePath);
+    cards = dataBaseList.map((e) {
+      return CardInfo.fromJson(e);
+    }).toList();
+    query = 'testQuery';
+    notifyListeners();
+    // print(cards2[0].prices?.toJson());
   }
 }

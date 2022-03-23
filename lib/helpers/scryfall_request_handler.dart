@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
 import '../models/card_data.dart';
+import '../scryfall_api_json_serialization/card_info.dart';
 
 class ScryfallRequestHandler {
   static const String apiBasePath = 'api.scryfall.com';
@@ -126,30 +127,44 @@ class ScryfallRequestHandler {
     return linksValues;
   }
 
-  List<CardData> processQueryData() {
-    final List<CardData> resultList = [];
+  List<CardInfo> processQueryData() {
+    final List<CardInfo> resultList = [];
+    print(responseData["data"]);
     if (responseData["data"] != null) {
-      responseData["data"].map(
-        (result) {
-          resultList.add(
-            CardData(
-              id: result["id"] ?? '',
-              name: result["name"] ?? '',
-              text: result["oracle_text"] ?? '',
-              images: findPictures(result),
-              hasTwoSides: (result.containsKey("card_faces") &&
-                      !result.containsKey("image_uris"))
-                  ? true
-                  : false,
-              price: addPrices(result),
-              dateTime: DateTime.now(),
-              links: addLinks(result),
-            ),
-          );
-        },
-      ).toList();
+      for (Map<String, dynamic> item in responseData["data"]) {
+        resultList.add(CardInfo.fromJson(item));
+      }
+      // responseData["data"].map((result) {
+      //   print('result: $result');
+      //   resultList.add(CardInfo.fromJson(result));
+      // });
     } else {}
+    print(resultList);
 
     return resultList;
+
+    // if (responseData["data"] != null) {
+    //   responseData["data"].map(
+    //     (result) {
+    //       resultList.add(
+    //         CardData(
+    //           id: result["id"] ?? '',
+    //           name: result["name"] ?? '',
+    //           text: result["oracle_text"] ?? '',
+    //           images: findPictures(result),
+    //           hasTwoSides: (result.containsKey("card_faces") &&
+    //                   !result.containsKey("image_uris"))
+    //               ? true
+    //               : false,
+    //           price: addPrices(result),
+    //           dateTime: DateTime.now(),
+    //           links: addLinks(result),
+    //         ),
+    //       );
+    //     },
+    //   ).toList();
+    // } else {}
+    //
+    // return resultList;
   }
 }

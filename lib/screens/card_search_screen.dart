@@ -57,7 +57,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
       itemCount: cardDataProvider.cards.length,
       itemBuilder: (ctx, index) {
         return card_display.CardDisplay(
-          cardData: cardDataProvider.cards[index],
+          cardInfo: cardDataProvider.cards[index],
           key: UniqueKey(),
         );
       },
@@ -175,6 +175,18 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
                 ProcessImageTaking.takePictureAndFireQuery(context);
               },
               child: const Icon(Icons.camera_enhance),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: FloatingActionButton(
+              heroTag: 'DB',
+              onPressed: () {
+                final cardDataProvider =
+                Provider.of<CardDataProvider>(context, listen: false);
+                cardDataProvider.loadDataFromLocalDB();
+              },
+              child: const Icon(Icons.data_array),
             ),
           ),
         ],

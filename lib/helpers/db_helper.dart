@@ -18,7 +18,7 @@ class DBHelper {
   }
 
   static Future<void> insert(
-      String table, Map<String, Map<String, Object?>> data) async {
+      String table, Map<String, dynamic> data) async {
     final db = await DBHelper.database();
     db.insert('user_searches', data["user_searches"] ?? {},
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
