@@ -32,4 +32,5 @@ class CameraHelper {
     print('Saving: filename: $fileName, url: $url');
     return savedImage;
   }
+
 }

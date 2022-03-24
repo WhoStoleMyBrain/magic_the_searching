@@ -1,9 +1,4 @@
-import 'dart:io';
-
-import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/helpers/scryfall_request_handler.dart';
-import '../helpers/camera_helper.dart';
 import '../screens/card_detail_screen.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import '../scryfall_api_json_serialization/image_uris.dart';
@@ -131,45 +126,25 @@ class CardImageDisplay extends StatefulWidget {
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
-  var _hasLocalImage = false;
-  late File _storedImage;
+  // var _hasLocalImage = false;
+  // late File _storedImage;
+  late Image _networkImage;
   // bool pictureLoaded = false;
 
   Future<void> getLocalImage() async {
-    //rewrite logic: if has cardFaces -> twosided, if not: onesided.
-    late File localFile;
-    if (!CardImageDisplay.pictureLoaded) {
-      if (widget.cardInfo.hasTwoSides) {
-        var fileExists = await CameraHelper.doesLocalFileExist(
-            widget.cardInfo.cardFaces?[_side]?.normal ?? '');
-        if (fileExists && _side == 1) {
-          if (path.basename(
-                  widget.cardInfo.cardFaces?[0]?.normal.toString() ?? '') ==
-              path.basename(
-                  widget.cardInfo.cardFaces?[1]?.normal.toString() ?? '')) {
-            localFile = await CameraHelper.saveFileLocally(
-                '${widget.cardInfo.cardFaces?[1]?.normal.toString()}back');
-          } else {
-            localFile = await CameraHelper.saveFileLocally(
-                '${widget.cardInfo.cardFaces?[1]?.normal.toString()}');
-          }
-        } else {
-          var fileExists = await CameraHelper.doesLocalFileExist(
-              widget.cardInfo.imageUris?.normal ?? '');
-          if (fileExists) {
-            localFile = await CameraHelper.saveFileLocally(
-                widget.cardInfo.imageUris?.normal ?? '');
-          }
-          // else {
-          //   localFile = await CameraHelper.saveFileLocally(
-          //       widget.cardInfo.imageUris?.normal ?? '');
-          // }
-        }
-        _storedImage = localFile;
-        _hasLocalImage = fileExists;
-        CardImageDisplay.pictureLoaded = true;
-      }
-    }
+    CardImageDisplay.pictureLoaded = true;
+    List<ImageLinks?>? localImages =
+        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris == null))
+            ? widget.cardInfo.cardFaces
+            : [widget.cardInfo.imageUris];
+    _networkImage = Image.network(
+      localImages?[_side]?.normal ?? '',
+      fit: BoxFit.cover,
+      width: (widget.mediaQuery.size.width -
+              widget.mediaQuery.padding.horizontal) /
+          2,
+      height: (widget.mediaQuery.size.height / 3),
+    );
   }
 
   @override
@@ -180,7 +155,10 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
         return Stack(
           children: [
             (snapshot.connectionState == ConnectionState.done)
-                ? displayImage()
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: _networkImage,
+                  )
                 : SizedBox(
                     width: (widget.mediaQuery.size.width -
                             widget.mediaQuery.padding.horizontal) /
@@ -221,55 +199,5 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
         );
       },
     );
-  }
-
-  Widget displayImage() {
-    return _hasLocalImage
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.file(
-              _storedImage,
-              fit: BoxFit.cover,
-              width: (widget.mediaQuery.size.width -
-                      widget.mediaQuery.padding.horizontal) /
-                  2,
-              height: (widget.mediaQuery.size.height / 3),
-            ),
-          )
-        : displayNonLocalImage();
-  }
-
-  Widget displayNonLocalImage() {
-    List<ImageLinks?>? localImages =
-        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris == null))
-            ? widget.cardInfo.cardFaces
-            : [widget.cardInfo.imageUris];
-    return localImages?[_side]?.normal?.contains('http') ?? false
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              localImages?[_side]?.normal ?? '',
-              fit: BoxFit.cover,
-              width: (widget.mediaQuery.size.width -
-                      widget.mediaQuery.padding.horizontal) /
-                  2,
-              height: (widget.mediaQuery.size.height / 3),
-            ),
-          )
-        : localImages?[_side]?.normal == ''
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: const Image(
-                  image: AssetImage(ScryfallRequestHandler.isshinLocal),
-                ),
-              )
-            : ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image(
-                  image: AssetImage(
-                    localImages?[_side]?.normal ?? '',
-                  ),
-                ),
-              );
   }
 }

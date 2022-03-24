@@ -1,15 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
-import 'package:path/path.dart' as path;
+
 import 'package:url_launcher/url_launcher.dart' as url;
-import 'package:magic_the_searching/helpers/camera_helper.dart';
+
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 
-import '../helpers/scryfall_request_handler.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import '../scryfall_api_json_serialization/image_uris.dart';
 
@@ -148,59 +145,17 @@ class CardImageDisplay extends StatefulWidget {
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
-  var _hasLocalImage = false;
-  late File _storedImage;
-
-  // Future<void> getLocalImage2() async {
-  //   late File localFile;
-  //   var fileExists =
-  //       await CameraHelper.doesLocalFileExist(widget.cardData.images[_side]);
-  //   if (fileExists && widget.cardData.hasTwoSides && (_side == 1)) {
-  //     if (path.basename(widget.cardData.images[0]) ==
-  //         path.basename(widget.cardData.images[1])) {
-  //       localFile = await CameraHelper.saveFileLocally(
-  //           '${widget.cardData.images[_side]}back');
-  //     }
-  //   } else {
-  //     localFile =
-  //         await CameraHelper.saveFileLocally(widget.cardData.images[_side]);
-  //   }
-  //   _storedImage = localFile;
-  //   _hasLocalImage = fileExists;
-  // }
+  late Image _networkImage;
 
   Future<void> getLocalImage() async {
-    //rewrite logic: if has cardFaces -> twosided, if not: onesided.
-    late File localFile;
-    if (widget.cardInfo.hasTwoSides) {
-      var fileExists = await CameraHelper.doesLocalFileExist(
-          widget.cardInfo.cardFaces?[_side]?.normal ?? '');
-      if (fileExists && _side == 1) {
-        if (path.basename(
-                widget.cardInfo.cardFaces?[0]?.normal.toString() ?? '') ==
-            path.basename(
-                widget.cardInfo.cardFaces?[1]?.normal.toString() ?? '')) {
-          localFile = await CameraHelper.saveFileLocally(
-              '${widget.cardInfo.cardFaces?[1]?.normal.toString()}back');
-        } else {
-          localFile = await CameraHelper.saveFileLocally(
-              '${widget.cardInfo.cardFaces?[1]?.normal.toString()}');
-        }
-      } else {
-        var fileExists = await CameraHelper.doesLocalFileExist(
-            widget.cardInfo.imageUris?.normal ?? '');
-        if (fileExists) {
-          localFile = await CameraHelper.saveFileLocally(
-              widget.cardInfo.imageUris?.normal ?? '');
-        }
-        // else {
-        //   localFile = await CameraHelper.saveFileLocally(
-        //       widget.cardInfo.imageUris?.normal ?? '');
-        // }
-      }
-      _storedImage = localFile;
-      _hasLocalImage = fileExists;
-    }
+    List<ImageLinks?>? localImages =
+        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris == null))
+            ? widget.cardInfo.cardFaces
+            : [widget.cardInfo.imageUris];
+    _networkImage = Image.network(
+      localImages?[_side]?.normal ?? '',
+      fit: BoxFit.cover,
+    );
   }
 
   @override
@@ -210,57 +165,21 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       builder: (context, snapshot) {
         return Stack(
           children: [
-            (snapshot.connectionState != ConnectionState.none)
-                ? displayImage()
+            (snapshot.connectionState == ConnectionState.done)
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: _networkImage,
+                  )
                 : const Center(
                     child: CircularProgressIndicator(),
                   ),
-            if (widget.cardInfo.hasTwoSides  && (widget.cardInfo.imageUris == null)) getFlipButton(),
+            if (widget.cardInfo.hasTwoSides &&
+                (widget.cardInfo.imageUris == null))
+              getFlipButton(),
           ],
         );
       },
     );
-  }
-
-  Widget displayImage() {
-    return _hasLocalImage
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: Image.file(
-              _storedImage,
-              fit: BoxFit.cover,
-            ),
-          )
-        : displayNonLocalImage();
-  }
-
-  Widget displayNonLocalImage() {
-    List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris == null))
-        ? widget.cardInfo.cardFaces
-        : [widget.cardInfo.imageUris];
-    return localImages?[_side]?.normal?.contains('http') ?? false
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: Image.network(
-              localImages?[_side]?.normal ?? '',
-              fit: BoxFit.cover,
-            ),
-          )
-        : localImages?[_side]?.normal == ''
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: const Image(
-                  image: AssetImage(ScryfallRequestHandler.isshinLocal),
-                ),
-              )
-            : ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Image(
-                  image: AssetImage(
-                    localImages?[_side]?.normal ?? '',
-                  ),
-                ),
-              );
   }
 
   Positioned getFlipButton() {

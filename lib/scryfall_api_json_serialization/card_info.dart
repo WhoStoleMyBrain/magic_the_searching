@@ -27,6 +27,18 @@ List<ImageLinks?>? cardFacesFromJson(List<dynamic>? json) {
   return tmp;
 }
 
+List<ImageLinks?>? cardFacesFromDB(Map<String, dynamic> dbData) {
+  Map<String, dynamic> frontImages = {
+    'normal': dbData['normalFront'],
+    'small': dbData['smallFront']
+  };
+  Map<String, dynamic> backImages = {
+    'normal': dbData['normalBack'],
+    'small': dbData['smallBack']
+  };
+  return [ImageLinks.fromJson(frontImages), ImageLinks.fromJson(backImages)];
+}
+
 Map<String, dynamic> cardFacesToJson(List<ImageLinks?>? instance) {
   Map<String, dynamic> returnValue = {};
   returnValue['card_faces'] = instance?.map((e) => e?.toJson());
@@ -41,8 +53,15 @@ Map<String, dynamic> hasTwoSidesToJson(bool instance) {
   return {'value': instance.toString()};
 }
 
-List<dynamic>? hasTwoSidesReadValue(Map<dynamic, dynamic>? json, String parameterName) {
-  return json?['card_faces'] == null ? [{'value': false}] : [{'value':true}];
+List<dynamic>? hasTwoSidesReadValue(
+    Map<dynamic, dynamic>? json, String parameterName) {
+  return json?['card_faces'] == null
+      ? [
+          {'value': false}
+        ]
+      : [
+          {'value': true}
+        ];
 }
 
 //dateTime
@@ -55,7 +74,8 @@ Map<String, dynamic> dateTimeToJson(DateTime instance) {
   return {'dateTime': instance.toIso8601String()};
 }
 
-List<dynamic>? dateTimeReadValue(Map<dynamic, dynamic>? json, String parameterName) {
+List<dynamic>? dateTimeReadValue(
+    Map<dynamic, dynamic>? json, String parameterName) {
   return [DateTime.now().toIso8601String()];
 }
 
@@ -92,13 +112,18 @@ class CardInfo {
   PurchaseUris? purchaseUris;
   @JsonKey(
       readValue: hasTwoSidesReadValue,
-      name: 'hasTwoSides', // note: this key should NOT exist in the json from the API. refer to functions for more information
+      name:
+          'hasTwoSides', // note: this key should NOT exist in the json from the API. refer to functions for more information
       fromJson: hasTwoSidesFromJson,
       toJson: hasTwoSidesToJson)
   bool hasTwoSides; // Can I even add this here?
   @JsonKey(fromJson: cardFacesFromJson, toJson: cardFacesToJson)
   List<ImageLinks?>? cardFaces;
-  @JsonKey(name: '', readValue: dateTimeReadValue, fromJson: dateTimeFromJson, toJson: dateTimeToJson)
+  @JsonKey(
+      name: '',
+      readValue: dateTimeReadValue,
+      fromJson: dateTimeFromJson,
+      toJson: dateTimeToJson)
   DateTime dateTime; // how to add this here?
 
   /// A necessary factory constructor for creating a new User instance
@@ -111,4 +136,64 @@ class CardInfo {
   /// to JSON. The implementation simply calls the private, generated
   /// helper method `_$UserToJson`.
   Map<String, dynamic> toJson() => _$CardInfoToJson(this);
+
+  factory CardInfo.fromDB(Map<String, dynamic> dbData) {
+    return CardInfo(
+        id: dbData['card_info']['id'] as String,
+        name: dbData['card_info']['name'] as String?,
+        oracleId: dbData['card_info']['oracle_id'] as String?,
+        oracleText: dbData['card_info']['oracle_text'] as String?,
+        scryfallUri: dbData['card_info']['scryfall_uri'] as String?,
+        imageUris: dbData['image_uris'] == null
+            ? null
+            : ImageLinks.fromJson(dbData['image_uris'] as Map<String, dynamic>),
+        cardFaces: cardFacesFromDB(dbData['card_faces']),
+        prices: dbData['prices'] == null
+            ? null
+            : Prices.fromJson(dbData['prices'] as Map<String, dynamic>),
+        purchaseUris: dbData['purchase_uris'] == null
+            ? null
+            : PurchaseUris.fromJson(
+                dbData['purchase_uris'] as Map<String, dynamic>),
+        hasTwoSides: dbData['card_info']['hasTwoSides'] == 0 ? false : true,
+        dateTime: DateTime.parse(dbData['card_info']['dateTime'] as String));
+  }
+
+  Map<String, dynamic> toDB() {
+    return {
+      'card_info': {
+        'id': id,
+        'name': name,
+        'oracleId': oracleId,
+        'oracleText': oracleText,
+        'scryfallUri': scryfallUri,
+        'hasTwoSides': hasTwoSides,
+        'dateTime': dateTime.toIso8601String(),
+      },
+      'image_uris': {
+        'id': id,
+        'normal': imageUris?.normal,
+        'small': imageUris?.small,
+      },
+      'card_faces': {
+        'id': id,
+        'normalFront': cardFaces?[0]?.normal,
+        'smallFront': cardFaces?[0]?.small,
+        'normalBack': cardFaces?[1]?.normal,
+        'smallBack': cardFaces?[1]?.small,
+      },
+      'prices': {
+        'id': id,
+        'usd': prices?.usd,
+        'usdFoil': prices?.usdFoil,
+        'eur': prices?.eur,
+        'eurFoil': prices?.eurFoil,
+      },
+      'purchase_uris': {
+        'id': id,
+        'tcgPlayer': purchaseUris?.tcgplayer,
+        'cardmarket': purchaseUris?.cardmarket,
+      }
+    };
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/internet_usage_helper.dart';
+import 'package:magic_the_searching/providers/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './providers/handedness.dart';
@@ -30,6 +31,9 @@ class MyApp extends StatelessWidget {
     }
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
     cleanDB();
@@ -46,6 +50,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => InternetUsageHelper(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => Settings(false),
         ),
       ],
       child: MaterialApp(

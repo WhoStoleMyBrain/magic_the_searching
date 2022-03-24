@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/process_image_taking.dart';
 import '../helpers/search_start_helper.dart';
 import '../providers/handedness.dart';
 import '../providers/card_data_provider.dart';
+import '../providers/settings.dart';
 import '../screens/history_screen.dart';
 import '../widgets/card_display.dart' as card_display;
 
@@ -22,6 +24,20 @@ class CardSearchScreen extends StatefulWidget {
 }
 
 class _CardSearchScreenState extends State<CardSearchScreen> {
+
+  Future<void> getUseLocalDB() async {
+    final prefs = await SharedPreferences.getInstance();
+    final settings = Provider.of<Settings>(context, listen: false);
+    bool useLocalDB = prefs.getBool('useLocalDB') ?? false;
+    settings.useLocalDB = useLocalDB;
+  }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addPostFrameCallback((_) {getUseLocalDB();});
+    // getUseLocalDB();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
@@ -77,7 +93,15 @@ class MyAppBar extends StatefulWidget with PreferredSizeWidget {
 
 class _MyAppBarState extends State<MyAppBar> {
   bool handedMode = false;
+  late bool useLocalDB = false;
   String title = '';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final settings = Provider.of<Settings>(context, listen: false);
+    useLocalDB = settings.useLocalDB;
+  }
 
   void setTitle() {
     final cardDataProvider =
@@ -92,12 +116,16 @@ class _MyAppBarState extends State<MyAppBar> {
       },
     );
   }
+  //Survival of the Fittest
+  //Ornithopter
+  //Kamahl, Pit Fighter
 
   @override
   Widget build(BuildContext context) {
     final handednessProvider = Provider.of<Handedness>(context, listen: false);
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: false);
+    final settings = Provider.of<Settings>(context, listen: false);
     setTitle();
     return AppBar(
       title: (cardDataProvider.cards.isNotEmpty && title != '')
@@ -112,10 +140,21 @@ class _MyAppBarState extends State<MyAppBar> {
             ),
       actions: [
         Switch(
-          value: handedMode,
+          value: useLocalDB,
           onChanged: (value) {
             setState(
               () {
+                useLocalDB = value;
+                settings.useLocalDB = value;
+              },
+            );
+          },
+        ),
+        Switch(
+          value: handedMode,
+          onChanged: (value) {
+            setState(
+                  () {
                 handedMode = value;
                 handednessProvider.handedness = value;
               },
@@ -152,8 +191,8 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
     final handednessProvider = Provider.of<Handedness>(context);
     return Container(
       padding: handednessProvider.handedness
-          ? const EdgeInsets.symmetric(horizontal: 0, vertical: 0)
-          : const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+          ? const EdgeInsets.symmetric(horizontal: 70, vertical: 0)
+          : const EdgeInsets.symmetric(horizontal: 90, vertical: 0),
       child: Row(
         mainAxisAlignment: handednessProvider.handedness
             ? MainAxisAlignment.end
@@ -181,16 +220,18 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
             padding: const EdgeInsets.all(5.0),
             child: FloatingActionButton(
               heroTag: 'DB',
-              onPressed: () {
-                final cardDataProvider =
-                Provider.of<CardDataProvider>(context, listen: false);
-                cardDataProvider.loadDataFromLocalDB();
-              },
+              onPressed: _loadDBData,
               child: const Icon(Icons.data_array),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _loadDBData() {
+    final cardDataProvider =
+        Provider.of<CardDataProvider>(context, listen: false);
+    cardDataProvider.processFileToLocalDB();
   }
 }

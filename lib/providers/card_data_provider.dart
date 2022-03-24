@@ -5,11 +5,9 @@ import '../helpers/database_loader.dart';
 import '../helpers/internet_usage_helper.dart';
 import '../helpers/scryfall_request_handler.dart';
 import '../helpers/db_helper.dart';
-import '../models/card_data.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 
 class CardDataProvider with ChangeNotifier {
-  // List<CardData> _cards = [];
   List<CardInfo> _cards = [];
   List<String> languages = [];
   String query = '';
@@ -18,10 +16,6 @@ class CardDataProvider with ChangeNotifier {
   bool isStandardQuery = true;
   late Function dbHelperFunction;
   Map<String, String> queryParameters = {};
-
-  // List<CardData> get cards {
-  //   return [..._cards];
-  // }
 
   set cards(List<CardInfo> queryData) {
     _cards = queryData;
@@ -32,12 +26,6 @@ class CardDataProvider with ChangeNotifier {
   List<CardInfo> get cards {
     return [..._cards];
   }
-
-  // set cards(List<CardData> queryData) {
-  //   _cards = queryData;
-  //   isLoading = false;
-  //   notifyListeners();
-  // }
 
   CardInfo getCardById(String id) {
     return cards.firstWhere((card) => card.id == id);
@@ -52,6 +40,20 @@ class CardDataProvider with ChangeNotifier {
     } else {
       return _requestDataFromScryfall();
     }
+  }
+
+  Future<bool> processQueryLocally() async {
+    isLoading = true;
+
+    List<Map<String, dynamic>> dbResult = await DBHelper.getCardsByName(query);
+    // print('dbResult: $dbResult');
+    if (dbResult.isEmpty) {
+      cards = [];
+      return false;
+    }
+    cards = dbResult.map((e) => CardInfo.fromDB(e)).toList();
+    // return false;
+    return true;
   }
 
   Future<bool> _loadDataFromDB() async {
@@ -115,9 +117,7 @@ class CardDataProvider with ChangeNotifier {
       return false;
     } else {
       for (CardInfo card in queryResult) {
-        // await DBHelper.insert(
-        // 'user_searches', card.toDB(card, query, !isStandardQuery));
-        // 'user_searches', card.toJson();
+        // await DBHelper.insertIntoCardDatabase(card.toDB());
       }
     }
     cards = queryResult;
@@ -125,14 +125,25 @@ class CardDataProvider with ChangeNotifier {
     return true;
   }
 
-  Future<void> loadDataFromLocalDB() async {
-    final List dataBaseList = await DatabaseLoader.readDataFromDBFile(
+  // Future<void> loadDataFromLocalDB() async {
+  //   final List databaseList = await DatabaseLoader.readDataFromDBFile(
+  //       DatabaseLoader.cardDatabasePath);
+  //   cards = databaseList.map((e) {
+  //     return CardInfo.fromJson(e);
+  //   }).toList();
+  //   query = 'testQuery';
+  //   notifyListeners();
+  // }
+
+  Future<void> processFileToLocalDB() async {
+    final List databaseList = await DatabaseLoader.readDataFromDBFile(
         DatabaseLoader.cardDatabasePath);
-    cards = dataBaseList.map((e) {
+    final List<CardInfo> tmpCards = databaseList.map((e) {
       return CardInfo.fromJson(e);
     }).toList();
-    query = 'testQuery';
-    notifyListeners();
-    // print(cards2[0].prices?.toJson());
+    for (CardInfo card in tmpCards) {
+      print('Inserting card with name: ${card.name} into DB...');
+      DBHelper.insertIntoCardDatabase(card.toDB());
+    }
   }
 }

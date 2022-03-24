@@ -4,6 +4,7 @@ import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/card_data_provider.dart';
+import '../providers/settings.dart';
 import '../widgets/enter_search_term.dart';
 import '../widgets/card_display.dart';
 
@@ -48,13 +49,21 @@ class SearchStartHelper {
   static Future<void> startSearchForCard(
       BuildContext ctx, String text, List<String> languages) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
+    final settings = Provider.of<Settings>(ctx, listen: false);
+    bool requestSuccessful;
     CardImageDisplay.pictureLoaded = false;
     cardDataProvider.query = text;
     cardDataProvider.languages = languages;
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
-    bool requestSuccessful = await cardDataProvider.processQuery();
+    if (settings.useLocalDB) {
+      print('processing locally...');
+      requestSuccessful = await cardDataProvider.processQueryLocally();
+    } else {
+      print('using Scryfall API...');
+      requestSuccessful = await cardDataProvider.processQuery();
+    }
     if (!requestSuccessful) {
       showFailedQuery(ctx, text);
     }
