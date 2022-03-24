@@ -60,6 +60,25 @@ class DBHelper {
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
+  static Future<void> insertBulkDataIntoCardDatabase(List<Map<String, dynamic>> dataList) async {
+    final db = await DBHelper.cardDatabase();
+    var batch = db.batch();
+    for (Map<String, dynamic> data in dataList) {
+      batch.insert('card_info', data["card_info"] ?? {},
+          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+      batch.insert('image_uris', data["image_uris"] ?? {},
+          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+      batch.insert('card_faces', data["card_faces"] ?? {},
+          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+      batch.insert('prices', data["prices"] ?? {},
+          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+      batch.insert('purchase_uris', data["purchase_uris"] ?? {},
+          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+    }
+    await batch.commit(noResult: true);
+  }
+
+
   static Future<Map<String, dynamic>> getCardById(String id) async {
     final db = await DBHelper.cardDatabase();
     final _cardInfo = db.query('card_info', where: 'id = ?', whereArgs: [id]);

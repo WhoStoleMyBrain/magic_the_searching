@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/screens/settings_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,17 +25,19 @@ class CardSearchScreen extends StatefulWidget {
 }
 
 class _CardSearchScreenState extends State<CardSearchScreen> {
-
   Future<void> getUseLocalDB() async {
     final prefs = await SharedPreferences.getInstance();
     final settings = Provider.of<Settings>(context, listen: false);
     bool useLocalDB = prefs.getBool('useLocalDB') ?? false;
     settings.useLocalDB = useLocalDB;
   }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {getUseLocalDB();});
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      getUseLocalDB();
+    });
     // getUseLocalDB();
   }
 
@@ -97,7 +100,6 @@ class _MyAppBarState extends State<MyAppBar> {
   String title = '';
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     final settings = Provider.of<Settings>(context, listen: false);
     useLocalDB = settings.useLocalDB;
@@ -116,16 +118,13 @@ class _MyAppBarState extends State<MyAppBar> {
       },
     );
   }
-  //Survival of the Fittest
-  //Ornithopter
-  //Kamahl, Pit Fighter
 
   @override
   Widget build(BuildContext context) {
     final handednessProvider = Provider.of<Handedness>(context, listen: false);
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: false);
-    final settings = Provider.of<Settings>(context, listen: false);
+    // final settings = Provider.of<Settings>(context, listen: false);
     setTitle();
     return AppBar(
       title: (cardDataProvider.cards.isNotEmpty && title != '')
@@ -140,25 +139,20 @@ class _MyAppBarState extends State<MyAppBar> {
             ),
       actions: [
         Switch(
-          value: useLocalDB,
-          onChanged: (value) {
-            setState(
-              () {
-                useLocalDB = value;
-                settings.useLocalDB = value;
-              },
-            );
-          },
-        ),
-        Switch(
           value: handedMode,
           onChanged: (value) {
             setState(
-                  () {
+              () {
                 handedMode = value;
                 handednessProvider.handedness = value;
               },
             );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            Navigator.of(context).pushNamed(SettingsScreen.routeName);
           },
         ),
         IconButton(

@@ -60,73 +60,6 @@ class ScryfallRequestHandler {
     } catch (error) {}
   }
 
-  List<String> getMultiplePictures(card) {
-    List<String> images = [];
-    card["card_faces"].forEach((cardFace) {
-      images.add(cardFace["image_uris"]["normal"]);
-    });
-    return images;
-  }
-
-  List<String> findPictures(Map<String, dynamic> card) {
-    return card.containsKey("image_uris")
-        ? [card["image_uris"]["normal"]]
-        : (card.containsKey("card_faces")
-            ? (card["card_faces"][0].containsKey("image_uris")
-                ? getMultiplePictures(card)
-                : [isshinLocal, isshinLocal])
-            : [isshinLocal, isshinLocal]);
-  }
-
-  Map<String, String> addPrices(Map<String, dynamic> card) {
-    return card.containsKey('prices')
-        ? {
-            'tcg': card['prices'].containsKey('usd')
-                ? (card['prices']['usd'] ?? ' --.--')
-                : '',
-            'tcg_foil': card['prices'].containsKey('usd_foil')
-                ? (card['prices']['usd_foil'] ?? ' --.--')
-                : '',
-            'cardmarket': card['prices'].containsKey('eur')
-                ? (card['prices']['eur'] ?? ' --.--')
-                : '',
-            'cardmarket_foil': card['prices'].containsKey('eur_foil')
-                ? (card['prices']['eur_foil'] ?? ' --.--')
-                : '',
-          }
-        : {
-            'tcg': '--.--',
-            'tcg_foil': '--.--',
-            'cardmarket': '--.--',
-            'cardmarket_foil': '--.--',
-          };
-  }
-
-  Map<String, String> addLinks(Map<String, dynamic> card) {
-    final Map<String, String> linksValues = {};
-    if (card.containsKey('scryfall_uri')) {
-      linksValues['scryfall'] = card['scryfall_uri'];
-    } else {
-      linksValues['scryfall'] = '';
-    }
-    if (card.containsKey('purchase_uris')) {
-      if (card['purchase_uris'].containsKey('tcgplayer')) {
-        linksValues['tcg'] = card['purchase_uris']['tcgplayer'];
-      } else {
-        linksValues['tcg'] = '';
-      }
-      if (card['purchase_uris'].containsKey('cardmarket')) {
-        linksValues['cardmarket'] = card['purchase_uris']['cardmarket'];
-      } else {
-        linksValues['cardmarket'] = '';
-      }
-    } else {
-      linksValues['tcg'] = '';
-      linksValues['cardmarket'] = '';
-    }
-    return linksValues;
-  }
-
   List<CardInfo> processQueryData() {
     final List<CardInfo> resultList = [];
     print(responseData["data"]);
@@ -134,37 +67,8 @@ class ScryfallRequestHandler {
       for (Map<String, dynamic> item in responseData["data"]) {
         resultList.add(CardInfo.fromJson(item));
       }
-      // responseData["data"].map((result) {
-      //   print('result: $result');
-      //   resultList.add(CardInfo.fromJson(result));
-      // });
     } else {}
     print(resultList);
-
     return resultList;
-
-    // if (responseData["data"] != null) {
-    //   responseData["data"].map(
-    //     (result) {
-    //       resultList.add(
-    //         CardData(
-    //           id: result["id"] ?? '',
-    //           name: result["name"] ?? '',
-    //           text: result["oracle_text"] ?? '',
-    //           images: findPictures(result),
-    //           hasTwoSides: (result.containsKey("card_faces") &&
-    //                   !result.containsKey("image_uris"))
-    //               ? true
-    //               : false,
-    //           price: addPrices(result),
-    //           dateTime: DateTime.now(),
-    //           links: addLinks(result),
-    //         ),
-    //       );
-    //     },
-    //   ).toList();
-    // } else {}
-    //
-    // return resultList;
   }
 }

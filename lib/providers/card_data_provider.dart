@@ -46,7 +46,7 @@ class CardDataProvider with ChangeNotifier {
     isLoading = true;
 
     List<Map<String, dynamic>> dbResult = await DBHelper.getCardsByName(query);
-    // print('dbResult: $dbResult');
+    print('dbResult: $dbResult');
     if (dbResult.isEmpty) {
       cards = [];
       return false;
