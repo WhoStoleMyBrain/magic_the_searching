@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../screens/card_detail_screen.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
@@ -21,22 +23,24 @@ class CardDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return InkWell(
-      onTap: () {
-        cardTapped(context, cardInfo.id);
-      },
-      child: SizedBox(
-        height: mediaQuery.size.height,
-        child: Card(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CardImageDisplay(cardInfo: cardInfo, mediaQuery: mediaQuery),
-              CardPriceDisplay(cardInfo: cardInfo),
-            ],
+        onTap: () {
+          cardTapped(context, cardInfo.id);
+        },
+        child: SingleChildScrollView(
+          child: SizedBox(
+            // height: mediaQuery.size.height / 30 * 14,
+            child: Card(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CardImageDisplay(cardInfo: cardInfo, mediaQuery: mediaQuery),
+                  CardPriceDisplay(cardInfo: cardInfo),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
     );
   }
 }
@@ -127,15 +131,16 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   // var _hasLocalImage = false;
   // late File _storedImage;
   late Image _networkImage;
+  late bool _hasInternetConnection;
   // bool pictureLoaded = false;
 
-  Future<void> getLocalImage() async {
+  Future<void> getLocalImage2() async {
     CardImageDisplay.pictureLoaded = true;
     // print(widget.cardInfo.toJson()['hasTwoSides']);
-    List<ImageLinks?>? localImages =
-        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris?.normal == null))
-            ? widget.cardInfo.cardFaces
-            : [widget.cardInfo.imageUris];
+    List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
+            (widget.cardInfo.imageUris?.normal == null))
+        ? widget.cardInfo.cardFaces
+        : [widget.cardInfo.imageUris];
     _networkImage = Image.network(
       localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
       fit: BoxFit.cover,
@@ -144,6 +149,50 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           2,
       height: (widget.mediaQuery.size.height / 3),
     );
+  }
+
+  Future<void> getLocalImage() async {
+    // CardImageDisplay.pictureLoaded = true;
+    // print(widget.cardInfo.toJson()['hasTwoSides']);
+    // print(widget.cardInfo.hasTwoSides);
+    try {
+      final result = await InternetAddress.lookup('c1.scryfall.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        print('connected');
+        List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
+                (widget.cardInfo.imageUris?.normal == null))
+            ? widget.cardInfo.cardFaces
+            : [widget.cardInfo.imageUris];
+        _networkImage = Image.network(
+          localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
+          fit: BoxFit.cover,
+        );
+        // setState(() {
+        _hasInternetConnection = true;
+        // });
+      }
+    } on SocketException catch (_) {
+      print('not connected');
+      // setState(() {
+      _hasInternetConnection = false;
+      // });
+    }
+  }
+
+  Widget cardText() {
+    return Card(
+        child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(widget.cardInfo.name ?? 'No name found for this card.'),
+          const SizedBox(
+            height: 10,
+          ),
+          Text(widget.cardInfo.oracleText ?? 'No Oracle text found'),
+        ],
+      ),
+    ));
   }
 
   @override
@@ -156,7 +205,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
             (snapshot.connectionState == ConnectionState.done)
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: _networkImage,
+                    child: _hasInternetConnection ? _networkImage : cardText(),
                   )
                 : SizedBox(
                     width: (widget.mediaQuery.size.width -

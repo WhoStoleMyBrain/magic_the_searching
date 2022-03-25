@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
@@ -145,21 +147,60 @@ class CardImageDisplay extends StatefulWidget {
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
-  late Image _networkImage;
+  late Image? _networkImage;
+  late bool _hasInternetConnection;
 
   Future<void> getLocalImage() async {
     // CardImageDisplay.pictureLoaded = true;
     // print(widget.cardInfo.toJson()['hasTwoSides']);
     // print(widget.cardInfo.hasTwoSides);
-    List<ImageLinks?>? localImages =
-        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris?.normal == null))
+    try {
+      final result = await InternetAddress.lookup('c1.scryfall.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        print('connected');
+        List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
+                (widget.cardInfo.imageUris?.normal == null))
             ? widget.cardInfo.cardFaces
             : [widget.cardInfo.imageUris];
-    _networkImage = Image.network(
-      localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
-      fit: BoxFit.cover,
-    );
+        _networkImage = Image.network(
+          localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
+          fit: BoxFit.cover,
+        );
+        // setState(() {
+          _hasInternetConnection = true;
+        // });
+      }
+    } on SocketException catch (_) {
+      print('not connected');
+      // setState(() {
+        _hasInternetConnection = false;
+      // });
+    }
   }
+
+  Widget cardText() {
+    return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+      children: [
+          Text(widget.cardInfo.name ?? 'No name found for this card.'),
+          const SizedBox(height: 10,),
+          Text(widget.cardInfo.oracleText ?? 'No Oracle text found'),
+      ],
+    ),
+        ));
+  }
+
+  // Widget displayCardImageOrInfo() {
+  //   try {
+  //     return
+  //   } catch (error) {
+  //     return ClipRRect(
+  //         borderRadius: BorderRadius.circular(15), child: cardText());
+  //   }
+  //   // _networkImage ?? cardText(),
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +212,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
             (snapshot.connectionState == ConnectionState.done)
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(15),
-                    child: _networkImage,
+                    child: _hasInternetConnection ? _networkImage : cardText(),
                   )
                 : const Center(
                     child: CircularProgressIndicator(),
@@ -294,10 +335,12 @@ class CardDetails extends StatelessWidget {
 
   TextButton getLinkButton(String name, String? url) {
     return TextButton(
-      onPressed: (url == null) ? null : () {
-        // _launchURL(cardInfo.purchaseUris?.cardmarket ?? '');
-        _launchURL(url);
-      },
+      onPressed: (url == null)
+          ? null
+          : () {
+              // _launchURL(cardInfo.purchaseUris?.cardmarket ?? '');
+              _launchURL(url);
+            },
       child: Text(
         'Open on $name',
         style: textStyle,

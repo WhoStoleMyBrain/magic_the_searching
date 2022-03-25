@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     final prefs = await SharedPreferences.getInstance();
 
     DateTime today = DateTime.now();
-    int timestamp = prefs.getInt('lastDbCleaned') ?? 0;
+    int timestamp = prefs.getInt('lastDbCleaned') ?? today.subtract(const Duration(days: 100)).millisecondsSinceEpoch;
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     if (today.difference(dateTime).inDays > 7) {
       // print('clearing db...');
