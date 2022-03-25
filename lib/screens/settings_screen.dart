@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/helpers/bulk_data_helper.dart';
+import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/bulk_data.dart';
+import '../scryfall_api_json_serialization/card_info.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -19,25 +21,41 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  int _total = 0, _received = 0;
+  int _totalBits = 0, _receivedBits = 0, _entriesSaved = 0, _totalEntries = 0;
   late http.StreamedResponse _response;
   File? _file;
   bool isInit = false;
+  bool _isRequestingBulkData = false;
+  bool _isDownloading = false;
+  bool _isSavingToLocalFile = false;
+  bool _isProcessingToLocalDB = false;
 
   Future<BulkData?> _downloadData(BulkData? bulkData) async {
     final List<int> _bytes = [];
     _response = await http.Client()
         .send(http.Request('GET', Uri.parse(bulkData?.downloadUri ?? '')));
-    _total = _response.contentLength ?? 0;
+    _totalBits = (_response.contentLength ?? 0) * 8;
+    print(
+        'contentlength: ${_response.contentLength}; bitlength: ${_response.contentLength?.bitLength}');
     _response.stream.listen((value) {
       setState(() {
         _bytes.addAll(value);
-        _received += value.length;
+        _receivedBits += value.length;
       });
     }).onDone(() async {
+      setState(() {
+        _isDownloading = false;
+        _isSavingToLocalFile = true;
+      });
       await saveBytesToFile(_bytes)
           .whenComplete(() => setPreferences(bulkData))
-          .whenComplete(() => _saveDataToDB());
+          .whenComplete(() => _saveDataToDB())
+          .whenComplete(() => setState(() {
+                _isRequestingBulkData = false;
+                _isDownloading = false;
+                _isSavingToLocalFile = false;
+                _isProcessingToLocalDB = false;
+              }));
     });
     return bulkData;
   }
@@ -45,19 +63,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> saveBytesToFile(List<int> bytes) async {
     final file = File(
         '${(await getApplicationDocumentsDirectory()).path}/myBulkData.txt');
-    await file.writeAsBytes(bytes);
-    setState(() {
-      _file = file;
-    });
+    await file.writeAsBytes(bytes).whenComplete(() => setState(() {
+          _isSavingToLocalFile = false;
+          _isProcessingToLocalDB = true;
+          _file = file;
+        }));
   }
 
   Future<void> handleBulkData() async {
     setState(() {
-      _total = 0;
-      _received = 0;
+      _isRequestingBulkData = true;
+      _totalBits = 0;
+      _receivedBits = 0;
     });
-    BulkData? bulkData = await BulkDataHelper.getBulkData();
-    await _downloadData(bulkData);
+    // BulkData? bulkData =
+    //     await BulkDataHelper.getBulkData().whenComplete(() => setState(() {
+    //           _isRequestingBulkData = false;
+    //           _isDownloading = true;
+    //         }));
+    await BulkDataHelper.getBulkData().then((BulkData? bulkData) async => {
+          setState(() {
+            _isRequestingBulkData = false;
+            _isDownloading = true;
+          }),
+          await _downloadData(bulkData)
+        });
+    // await _downloadData(bulkData);
   }
 
   Future<BulkData?> setPreferences(BulkData? bulkData) async {
@@ -72,7 +103,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _saveDataToDB() async {
     final content = await _file?.readAsString() ?? '';
     final jsonList = await jsonDecode(content);
-    await BulkDataHelper.writeBulkDataToDB(jsonList);
+    setState(() {
+      _entriesSaved = 0;
+      _totalEntries = jsonList.length;
+    });
+    print('Start writing to local DB');
+    print(jsonList.length);
+    for (int i = 0; i < jsonList.length; i += 1000) {
+      try {
+        setState(() {
+          _entriesSaved = i;
+        });
+        print('Processing data $i to ${i + 999}...');
+        // final List<Map<String, dynamic>> tmp = jsonList
+        //     .sublist(i, i + 999)
+        //     .map((e) => CardInfo.fromJson(e).toDB())
+        //     .toList();
+        final List tmp = jsonList.sublist(i, i+1000);
+        final List<Map<String, dynamic>> tmp2 = tmp.map((e) => CardInfo.fromJson(e).toDB()).toList();
+        await DBHelper.insertBulkDataIntoCardDatabase(tmp2);
+      } catch (error) {
+        print(error);
+      }
+      print('done writing to local DB');
+    }
   }
 
   Future<void> deleteLocalFile() async {
@@ -93,12 +147,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       isInit = true;
     }
   }
-  // floatingActionButton: FloatingActionButton.extended(
-  // label:
-  // Text('${_received ~/ (1024 * 1024)}/${_total ~/ (1024 * 1024)} MB'),
-  // icon: const Icon(Icons.file_download),
-  // onPressed: handleBulkData,
-  // ),
 
   @override
   Widget build(BuildContext context) {
@@ -110,57 +158,108 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
-        actions: [
-          TextButton(
-              onPressed: () {
-                setState(() {
-                  isInit = false;
-                });
-              },
-              child: const Text(
-                'check bulk date',
-                style: TextStyle(color: Colors.black),
-              ))
-        ],
+        automaticallyImplyLeading: (_isProcessingToLocalDB ||
+                _isSavingToLocalFile ||
+                _isDownloading ||
+                _isRequestingBulkData)
+            ? false
+            : true,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          const SizedBox(
-            height: 20,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Use local DB'),
-              Switch(
-                value: useLocalDB,
-                onChanged: (newValue) {
-                  onDBValueChange(newValue);
-                },
-              ),
-            ],
-          ),
           Column(
             children: [
-              ElevatedButton(
-                onPressed: canUpdateDB
-                    ? () {
-                        handleBulkData();
-                      }
-                    : null,
-                child: canUpdateDB
-                    ? const Text('Refresh local DB')
-                    : const Text('DB up to date'),
+              const SizedBox(
+                height: 20,
               ),
-              Text(
-                'last updated: ${dbDate.year}-${dbDate.month.toString().length < 2 ? '0${dbDate.month}' : dbDate.month}-${dbDate.day.toString().length < 2 ? '0${dbDate.day}' : dbDate.day}',
-                //   'last updated: ${dbDate.toLocal(}',
-                style: const TextStyle(fontSize: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Use local DB'),
+                  Switch(
+                    value: useLocalDB,
+                    onChanged: (newValue) {
+                      onDBValueChange(newValue);
+                    },
+                  ),
+                ],
               ),
-              Text(
-                  '${_received ~/ (1024 * 1024)}/${_total ~/ (1024 * 1024)} MB'),
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: canUpdateDB
+                        ? () {
+                            handleBulkData();
+                          }
+                        : null,
+                    child: canUpdateDB
+                        ? const Text('Refresh local DB')
+                        : const Text('DB up to date'),
+                  ),
+                  Text(
+                    'last updated: ${dbDate.year}-${dbDate.month.toString().length < 2 ? '0${dbDate.month}' : dbDate.month}-${dbDate.day.toString().length < 2 ? '0${dbDate.day}' : dbDate.day}',
+                    //   'last updated: ${dbDate.toLocal(}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  // Text('${_receivedBits ~/ (1024 * 1024)}/${_totalBits ~/ (1024 * 1024)} MB'),
+                ],
+              ),
             ],
           ),
+          (_isRequestingBulkData ||
+                  _isDownloading ||
+                  _isSavingToLocalFile ||
+                  _isProcessingToLocalDB)
+              ? Container(
+                  color: const Color.fromRGBO(197, 197, 197, 0.35),
+                  height: MediaQuery.of(context).size.height * 1,
+                  child: Center(
+                    child: _isRequestingBulkData
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              CircularProgressIndicator(),
+                              Text('Fetching Bulk Data Url...'),
+                            ],
+                          )
+                        : _isDownloading
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    value: (_receivedBits / _totalBits) < 1
+                                        ? _receivedBits / _totalBits
+                                        : 1,
+                                  ),
+                                  Text(
+                                      'Downloading data... ${_receivedBits ~/ (1024 * 1024)}/${_totalBits ~/ (1024 * 1024)} MB'),
+                                ],
+                              )
+                            : _isSavingToLocalFile
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      CircularProgressIndicator(),
+                                      Text('Saving file before processing...'),
+                                    ],
+                                  )
+                                : _isProcessingToLocalDB
+                                    ? Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          CircularProgressIndicator(
+                                            value:
+                                                _totalEntries != 0 ? (_entriesSaved / _totalEntries) : 0,
+                                          ),
+                                          Text(
+                                              'Processing data to local DB... $_entriesSaved / $_totalEntries done'),
+                                        ],
+                                      )
+                                    : const Center(),
+                  ),
+                )
+              : const Center(),
         ],
       ),
     );

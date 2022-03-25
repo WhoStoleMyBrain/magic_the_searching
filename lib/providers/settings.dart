@@ -37,12 +37,12 @@ class Settings with ChangeNotifier {
         prefs.getString('dbUpdatedAt') ?? DateTime.now().toIso8601String());
     BulkData? bulkData = await BulkDataHelper.getBulkData();
     if (bulkData?.updatedAt
-            .subtract(const Duration(days: 0))
+            .subtract(const Duration(days: 1))
             .isAfter(oldDBDate) ??
         true) {
       canUpdateDB = true;
     } else {
-      canUpdateDB = true;
+      canUpdateDB = false;
     }
     dbDate = oldDBDate;
     print('can Update: $canUpdateDB');
