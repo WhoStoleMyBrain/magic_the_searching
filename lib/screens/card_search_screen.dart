@@ -210,22 +210,8 @@ class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
               child: const Icon(Icons.camera_enhance),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: FloatingActionButton(
-              heroTag: 'DB',
-              onPressed: _loadDBData,
-              child: const Icon(Icons.data_array),
-            ),
-          ),
         ],
       ),
     );
-  }
-
-  void _loadDBData() {
-    final cardDataProvider =
-        Provider.of<CardDataProvider>(context, listen: false);
-    cardDataProvider.processFileToLocalDB();
   }
 }

@@ -72,8 +72,8 @@ class CardPriceDisplay extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                buildSinglePriceItem('TCG', 'tcg', '\$'),
-                buildSinglePriceItem('TCG', 'tcg_foil', '\$'),
+                buildSinglePriceItem('TCG', cardInfo.prices?.usd, '\$'),
+                buildSinglePriceItem('TCG', cardInfo.prices?.usdFoil, '\$'),
                 // Expanded(child: Container()),
               ],
             ),
@@ -83,8 +83,8 @@ class CardPriceDisplay extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                buildSinglePriceItem('CDM', 'cardmarket', '€'),
-                buildSinglePriceItem('CDM', 'cardmarket_foil', '€'),
+                buildSinglePriceItem('CDM', cardInfo.prices?.eur, '€'),
+                buildSinglePriceItem('CDM', cardInfo.prices?.eurFoil, '€'),
               ],
             ),
           ],
@@ -93,15 +93,13 @@ class CardPriceDisplay extends StatelessWidget {
     );
   }
 
-  Expanded buildSinglePriceItem(String name, String mapKey, String currency) {
+  Expanded buildSinglePriceItem(String name, String? value, String currency) {
     return Expanded(
       child: Text(
-        '$name: $currency${cardInfo.prices?.usd}',
+        '$name: $currency${value ?? '--.--'}',
         style: TextStyle(
-          fontSize: (double.parse(cardInfo.prices?.usd ?? '0')) >= 100
-              ? (12 -
-                  (double.parse(cardInfo.prices?.usd ?? '')).toString().length +
-                  5)
+          fontSize: (double.parse(value ?? '0')) >= 100
+              ? (12 - (double.parse(value ?? '')).toString().length + 5)
               : 12,
         ),
       ),
@@ -133,12 +131,13 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
 
   Future<void> getLocalImage() async {
     CardImageDisplay.pictureLoaded = true;
+    // print(widget.cardInfo.toJson()['hasTwoSides']);
     List<ImageLinks?>? localImages =
-        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris == null))
+        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris?.normal == null))
             ? widget.cardInfo.cardFaces
             : [widget.cardInfo.imageUris];
     _networkImage = Image.network(
-      localImages?[_side]?.normal ?? '',
+      localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
       fit: BoxFit.cover,
       width: (widget.mediaQuery.size.width -
               widget.mediaQuery.padding.horizontal) /
@@ -169,7 +168,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                     ),
                   ),
             if (widget.cardInfo.hasTwoSides &&
-                (widget.cardInfo.imageUris == null))
+                (widget.cardInfo.imageUris?.normal == null))
               Positioned(
                 left: (widget.mediaQuery.size.width -
                             widget.mediaQuery.padding.horizontal) /

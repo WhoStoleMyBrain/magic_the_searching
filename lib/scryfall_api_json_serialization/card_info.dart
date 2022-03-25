@@ -104,11 +104,15 @@ class CardInfo {
   });
   String id;
   String? name;
+  @JsonKey(name: 'oracle_id')
   String? oracleId;
+  @JsonKey(name: 'oracle_text')
   String? oracleText;
+  @JsonKey(name: 'scryfall_uri')
   String? scryfallUri;
   ImageLinks? imageUris;
   Prices? prices;
+  @JsonKey(name: 'purchase_uris')
   PurchaseUris? purchaseUris;
   @JsonKey(
       readValue: hasTwoSidesReadValue,
@@ -141,9 +145,9 @@ class CardInfo {
     return CardInfo(
         id: dbData['card_info']['id'] as String,
         name: dbData['card_info']['name'] as String?,
-        oracleId: dbData['card_info']['oracle_id'] as String?,
-        oracleText: dbData['card_info']['oracle_text'] as String?,
-        scryfallUri: dbData['card_info']['scryfall_uri'] as String?,
+        oracleId: dbData['card_info']['oracleId'] as String?,
+        oracleText: dbData['card_info']['oracleText'] as String?,
+        scryfallUri: dbData['card_info']['scryfallUri'] as String?,
         imageUris: dbData['image_uris'] == null
             ? null
             : ImageLinks.fromJson(dbData['image_uris'] as Map<String, dynamic>),

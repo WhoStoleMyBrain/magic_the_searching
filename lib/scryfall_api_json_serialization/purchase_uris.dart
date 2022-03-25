@@ -15,6 +15,7 @@ class PurchaseUris {
     required this.cardmarket,
 
   });
+  @JsonKey(name: 'oracle_id')
   String? tcgplayer;
   String? cardmarket;
 

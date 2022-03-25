@@ -148,12 +148,15 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   late Image _networkImage;
 
   Future<void> getLocalImage() async {
+    // CardImageDisplay.pictureLoaded = true;
+    // print(widget.cardInfo.toJson()['hasTwoSides']);
+    // print(widget.cardInfo.hasTwoSides);
     List<ImageLinks?>? localImages =
-        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris == null))
+        (widget.cardInfo.hasTwoSides && (widget.cardInfo.imageUris?.normal == null))
             ? widget.cardInfo.cardFaces
             : [widget.cardInfo.imageUris];
     _networkImage = Image.network(
-      localImages?[_side]?.normal ?? '',
+      localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
       fit: BoxFit.cover,
     );
   }
@@ -174,7 +177,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                     child: CircularProgressIndicator(),
                   ),
             if (widget.cardInfo.hasTwoSides &&
-                (widget.cardInfo.imageUris == null))
+                (widget.cardInfo.imageUris?.normal == null))
               getFlipButton(),
           ],
         );
@@ -221,6 +224,8 @@ class CardDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // print(cardInfo.purchaseUris?.toJson());
+    print(cardInfo.toJson());
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -248,8 +253,8 @@ class CardDetails extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              buildSinglePriceItem('TCG', 'tcg', '\$'),
-              buildSinglePriceItem('TCG', 'tcg_foil', '\$'),
+              buildSinglePriceItem('TCG', cardInfo.prices?.usd, '\$'),
+              buildSinglePriceItem('TCG', cardInfo.prices?.usdFoil, '\$'),
             ],
           ),
           const SizedBox(
@@ -258,8 +263,8 @@ class CardDetails extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              buildSinglePriceItem('CDM', 'cardmarket', '€'),
-              buildSinglePriceItem('CDM', 'cardmarket_foil', '€'),
+              buildSinglePriceItem('CDM', cardInfo.prices?.eur, '€'),
+              buildSinglePriceItem('CDM', cardInfo.prices?.eurFoil, '€'),
             ],
           ),
           const SizedBox(
@@ -268,9 +273,9 @@ class CardDetails extends StatelessWidget {
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              getLinkButton('Scryfall', 'scryfall'),
-              getLinkButton('Cardmarket', 'cardmarket'),
-              getLinkButton('TCGPlayer', 'tcg'),
+              getLinkButton('Scryfall', cardInfo.scryfallUri),
+              getLinkButton('Cardmarket', cardInfo.purchaseUris?.cardmarket),
+              getLinkButton('TCGPlayer', cardInfo.purchaseUris?.tcgplayer),
             ],
           ),
         ],
@@ -278,20 +283,20 @@ class CardDetails extends StatelessWidget {
     );
   }
 
-  Expanded buildSinglePriceItem(String name, String mapKey, String currency) {
+  Expanded buildSinglePriceItem(String name, String? value, String currency) {
     return Expanded(
       child: Text(
-        '$name:  $currency${cardInfo.prices?.usd}',
+        '$name:  $currency${value ?? '--.--'}',
         style: textStyle,
       ),
     );
   }
 
-  TextButton getLinkButton(String name, String mapKey) {
+  TextButton getLinkButton(String name, String? url) {
     return TextButton(
-      onPressed: () {
+      onPressed: (url == null) ? null : () {
         // _launchURL(cardInfo.purchaseUris?.cardmarket ?? '');
-        _launchURL(cardInfo.scryfallUri ?? '');
+        _launchURL(url);
       },
       child: Text(
         'Open on $name',
