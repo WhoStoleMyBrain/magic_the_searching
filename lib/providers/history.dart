@@ -10,19 +10,16 @@ class History with ChangeNotifier {
   }
 
   Future<void> getDBData(Function setInitToTrue) async {
-    List<HistoryObject> data = [];
+    // List<HistoryObject> data = [];
     var historyData = await DBHelper.getHistoryData();
-    for (var historyElement in historyData) {
-      data.add(
-        HistoryObject(
-          query: historyElement['searchText'].toString(),
-          matches: historyElement['count'].toString(),
-          dateTime: DateTime.parse(historyElement['requestTime'].toString()),
-        ),
-      );
-    }
+    // for (var historyElement in historyData) {
+    //   data.add(
+    //     HistoryObject.fromDB(historyElement),
+    //   );
+    // }
+    // data = historyData;
     setInitToTrue();
-    _data = data;
+    _data = historyData;
     notifyListeners();
   }
 }
@@ -34,4 +31,18 @@ class HistoryObject {
 
   HistoryObject(
       {required this.query, required this.matches, required this.dateTime});
+
+  factory HistoryObject.fromDB(Map<String, dynamic> json) => HistoryObject(
+        query: json['searchText'].toString(),
+        matches: json['matches'].toString(),
+        dateTime: DateTime.parse(json['dateTime'].toString()),
+      );
+
+  Map<String, dynamic> toDB() {
+    return {
+      'searchText': query,
+      'count': matches,
+      'requestTime': dateTime,
+    };
+  }
 }

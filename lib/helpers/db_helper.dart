@@ -1,34 +1,18 @@
+import 'dart:io';
+
+import 'package:magic_the_searching/providers/history.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 
-// CREATE TABLE my_table(id INTEGER PRIMARY KEY, name TEXT);
-// CREATE TABLE second_table(id INTEGER PRIMARY KEY, second_id INTEGER, FOREIGN KEY(second_id) REFERENCES my_table(id));
-//
-// CREATE TABLE third_table(id INTEGER PRIMARY KEY, third_id INTEGER, FOREIGN KEY(third_id) REFERENCES my_table(id));
-//
-// CREATE TABLE fourth_table(id INTEGER PRIMARY KEY, FOREIGN KEY(id) REFERENCES my_table(id));
-//
-// INSERT INTO my_table (id, name) VALUES (1, 'Gobbo');
-// INSERT INTO my_table (id, name) VALUES (2, 'Leo');
-// INSERT INTO my_table (id, name) VALUES (3, 'Majo');
-//
-// INSERT INTO second_table (id, second_id) VALUES (1, 2);
-// INSERT INTO second_table (id, second_id) VALUES (2, 1);
-// INSERT INTO second_table (id, second_id) VALUES (3, 3);
-//
-// INSERT INTO third_table (id, third_id) VALUES (7, 2);
-// INSERT INTO third_table (id, third_id) VALUES (8, 1);
-// INSERT INTO third_table (id, third_id) VALUES (9, 3);
-
-// #SELECT * FROM my_table;
-//
-// SELECT * FROM my_table inner join second_table on my_table.id = second_table.second_id inner join third_table on my_table.id = third_table.third_id;
-//
-// SELECT my_table.id, my_table.name, sec.second_id, thi.third_id FROM my_table inner join second_table as sec on my_table.id = sec.second_id inner join third_table as thi on my_table.id = thi.third_id;
-//
-// SELECT my_table.id, my_table.name, sec.second_id, thi.third_id, fou.id FROM my_table inner join second_table as sec on my_table.id = sec.second_id inner join third_table as thi on my_table.id = thi.third_id inner join fourth_table as fou on my_table.id = fou.id;
-
 class DBHelper {
+  static Future<int> checkDatabaseSize(String dbName) async {
+    final dbPath = await sql.getDatabasesPath();
+    String fullDbPath = path.join(dbPath, dbName);
+    final file = File(fullDbPath);
+    final size = await file.length();
+    return size;
+  }
+
   static Future<sql.Database> cardDatabase() async {
     final dbPath = await sql.getDatabasesPath();
     return sql.openDatabase(path.join(dbPath, 'cardDatabase.db'),
@@ -60,24 +44,29 @@ class DBHelper {
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
-  static Future<void> insertBulkDataIntoCardDatabase(List<Map<String, dynamic>> dataList) async {
+  static Future<void> insertBulkDataIntoCardDatabase(
+      List<Map<String, dynamic>> dataList) async {
     final db = await DBHelper.cardDatabase();
     var batch = db.batch();
     for (Map<String, dynamic> data in dataList) {
       batch.insert('card_info', data["card_info"] ?? {},
-          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+          conflictAlgorithm: sql.ConflictAlgorithm.replace,
+          nullColumnHack: 'id');
       batch.insert('image_uris', data["image_uris"] ?? {},
-          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+          conflictAlgorithm: sql.ConflictAlgorithm.replace,
+          nullColumnHack: 'id');
       batch.insert('card_faces', data["card_faces"] ?? {},
-          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+          conflictAlgorithm: sql.ConflictAlgorithm.replace,
+          nullColumnHack: 'id');
       batch.insert('prices', data["prices"] ?? {},
-          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+          conflictAlgorithm: sql.ConflictAlgorithm.replace,
+          nullColumnHack: 'id');
       batch.insert('purchase_uris', data["purchase_uris"] ?? {},
-          conflictAlgorithm: sql.ConflictAlgorithm.replace, nullColumnHack: 'id');
+          conflictAlgorithm: sql.ConflictAlgorithm.replace,
+          nullColumnHack: 'id');
     }
     await batch.commit(noResult: true);
   }
-
 
   static Future<Map<String, dynamic>> getCardById(String id) async {
     final db = await DBHelper.cardDatabase();
@@ -133,12 +122,13 @@ class DBHelper {
       final String id = _cardInfo[i]["id"];
       // retList.add(await DBHelper.getCardById(id));
       final _imageUris =
-      await db.query('image_uris', where: 'id = ?', whereArgs: [id]);
+          await db.query('image_uris', where: 'id = ?', whereArgs: [id]);
       final _cardFaces =
-      await db.query('card_faces', where: 'id = ?', whereArgs: [id]);
-      final _prices = await db.query('prices', where: 'id = ?', whereArgs: [id]);
+          await db.query('card_faces', where: 'id = ?', whereArgs: [id]);
+      final _prices =
+          await db.query('prices', where: 'id = ?', whereArgs: [id]);
       final _purchaseUris =
-      await db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
+          await db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
       retList.add({
         'card_info': _cardInfo[i],
         'image_uris': _imageUris.first,
@@ -150,65 +140,44 @@ class DBHelper {
     return retList;
   }
 
-  static Future<sql.Database> database2() async {
+  static Future<sql.Database> historyDatabase() async {
     final dbPath = await sql.getDatabasesPath();
-    return sql.openDatabase(path.join(dbPath, 'searches.db'),
+    return sql.openDatabase(path.join(dbPath, 'history.db'),
         onCreate: (db, version) async {
       await db.execute(
-          'CREATE TABLE user_searches(searchText TEXT, id TEXT PRIMARY KEY, name TEXT, text TEXT, hasTwoSides BIT, requestTime DATETIME, isFromVersions BIT)');
-      await db.execute(
-          'CREATE TABLE search_images(searchText TEXT, id TEXT PRIMARY KEY, frontImage TEXT, backImage TEXT, requestTime DATETIME)');
-      await db.execute(
-          'CREATE TABLE search_prices(searchText TEXT, id TEXT PRIMARY KEY, tcg TEXT, tcgFoil TEXT, cdm TEXT, cdmFoil TEXT, requestTime DATETIME)');
-      await db.execute(
-          'CREATE TABLE search_links(searchText TEXT, id TEXT PRIMARY KEY, tcg TEXT, cardmarket TEXT, scryfall TEXT, requestTime DATETIME)');
+          'CREATE TABLE search_history(searchText TEXT UNIQUE PRIMARY KEY, matches INTEGER, dateTime DATETIME);');
     }, version: 1);
   }
 
-  static Future<void> insert2(String table, Map<String, dynamic> data) async {
-    final db = await DBHelper.database2();
-    db.insert('user_searches', data["user_searches"] ?? {},
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
-    db.insert('search_images', data["search_images"] ?? {},
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
-    db.insert('search_prices', data["search_prices"] ?? {},
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
-    db.insert('search_links', data["search_links"] ?? {},
+  static Future<void> insertIntoHistory(Map<String, dynamic>? data) async {
+    final db = await DBHelper.historyDatabase();
+    db.insert('search_history', data ?? {},
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
-  static Future<List<Map<String, dynamic>>> getData(
-    String table,
-    String column,
-    String searchText,
-  ) async {
-    final db = await DBHelper.database2();
-    return db.query(table, where: '$column = ?', whereArgs: [searchText]);
+  static Future<List<HistoryObject>> getHistoryData() async {
+    final db = await DBHelper.historyDatabase();
+    var history = await db
+        .rawQuery('SELECT * from search_history ORDER BY dateTime DESC');
+    return history.map((e) => HistoryObject.fromDB(e)).toList();
   }
 
-  static Future<List<Map<String, dynamic>>> getHistoryData() async {
-    final db = await DBHelper.database2();
-    var history = await db.rawQuery(
-        'SELECT searchText, COUNT(*) as count, requestTime from user_searches GROUP BY searchText ORDER BY requestTime DESC');
-    return history;
-  }
-
-  static Future<List<Map<String, dynamic>>> getVersionsOrPrintsData() async {
-    final db = await DBHelper.database2();
-    var history = await db.rawQuery(
-        'SELECT name, searchText FROM user_searches WHERE user_searches.name = user_searches.searchText AND isFromVersions = 1');
-    return history;
-  }
+  // static Future<List<Map<String, dynamic>>> getVersionsOrPrintsData() async {
+  //   final db = await DBHelper.historyDatabase();
+  //   var history = await db.rawQuery(
+  //       'SELECT name, searchText FROM user_searches WHERE user_searches.name = user_searches.searchText AND isFromVersions = 1');
+  //   return history;
+  // }
 
   static Future<void> cleanDB() async {
-    final db = await DBHelper.database2();
+    final db = await DBHelper.historyDatabase();
     await db.execute(
-        "DELETE FROM search_images WHERE requestTime <= datetime('now', '-7 day')");
-    await db.execute(
-        "DELETE FROM search_prices WHERE requestTime <= datetime('now', '-7 day')");
-    await db.execute(
-        "DELETE FROM user_searches WHERE requestTime <= datetime('now', '-7 day')");
-    await db.execute(
-        "DELETE FROM search_links WHERE requestTime <= datetime('now', '-7 day')");
+        "DELETE FROM search_history WHERE dateTime <= datetime('now', '-7 day')");
+    // await db.execute(
+    //     "DELETE FROM search_prices WHERE requestTime <= datetime('now', '-7 day')");
+    // await db.execute(
+    //     "DELETE FROM user_searches WHERE requestTime <= datetime('now', '-7 day')");
+    // await db.execute(
+    //     "DELETE FROM search_links WHERE requestTime <= datetime('now', '-7 day')");
   }
 }

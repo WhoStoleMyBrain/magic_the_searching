@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/providers/history.dart';
 
-import '../helpers/database_loader.dart';
 import '../helpers/internet_usage_helper.dart';
 import '../helpers/scryfall_request_handler.dart';
 import '../helpers/db_helper.dart';
@@ -33,10 +33,12 @@ class CardDataProvider with ChangeNotifier {
 
   Future<bool> processQuery() async {
     isLoading = true;
-    var historyData = await dbHelperFunction();
-    var queries = historyData.map((e) => e['searchText']);
+    notifyListeners();
+    List<HistoryObject> historyData = await dbHelperFunction();
+    List<String> queries = historyData.map((e) => e.query).toList();
+    print(queries);
     if (queries.contains(query) && false) {
-      return _loadDataFromDB();
+      // return _loadDataFromDB();
     } else {
       return _requestDataFromScryfall();
     }
@@ -44,42 +46,52 @@ class CardDataProvider with ChangeNotifier {
 
   Future<bool> processQueryLocally() async {
     isLoading = true;
-
+    notifyListeners();
+    List<HistoryObject> historyData = await dbHelperFunction();
+    List<String> queries = historyData.map((e) => e.query).toList();
+    print(queries);
     List<Map<String, dynamic>> dbResult = await DBHelper.getCardsByName(query);
     print('dbResult: $dbResult');
     if (dbResult.isEmpty) {
       cards = [];
       return false;
+    } else {
+      Map<String, dynamic> historyData = {
+        'searchText': query,
+        'matches': dbResult.length,
+        'dateTime': DateTime.now().toIso8601String(),
+      };
+      DBHelper.insertIntoHistory(historyData);
     }
     cards = dbResult.map((e) => CardInfo.fromDB(e)).toList();
     // return false;
     return true;
   }
 
-  Future<bool> _loadDataFromDB() async {
-    var dbData = {
-      'user_searches':
-          await DBHelper.getData('user_searches', 'searchText', query),
-      'search_images':
-          await DBHelper.getData('search_images', 'searchText', query),
-      'search_prices':
-          await DBHelper.getData('search_prices', 'searchText', query),
-    };
-    List<CardInfo> myData = [];
-    for (int i = 0; i < dbData['user_searches']!.length; i++) {
-      myData.add(CardInfo.fromJson(dbData));
-      // CardData.fromMap(
-      //   {
-      //     'user_searches': dbData['user_searches']?[i] ?? {},
-      //     'search_images': dbData['search_images']?[i] ?? {},
-      //     'search_prices': dbData['search_prices']?[i] ?? {},
-      //   },
-      // ),
-      // );
-    }
-    cards = myData;
-    return true;
-  }
+  // Future<bool> _loadDataFromDB() async {
+  //   var dbData = {
+  //     'user_searches':
+  //         await DBHelper.getData('user_searches', 'searchText', query),
+  //     'search_images':
+  //         await DBHelper.getData('search_images', 'searchText', query),
+  //     'search_prices':
+  //         await DBHelper.getData('search_prices', 'searchText', query),
+  //   };
+  //   List<CardInfo> myData = [];
+  //   for (int i = 0; i < dbData['user_searches']!.length; i++) {
+  //     myData.add(CardInfo.fromJson(dbData));
+  //     // CardData.fromMap(
+  //     //   {
+  //     //     'user_searches': dbData['user_searches']?[i] ?? {},
+  //     //     'search_images': dbData['search_images']?[i] ?? {},
+  //     //     'search_prices': dbData['search_prices']?[i] ?? {},
+  //     //   },
+  //     // ),
+  //     // );
+  //   }
+  //   cards = myData;
+  //   return true;
+  // }
 
   Future<void> internetUsage() async {
     final internetUsageStats = InternetUsageHelper();
@@ -116,34 +128,20 @@ class CardDataProvider with ChangeNotifier {
       cards = [];
       return false;
     } else {
-      for (CardInfo card in queryResult) {
-        // await DBHelper.insertIntoCardDatabase(card.toDB());
-      }
+      // List<Map<String, dynamic>> historyData = queryResult.map((e) => e.toDB()).toList();
+      // print(historyData);
+      Map<String, dynamic> historyData = {
+        'searchText': query,
+        'matches': queryResult.length,
+        'dateTime': DateTime.now().toIso8601String(),
+      };
+      DBHelper.insertIntoHistory(historyData);
+      // for (CardInfo card in queryResult) {
+      // await DBHelper.insertIntoCardDatabase(card.toDB());
+      // }
     }
     cards = queryResult;
-    internetUsage();
+    // internetUsage();
     return true;
-  }
-
-  // Future<void> loadDataFromLocalDB() async {
-  //   final List databaseList = await DatabaseLoader.readDataFromDBFile(
-  //       DatabaseLoader.cardDatabasePath);
-  //   cards = databaseList.map((e) {
-  //     return CardInfo.fromJson(e);
-  //   }).toList();
-  //   query = 'testQuery';
-  //   notifyListeners();
-  // }
-
-  Future<void> processFileToLocalDB() async {
-    final List databaseList = await DatabaseLoader.readDataFromDBFile(
-        DatabaseLoader.cardDatabasePath);
-    final List<CardInfo> tmpCards = databaseList.map((e) {
-      return CardInfo.fromJson(e);
-    }).toList();
-    for (CardInfo card in tmpCards) {
-      print('Inserting card with name: ${card.name} into DB...');
-      DBHelper.insertIntoCardDatabase(card.toDB());
-    }
   }
 }

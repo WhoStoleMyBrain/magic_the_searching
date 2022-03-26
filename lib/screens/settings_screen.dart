@@ -119,8 +119,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         //     .sublist(i, i + 999)
         //     .map((e) => CardInfo.fromJson(e).toDB())
         //     .toList();
-        final List tmp = jsonList.sublist(i, i+1000);
-        final List<Map<String, dynamic>> tmp2 = tmp.map((e) => CardInfo.fromJson(e).toDB()).toList();
+        final List tmp = jsonList.sublist(i, i + 1000);
+        final List<Map<String, dynamic>> tmp2 =
+            tmp.map((e) => CardInfo.fromJson(e).toDB()).toList();
         await DBHelper.insertBulkDataIntoCardDatabase(tmp2);
       } catch (error) {
         print(error);
@@ -189,7 +190,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ElevatedButton(
                     onPressed: canUpdateDB
                         ? () {
-                            handleBulkData();
+                            handleBulkData().whenComplete(
+                                () => settings.checkCanUpdateDB());
                           }
                         : null,
                     child: canUpdateDB
@@ -204,6 +206,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // Text('${_receivedBits ~/ (1024 * 1024)}/${_totalBits ~/ (1024 * 1024)} MB'),
                 ],
               ),
+              ElevatedButton(
+                  onPressed: () async {
+                    var dbSize =
+                        await DBHelper.checkDatabaseSize('cardDatabase.db');
+                    print(
+                        'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+                  },
+                  child: const Text('Check card db file...')),
+              ElevatedButton(
+                  onPressed: () async {
+                    var dbSize = await DBHelper.checkDatabaseSize('history.db');
+                    print(
+                        'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+                  },
+                  child: const Text('Check history db file...')),
             ],
           ),
           (_isRequestingBulkData ||
@@ -249,8 +266,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                             MainAxisAlignment.center,
                                         children: [
                                           CircularProgressIndicator(
-                                            value:
-                                                _totalEntries != 0 ? (_entriesSaved / _totalEntries) : 0,
+                                            value: _totalEntries != 0
+                                                ? (_entriesSaved /
+                                                    _totalEntries)
+                                                : 0,
                                           ),
                                           Text(
                                               'Processing data to local DB... $_entriesSaved / $_totalEntries done'),

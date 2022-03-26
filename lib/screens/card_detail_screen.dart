@@ -78,13 +78,15 @@ class CardDetailScreen extends StatelessWidget {
           getRefinedSearchButton(
               context,
               cardInfo,
-              DBHelper.getVersionsOrPrintsData,
+              // DBHelper.getVersionsOrPrintsData,
+              () {},
               ScryfallQueryMaps.printsMap,
               'All Prints'),
           getRefinedSearchButton(
               context,
               cardInfo,
-              DBHelper.getVersionsOrPrintsData,
+              // DBHelper.getVersionsOrPrintsData,
+              () {},
               ScryfallQueryMaps.versionMap,
               'All Arts'),
         ],
@@ -167,13 +169,13 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           fit: BoxFit.cover,
         );
         // setState(() {
-          _hasInternetConnection = true;
+        _hasInternetConnection = true;
         // });
       }
     } on SocketException catch (_) {
       print('not connected');
       // setState(() {
-        _hasInternetConnection = false;
+      _hasInternetConnection = false;
       // });
     }
   }
@@ -181,15 +183,17 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   Widget cardText() {
     return Card(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-      children: [
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
           Text(widget.cardInfo.name ?? 'No name found for this card.'),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           Text(widget.cardInfo.oracleText ?? 'No Oracle text found'),
-      ],
-    ),
-        ));
+        ],
+      ),
+    ));
   }
 
   // Widget displayCardImageOrInfo() {
@@ -314,6 +318,7 @@ class CardDetails extends StatelessWidget {
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              Text('${cardInfo.purchaseUris?.tcgplayer}'),
               getLinkButton('Scryfall', cardInfo.scryfallUri),
               getLinkButton('Cardmarket', cardInfo.purchaseUris?.cardmarket),
               getLinkButton('TCGPlayer', cardInfo.purchaseUris?.tcgplayer),
