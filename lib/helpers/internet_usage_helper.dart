@@ -61,9 +61,6 @@ class InternetUsageHelper with ChangeNotifier {
   }
 
   Future<List<NetworkInfo>> get networkInfos async {
-    // _networkInfos =
-    //     await UsageStats.queryNetworkUsageStats(_startDate, _endDate);
-    // notifyListeners();
     return [..._networkInfos];
   }
 }

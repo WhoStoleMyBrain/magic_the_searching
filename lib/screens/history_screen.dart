@@ -19,7 +19,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void setInitToTrue() {
     setState(() {
       isInit = true;
-      // print(isInit);
     });
   }
 
@@ -30,7 +29,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       final history = Provider.of<History>(context, listen: false);
       setState(() {
         history.getDBData(setInitToTrue);
-        // isInit = !isInit;
       });
     }
   }

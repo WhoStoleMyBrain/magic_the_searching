@@ -10,14 +10,7 @@ class History with ChangeNotifier {
   }
 
   Future<void> getDBData(Function setInitToTrue) async {
-    // List<HistoryObject> data = [];
     var historyData = await DBHelper.getHistoryData();
-    // for (var historyElement in historyData) {
-    //   data.add(
-    //     HistoryObject.fromDB(historyElement),
-    //   );
-    // }
-    // data = historyData;
     setInitToTrue();
     _data = historyData;
     notifyListeners();

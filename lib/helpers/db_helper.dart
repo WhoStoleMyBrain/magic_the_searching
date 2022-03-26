@@ -162,22 +162,9 @@ class DBHelper {
     return history.map((e) => HistoryObject.fromDB(e)).toList();
   }
 
-  // static Future<List<Map<String, dynamic>>> getVersionsOrPrintsData() async {
-  //   final db = await DBHelper.historyDatabase();
-  //   var history = await db.rawQuery(
-  //       'SELECT name, searchText FROM user_searches WHERE user_searches.name = user_searches.searchText AND isFromVersions = 1');
-  //   return history;
-  // }
-
   static Future<void> cleanDB() async {
     final db = await DBHelper.historyDatabase();
     await db.execute(
         "DELETE FROM search_history WHERE dateTime <= datetime('now', '-7 day')");
-    // await db.execute(
-    //     "DELETE FROM search_prices WHERE requestTime <= datetime('now', '-7 day')");
-    // await db.execute(
-    //     "DELETE FROM user_searches WHERE requestTime <= datetime('now', '-7 day')");
-    // await db.execute(
-    //     "DELETE FROM search_links WHERE requestTime <= datetime('now', '-7 day')");
   }
 }

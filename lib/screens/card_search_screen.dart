@@ -38,7 +38,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       getUseLocalDB();
     });
-    // getUseLocalDB();
   }
 
   @override
@@ -124,7 +123,6 @@ class _MyAppBarState extends State<MyAppBar> {
     final handednessProvider = Provider.of<Handedness>(context, listen: false);
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: false);
-    // final settings = Provider.of<Settings>(context, listen: false);
     setTitle();
     return AppBar(
       title: (cardDataProvider.cards.isNotEmpty && title != '')

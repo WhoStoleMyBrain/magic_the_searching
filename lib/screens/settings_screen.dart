@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/helpers/bulk_data_helper.dart';
@@ -35,8 +36,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _response = await http.Client()
         .send(http.Request('GET', Uri.parse(bulkData?.downloadUri ?? '')));
     _totalBits = (_response.contentLength ?? 0) * 8;
-    print(
-        'contentlength: ${_response.contentLength}; bitlength: ${_response.contentLength?.bitLength}');
     _response.stream.listen((value) {
       setState(() {
         _bytes.addAll(value);
@@ -76,11 +75,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _totalBits = 0;
       _receivedBits = 0;
     });
-    // BulkData? bulkData =
-    //     await BulkDataHelper.getBulkData().whenComplete(() => setState(() {
-    //           _isRequestingBulkData = false;
-    //           _isDownloading = true;
-    //         }));
     await BulkDataHelper.getBulkData().then((BulkData? bulkData) async => {
           setState(() {
             _isRequestingBulkData = false;
@@ -88,7 +82,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }),
           await _downloadData(bulkData)
         });
-    // await _downloadData(bulkData);
   }
 
   Future<BulkData?> setPreferences(BulkData? bulkData) async {
@@ -107,26 +100,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _entriesSaved = 0;
       _totalEntries = jsonList.length;
     });
-    print('Start writing to local DB');
-    print(jsonList.length);
     for (int i = 0; i < jsonList.length; i += 1000) {
       try {
         setState(() {
           _entriesSaved = i;
         });
-        print('Processing data $i to ${i + 999}...');
-        // final List<Map<String, dynamic>> tmp = jsonList
-        //     .sublist(i, i + 999)
-        //     .map((e) => CardInfo.fromJson(e).toDB())
-        //     .toList();
         final List tmp = jsonList.sublist(i, i + 1000);
         final List<Map<String, dynamic>> tmp2 =
             tmp.map((e) => CardInfo.fromJson(e).toDB()).toList();
         await DBHelper.insertBulkDataIntoCardDatabase(tmp2);
       } catch (error) {
-        print(error);
+        if (kDebugMode) {
+          print(error);
+        }
       }
-      print('done writing to local DB');
     }
   }
 
@@ -200,27 +187,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   Text(
                     'last updated: ${dbDate.year}-${dbDate.month.toString().length < 2 ? '0${dbDate.month}' : dbDate.month}-${dbDate.day.toString().length < 2 ? '0${dbDate.day}' : dbDate.day}',
-                    //   'last updated: ${dbDate.toLocal(}',
                     style: const TextStyle(fontSize: 12),
                   ),
-                  // Text('${_receivedBits ~/ (1024 * 1024)}/${_totalBits ~/ (1024 * 1024)} MB'),
                 ],
               ),
-              ElevatedButton(
-                  onPressed: () async {
-                    var dbSize =
-                        await DBHelper.checkDatabaseSize('cardDatabase.db');
-                    print(
-                        'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
-                  },
-                  child: const Text('Check card db file...')),
-              ElevatedButton(
-                  onPressed: () async {
-                    var dbSize = await DBHelper.checkDatabaseSize('history.db');
-                    print(
-                        'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
-                  },
-                  child: const Text('Check history db file...')),
+              if (kDebugMode)
+                ElevatedButton(
+                    onPressed: () async {
+                      var dbSize =
+                          await DBHelper.checkDatabaseSize('cardDatabase.db');
+                      print(
+                          'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+                    },
+                    child: const Text('Check card db file...')),
+              if (kDebugMode)
+                ElevatedButton(
+                    onPressed: () async {
+                      var dbSize =
+                          await DBHelper.checkDatabaseSize('history.db');
+                      print(
+                          'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+                    },
+                    child: const Text('Check history db file...')),
             ],
           ),
           (_isRequestingBulkData ||

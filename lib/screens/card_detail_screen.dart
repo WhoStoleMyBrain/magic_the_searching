@@ -12,8 +12,6 @@ import 'package:magic_the_searching/providers/card_data_provider.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import '../scryfall_api_json_serialization/image_uris.dart';
 
-// import '../models/card_data.dart';
-
 class CardDetailScreen extends StatelessWidget {
   static const routeName = '/card-detail';
 
@@ -153,13 +151,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   late bool _hasInternetConnection;
 
   Future<void> getLocalImage() async {
-    // CardImageDisplay.pictureLoaded = true;
-    // print(widget.cardInfo.toJson()['hasTwoSides']);
-    // print(widget.cardInfo.hasTwoSides);
     try {
       final result = await InternetAddress.lookup('c1.scryfall.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        print('connected');
         List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
                 (widget.cardInfo.imageUris?.normal == null))
             ? widget.cardInfo.cardFaces
@@ -168,15 +162,10 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
           fit: BoxFit.cover,
         );
-        // setState(() {
         _hasInternetConnection = true;
-        // });
       }
     } on SocketException catch (_) {
-      print('not connected');
-      // setState(() {
       _hasInternetConnection = false;
-      // });
     }
   }
 
@@ -195,16 +184,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       ),
     ));
   }
-
-  // Widget displayCardImageOrInfo() {
-  //   try {
-  //     return
-  //   } catch (error) {
-  //     return ClipRRect(
-  //         borderRadius: BorderRadius.circular(15), child: cardText());
-  //   }
-  //   // _networkImage ?? cardText(),
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -343,7 +322,6 @@ class CardDetails extends StatelessWidget {
       onPressed: (url == null)
           ? null
           : () {
-              // _launchURL(cardInfo.purchaseUris?.cardmarket ?? '');
               _launchURL(url);
             },
       child: Text(

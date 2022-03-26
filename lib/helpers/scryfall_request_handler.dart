@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
-import '../models/card_data.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 
 class ScryfallRequestHandler {

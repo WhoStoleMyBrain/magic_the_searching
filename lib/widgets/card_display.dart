@@ -6,11 +6,9 @@ import '../scryfall_api_json_serialization/card_info.dart';
 import '../scryfall_api_json_serialization/image_uris.dart';
 
 class CardDisplay extends StatelessWidget {
-  // final CardData cardData;
   final CardInfo cardInfo;
 
   const CardDisplay(
-      // {Key? key, required this.cardData})
       {Key? key,
       required this.cardInfo})
       : super(key: key);
@@ -28,7 +26,6 @@ class CardDisplay extends StatelessWidget {
         },
         child: SingleChildScrollView(
           child: SizedBox(
-            // height: mediaQuery.size.height / 30 * 14,
             child: Card(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -128,15 +125,11 @@ class CardImageDisplay extends StatefulWidget {
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
-  // var _hasLocalImage = false;
-  // late File _storedImage;
   late Image _networkImage;
   late bool _hasInternetConnection;
-  // bool pictureLoaded = false;
 
   Future<void> getLocalImage2() async {
     CardImageDisplay.pictureLoaded = true;
-    // print(widget.cardInfo.toJson()['hasTwoSides']);
     List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
             (widget.cardInfo.imageUris?.normal == null))
         ? widget.cardInfo.cardFaces
@@ -152,13 +145,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   }
 
   Future<void> getLocalImage() async {
-    // CardImageDisplay.pictureLoaded = true;
-    // print(widget.cardInfo.toJson()['hasTwoSides']);
-    // print(widget.cardInfo.hasTwoSides);
     try {
       final result = await InternetAddress.lookup('c1.scryfall.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        print('connected');
         List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
                 (widget.cardInfo.imageUris?.normal == null))
             ? widget.cardInfo.cardFaces
@@ -167,15 +156,10 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
           fit: BoxFit.cover,
         );
-        // setState(() {
         _hasInternetConnection = true;
-        // });
       }
     } on SocketException catch (_) {
-      print('not connected');
-      // setState(() {
       _hasInternetConnection = false;
-      // });
     }
   }
 
