@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/helpers/bulk_data_helper.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
+import 'package:magic_the_searching/widgets/app_drawer.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -122,7 +123,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _file = null;
   }
 
-  Future<void> onDBValueChange(bool newValue) async {
+  Future<void> changeUseLocalDB(bool newValue) async {
     final settings = Provider.of<Settings>(context, listen: false);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('useLocalDB', newValue);
@@ -136,6 +137,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> changeUseImagesFromNet(bool newValue) async {
+    final settings = Provider.of<Settings>(context, listen: false);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('useImagesFromNet', newValue);
+    settings.useImagesFromNet = newValue;
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<Settings>(context);
@@ -143,6 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool useLocalDB = settings.useLocalDB;
     bool canUpdateDB = settings.canUpdateDB;
     DateTime dbDate = settings.dbDate;
+    bool useImagesFromNet = settings.useImagesFromNet;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -153,6 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ? false
             : true,
       ),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           Column(
@@ -167,7 +177,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Switch(
                     value: useLocalDB,
                     onChanged: (newValue) {
-                      onDBValueChange(newValue);
+                      changeUseLocalDB(newValue);
+                    },
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Show Images (requires network connection)'),
+                  Switch(
+                    value: useImagesFromNet,
+                    onChanged: (newValue) {
+                      changeUseImagesFromNet(newValue);
                     },
                   ),
                 ],

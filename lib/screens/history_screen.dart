@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
+import 'package:magic_the_searching/widgets/app_drawer.dart';
 import 'package:provider/provider.dart';
 import '../providers/history.dart';
 
@@ -53,6 +54,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       appBar: AppBar(
         title: const Text('Your past searches'),
       ),
+      drawer: const AppDrawer(),
       body: !isInit
           ? const Center(
               child: CircularProgressIndicator(),

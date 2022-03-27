@@ -54,7 +54,7 @@ class CardDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final id = ModalRoute.of(context)?.settings.arguments as String;
+    final id = ModalRoute.of(context)?.settings.arguments as String? ?? '';
     final CardInfo cardInfo =
         Provider.of<CardDataProvider>(context, listen: false).getCardById(id);
     final mediaQuery = MediaQuery.of(context);
@@ -69,7 +69,8 @@ class CardDetailScreen extends StatelessWidget {
           getRefinedSearchButton(
             context,
             cardInfo,
-            DBHelper.getHistoryData,
+            // DBHelper.getHistoryData,
+            () {},
             ScryfallQueryMaps.languagesMap,
             'All Languages',
           ),
@@ -89,6 +90,7 @@ class CardDetailScreen extends StatelessWidget {
               'All Arts'),
         ],
       ),
+      // drawer: const AppDrawer(),
       body: SizedBox(
         height: mediaQuery.size.height,
         child: Card(
@@ -249,7 +251,7 @@ class CardDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // print(cardInfo.purchaseUris?.toJson());
-    print(cardInfo.toJson());
+    // print(cardInfo.toJson());
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -297,7 +299,7 @@ class CardDetails extends StatelessWidget {
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text('${cardInfo.purchaseUris?.tcgplayer}'),
+              // Text('${cardInfo.purchaseUris?.tcgplayer}'),
               getLinkButton('Scryfall', cardInfo.scryfallUri),
               getLinkButton('Cardmarket', cardInfo.purchaseUris?.cardmarket),
               getLinkButton('TCGPlayer', cardInfo.purchaseUris?.tcgplayer),

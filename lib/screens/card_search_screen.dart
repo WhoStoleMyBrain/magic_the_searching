@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/screens/settings_screen.dart';
+import 'package:magic_the_searching/widgets/app_drawer.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,6 +48,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
 
     return Scaffold(
       appBar: MyAppBar(),
+      drawer: const AppDrawer(),
       body: cardDataProvider.isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -147,17 +149,6 @@ class _MyAppBarState extends State<MyAppBar> {
             );
           },
         ),
-        IconButton(
-          icon: const Icon(Icons.settings),
-          onPressed: () {
-            Navigator.of(context).pushNamed(SettingsScreen.routeName);
-          },
-        ),
-        IconButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed(HistoryScreen.routeName);
-            },
-            icon: const Icon(Icons.history)),
       ],
     );
   }
