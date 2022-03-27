@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
 import 'package:url_launcher/url_launcher.dart' as url;
@@ -9,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart' as url;
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 
+import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import '../scryfall_api_json_serialization/image_uris.dart';
 
@@ -99,7 +99,15 @@ class CardDetailScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CardImageDisplay(cardInfo: cardInfo, mediaQuery: mediaQuery),
+                SizedBox(
+                    height:
+                        (mediaQuery.size.height - mediaQuery.padding.top - 30) -
+                            100 -
+                            32 -
+                            16,
+                    child: SingleChildScrollView(
+                        child: CardImageDisplay(
+                            cardInfo: cardInfo, mediaQuery: mediaQuery))),
                 CardDetails(textStyle: textStyle, cardInfo: cardInfo),
               ],
             ),
@@ -152,36 +160,55 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   late Image? _networkImage;
   late bool _hasInternetConnection;
 
-  Future<void> getLocalImage() async {
-    try {
-      final result = await InternetAddress.lookup('c1.scryfall.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
-                (widget.cardInfo.imageUris?.normal == null))
-            ? widget.cardInfo.cardFaces
-            : [widget.cardInfo.imageUris];
-        _networkImage = Image.network(
-          localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
-          fit: BoxFit.cover,
-        );
-        _hasInternetConnection = true;
+  Future<void> getLocalImage(Settings settings) async {
+    if (settings.useImagesFromNet) {
+      try {
+        final result = await InternetAddress.lookup('c1.scryfall.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
+                  (widget.cardInfo.imageUris?.normal == null))
+              ? widget.cardInfo.cardFaces
+              : [widget.cardInfo.imageUris];
+          _networkImage = Image.network(
+            localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
+            fit: BoxFit.cover,
+          );
+          _hasInternetConnection = true;
+        }
+      } on SocketException catch (_) {
+        _hasInternetConnection = false;
       }
-    } on SocketException catch (_) {
+    } else {
       _hasInternetConnection = false;
     }
   }
 
   Widget cardText() {
     return Card(
-        child: Padding(
+        child: Container(
+      height:
+          (widget.mediaQuery.size.height - widget.mediaQuery.padding.top - 30) -
+              100 -
+              32 -
+              16 - 32,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Text(widget.cardInfo.name ?? 'No name found for this card.'),
-          const SizedBox(
-            height: 10,
+          Text(
+            widget.cardInfo.name ?? 'No name found for this card.',
+            style: const TextStyle(
+              fontSize: 24,
+            ),
           ),
-          Text(widget.cardInfo.oracleText ?? 'No Oracle text found'),
+          const SizedBox(
+            height: 30,
+          ),
+          Text(
+            widget.cardInfo.oracleText ?? 'No Oracle text found',
+            style: const TextStyle(
+              fontSize: 16,
+            ),
+          ),
         ],
       ),
     ));
@@ -189,29 +216,33 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<Settings>(context, listen: true);
     return FutureBuilder(
-      future: getLocalImage(),
+      future: getLocalImage(settings),
       builder: (context, snapshot) {
         return Stack(
           children: [
             (snapshot.connectionState == ConnectionState.done)
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(15),
-                    child: _hasInternetConnection ? _networkImage : cardText(),
+                    child: (_hasInternetConnection && settings.useImagesFromNet)
+                        ? _networkImage
+                        : cardText(),
                   )
                 : const Center(
                     child: CircularProgressIndicator(),
                   ),
             if (widget.cardInfo.hasTwoSides &&
-                (widget.cardInfo.imageUris?.normal == null))
-              getFlipButton(),
+                (widget.cardInfo.imageUris?.normal == null) &&
+                settings.useImagesFromNet)
+              getFlipButton(settings),
           ],
         );
       },
     );
   }
 
-  Positioned getFlipButton() {
+  Positioned getFlipButton(Settings settings) {
     return Positioned(
       left: (widget.mediaQuery.size.width -
                   widget.mediaQuery.padding.horizontal) /
@@ -221,7 +252,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       child: MaterialButton(
         onPressed: () {
           setState(() {
-            getLocalImage();
+            getLocalImage(settings);
             _side == 0 ? _side = 1 : _side = 0;
           });
         },

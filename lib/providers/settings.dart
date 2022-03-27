@@ -10,7 +10,8 @@ class Settings with ChangeNotifier {
   DateTime dbDate;
   bool _useImagesFromNet;
 
-  Settings(this._useLocalDB, this._canUpdateDB, this.dbDate, this._useImagesFromNet);
+  Settings(
+      this._useLocalDB, this._canUpdateDB, this.dbDate, this._useImagesFromNet);
 
   set useLocalDB(bool newValue) {
     _useLocalDB = newValue;
@@ -43,8 +44,8 @@ class Settings with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     var dt = prefs.getString('dbUpdatedAt');
     // print(dt);
-    DateTime oldDBDate = DateTime.parse(
-        prefs.getString('dbUpdatedAt') ?? DateTime.parse("1969-07-20 20:18:04Z").toIso8601String());
+    DateTime oldDBDate = DateTime.parse(prefs.getString('dbUpdatedAt') ??
+        DateTime.parse("1969-07-20 20:18:04Z").toIso8601String());
     BulkData? bulkData = await BulkDataHelper.getBulkData();
     if (bulkData?.updatedAt
             .subtract(const Duration(days: 1))
@@ -55,8 +56,12 @@ class Settings with ChangeNotifier {
       canUpdateDB = true;
     }
     dbDate = oldDBDate;
-    // print('can Update: $canUpdateDB');
-    // print('Old db Date: $oldDBDate');
     notifyListeners();
+  }
+
+  Future<void> checkUseImagesFromNet() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool useImages = prefs.getBool('useImagesFromNet') ?? true;
+    useImagesFromNet = useImages;
   }
 }

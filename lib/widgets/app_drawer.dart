@@ -12,7 +12,7 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           AppBar(
-            title: const Text('Hello Friend!'),
+            title: const Text('Where do You want to go?'),
             automaticallyImplyLeading: false,
           ),
           const Divider(),
@@ -20,17 +20,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.search),
             title: const Text('Search'),
             onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed('/');
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(SettingsScreen.routeName);
+              Navigator.of(context).pushReplacementNamed('/');
             },
           ),
           const Divider(),
@@ -40,6 +30,15 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.of(context)
                   .pushReplacementNamed(HistoryScreen.routeName);
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+            onTap: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(SettingsScreen.routeName);
             },
           ),
         ],

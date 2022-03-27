@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
           create: (_) => InternetUsageHelper(),
         ),
         ChangeNotifierProvider(
-          create: (_) => Settings(false, false, DateTime.now(), false),
+          create: (_) => Settings(false, false, DateTime.now(), true),
         ),
       ],
       child: MaterialApp(

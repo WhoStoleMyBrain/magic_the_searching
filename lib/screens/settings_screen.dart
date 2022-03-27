@@ -137,6 +137,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> checkIfUseImagesFromNet(Settings settings) async {
+    if (!isInit) {
+      settings.checkUseImagesFromNet();
+      isInit = true;
+    }
+  }
+
   Future<void> changeUseImagesFromNet(bool newValue) async {
     final settings = Provider.of<Settings>(context, listen: false);
     final prefs = await SharedPreferences.getInstance();
@@ -148,6 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final settings = Provider.of<Settings>(context);
     checkIfCanUpdateDB(settings);
+    checkIfUseImagesFromNet(settings);
     bool useLocalDB = settings.useLocalDB;
     bool canUpdateDB = settings.canUpdateDB;
     DateTime dbDate = settings.dbDate;

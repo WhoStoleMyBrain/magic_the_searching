@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/screens/settings_screen.dart';
-import 'package:magic_the_searching/widgets/app_drawer.dart';
+
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,8 +9,8 @@ import '../helpers/search_start_helper.dart';
 import '../providers/handedness.dart';
 import '../providers/card_data_provider.dart';
 import '../providers/settings.dart';
-import '../screens/history_screen.dart';
 import '../widgets/card_display.dart' as card_display;
+import '../widgets/app_drawer.dart';
 
 enum HandedMode {
   left,

@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/settings.dart';
 import '../screens/card_detail_screen.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import '../scryfall_api_json_serialization/image_uris.dart';
@@ -8,10 +10,7 @@ import '../scryfall_api_json_serialization/image_uris.dart';
 class CardDisplay extends StatelessWidget {
   final CardInfo cardInfo;
 
-  const CardDisplay(
-      {Key? key,
-      required this.cardInfo})
-      : super(key: key);
+  const CardDisplay({Key? key, required this.cardInfo}) : super(key: key);
 
   void cardTapped(BuildContext ctx, String id) {
     Navigator.of(ctx).pushNamed(CardDetailScreen.routeName, arguments: id);
@@ -21,23 +20,31 @@ class CardDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return InkWell(
-        onTap: () {
-          cardTapped(context, cardInfo.id);
-        },
-        child: SingleChildScrollView(
-          child: SizedBox(
-            child: Card(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CardImageDisplay(cardInfo: cardInfo, mediaQuery: mediaQuery),
-                  CardPriceDisplay(cardInfo: cardInfo),
-                ],
+      onTap: () {
+        cardTapped(context, cardInfo.id);
+      },
+      child: SizedBox(
+        child: Card(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                // width: mediaQuery.size.width,
+                height: (mediaQuery.size.height - mediaQuery.padding.top - 30) /
+                        2 -
+                    100 -
+                    16 -
+                    16, // Size of whole card - size of text display - padding and insets.
+                child: SingleChildScrollView(
+                    child: CardImageDisplay(
+                        cardInfo: cardInfo, mediaQuery: mediaQuery)),
               ),
-            ),
+              CardPriceDisplay(cardInfo: cardInfo),
+            ],
           ),
         ),
+      ),
     );
   }
 }
@@ -55,6 +62,7 @@ class CardPriceDisplay extends StatelessWidget {
     return Material(
       elevation: 0,
       child: Container(
+        height: 100,
         padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -124,72 +132,83 @@ class CardImageDisplay extends StatefulWidget {
 }
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
+  // final _TotalTextSize = 0;
   int _side = 0;
   late Image _networkImage;
   late bool _hasInternetConnection;
 
-  Future<void> getLocalImage2() async {
-    CardImageDisplay.pictureLoaded = true;
-    List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
-            (widget.cardInfo.imageUris?.normal == null))
-        ? widget.cardInfo.cardFaces
-        : [widget.cardInfo.imageUris];
-    _networkImage = Image.network(
-      localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
-      fit: BoxFit.cover,
-      width: (widget.mediaQuery.size.width -
-              widget.mediaQuery.padding.horizontal) /
-          2,
-      height: (widget.mediaQuery.size.height / 3),
-    );
-  }
-
-  Future<void> getLocalImage() async {
-    try {
-      final result = await InternetAddress.lookup('c1.scryfall.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
-                (widget.cardInfo.imageUris?.normal == null))
-            ? widget.cardInfo.cardFaces
-            : [widget.cardInfo.imageUris];
-        _networkImage = Image.network(
-          localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
-          fit: BoxFit.cover,
-        );
-        _hasInternetConnection = true;
+  Future<void> getLocalImage(Settings settings) async {
+    if (settings.useImagesFromNet) {
+      try {
+        final result = await InternetAddress.lookup('c1.scryfall.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
+                  (widget.cardInfo.imageUris?.normal == null))
+              ? widget.cardInfo.cardFaces
+              : [widget.cardInfo.imageUris];
+          _networkImage = Image.network(
+            localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
+            height: (widget.mediaQuery.size.height -
+                        widget.mediaQuery.padding.top -
+                        30) /
+                    2 -
+                100 -
+                16 -
+                16,
+            fit: BoxFit.cover,
+          );
+          _hasInternetConnection = true;
+        }
+      } on SocketException catch (_) {
+        _hasInternetConnection = false;
       }
-    } on SocketException catch (_) {
+    } else {
       _hasInternetConnection = false;
     }
   }
 
   Widget cardText() {
+    // final mediaQuery = MediaQuery.of(context);
     return Card(
-        child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Text(widget.cardInfo.name ?? 'No name found for this card.'),
-          const SizedBox(
-            height: 10,
-          ),
-          Text(widget.cardInfo.oracleText ?? 'No Oracle text found'),
-        ],
+      child: Container(
+        // height: (mediaQuery.size.height - mediaQuery.padding.top - 15) / 2 - 100,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Center(
+                child: Text(
+              widget.cardInfo.name ?? 'No name found for this card.',
+              style: const TextStyle(
+                fontSize: 16,
+              ),
+            )),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              widget.cardInfo.oracleText ?? 'No Oracle text found',
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<Settings>(context, listen: true);
     return FutureBuilder(
-      future: getLocalImage(),
+      future: getLocalImage(settings),
       builder: (context, snapshot) {
         return Stack(
           children: [
             (snapshot.connectionState == ConnectionState.done)
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: _hasInternetConnection ? _networkImage : cardText(),
+                    child: (_hasInternetConnection && settings.useImagesFromNet)
+                        ? _networkImage
+                        : cardText(),
                   )
                 : SizedBox(
                     width: (widget.mediaQuery.size.width -
@@ -201,7 +220,8 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                     ),
                   ),
             if (widget.cardInfo.hasTwoSides &&
-                (widget.cardInfo.imageUris?.normal == null))
+                (widget.cardInfo.imageUris?.normal == null) &&
+                settings.useImagesFromNet)
               Positioned(
                 left: (widget.mediaQuery.size.width -
                             widget.mediaQuery.padding.horizontal) /
@@ -213,7 +233,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                   onPressed: () {
                     setState(() {
                       CardImageDisplay.pictureLoaded = false;
-                      getLocalImage();
+                      getLocalImage(settings);
                       _side == 0 ? _side = 1 : _side = 0;
                     });
                   },
