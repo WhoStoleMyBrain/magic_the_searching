@@ -10,11 +10,11 @@ CardInfo _$CardInfoFromJson(Map<String, dynamic> json) => CardInfo(
       id: json['id'] as String,
       name: json['name'] as String?,
       oracleId: json['oracle_id'] as String?,
-      oracleText: json['oracle_text'] as String?,
+      oracleText: oracleTextReadValue(json, 'oracleText') as String?,
       scryfallUri: json['scryfall_uri'] as String?,
       imageUris: json['image_uris'] == null
           ? null
-          : ImageLinks.fromJson(json['image_uris'] as Map<String, dynamic>),
+          : ImageUris.fromJson(json['image_uris'] as Map<String, dynamic>),
       cardFaces: cardFacesFromJson(json['card_faces'] as List?),
       prices: json['prices'] == null
           ? null
@@ -25,19 +25,19 @@ CardInfo _$CardInfoFromJson(Map<String, dynamic> json) => CardInfo(
               json['purchase_uris'] as Map<String, dynamic>),
       hasTwoSides: hasTwoSidesFromJson(
           hasTwoSidesReadValue(json, 'hasTwoSides') as List?),
-      dateTime: dateTimeFromJson(dateTimeReadValue(json, '') as List?),
+      dateTime: dateTimeFromJson(dateTimeReadValue(json, 'test') as List?),
     );
 
 Map<String, dynamic> _$CardInfoToJson(CardInfo instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'oracle_id': instance.oracleId,
-      'oracle_text': instance.oracleText,
+      'oracleText': instance.oracleText,
       'scryfall_uri': instance.scryfallUri,
       'image_uris': instance.imageUris?.toJson(),
       'prices': instance.prices?.toJson(),
       'purchase_uris': instance.purchaseUris?.toJson(),
       'hasTwoSides': hasTwoSidesToJson(instance.hasTwoSides),
       'card_faces': cardFacesToJson(instance.cardFaces),
-      '': dateTimeToJson(instance.dateTime),
+      'test': dateTimeToJson(instance.dateTime),
     };

@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/providers/history.dart';
 
 import '../helpers/internet_usage_helper.dart';
 import '../helpers/scryfall_request_handler.dart';
@@ -14,7 +13,6 @@ class CardDataProvider with ChangeNotifier {
   String column = 'searchText';
   bool isLoading = false;
   bool isStandardQuery = true;
-  late Function dbHelperFunction;
   Map<String, String> queryParameters = {};
 
   set cards(List<CardInfo> queryData) {
@@ -34,24 +32,13 @@ class CardDataProvider with ChangeNotifier {
   Future<bool> processQuery() async {
     isLoading = true;
     notifyListeners();
-    List<HistoryObject> historyData = await dbHelperFunction();
-    List<String> queries = historyData.map((e) => e.query).toList();
-    print(queries);
-    if (queries.contains(query) && false) {
-      // return _loadDataFromDB();
-    } else {
-      return _requestDataFromScryfall();
-    }
+    return _requestDataFromScryfall();
   }
 
   Future<bool> processQueryLocally() async {
     isLoading = true;
     notifyListeners();
-    List<HistoryObject> historyData = await dbHelperFunction();
-    List<String> queries = historyData.map((e) => e.query).toList();
-    print(queries);
     List<Map<String, dynamic>> dbResult = await DBHelper.getCardsByName(query);
-    print('dbResult: $dbResult');
     if (dbResult.isEmpty) {
       cards = [];
       return false;
@@ -64,57 +51,7 @@ class CardDataProvider with ChangeNotifier {
       DBHelper.insertIntoHistory(historyData);
     }
     cards = dbResult.map((e) => CardInfo.fromDB(e)).toList();
-    // return false;
     return true;
-  }
-
-  // Future<bool> _loadDataFromDB() async {
-  //   var dbData = {
-  //     'user_searches':
-  //         await DBHelper.getData('user_searches', 'searchText', query),
-  //     'search_images':
-  //         await DBHelper.getData('search_images', 'searchText', query),
-  //     'search_prices':
-  //         await DBHelper.getData('search_prices', 'searchText', query),
-  //   };
-  //   List<CardInfo> myData = [];
-  //   for (int i = 0; i < dbData['user_searches']!.length; i++) {
-  //     myData.add(CardInfo.fromJson(dbData));
-  //     // CardData.fromMap(
-  //     //   {
-  //     //     'user_searches': dbData['user_searches']?[i] ?? {},
-  //     //     'search_images': dbData['search_images']?[i] ?? {},
-  //     //     'search_prices': dbData['search_prices']?[i] ?? {},
-  //     //   },
-  //     // ),
-  //     // );
-  //   }
-  //   cards = myData;
-  //   return true;
-  // }
-
-  Future<void> internetUsage() async {
-    final internetUsageStats = InternetUsageHelper();
-    internetUsageStats.endDate = DateTime.now();
-    await internetUsageStats.updateInternetUsage();
-    const myPackageName = 'com.example.magic_the_searching';
-    print(DateTime.now());
-
-    final networkInfos = await internetUsageStats.networkInfos;
-    final double newBytesReceived = double.parse(networkInfos
-            .firstWhere((element) => element.packageName == myPackageName)
-            .rxTotalBytes ??
-        '');
-    final double newBytesTransferred = double.parse(networkInfos
-            .firstWhere((element) => element.packageName == myPackageName)
-            .txTotalBytes ??
-        '');
-    print('newMB-R: ${(newBytesReceived / 1024 / 1024).toStringAsFixed(0)}, '
-        'oldMB-R: ${(internetUsageStats.startBytesReceived / 1024 / 1024).toStringAsFixed(0)}, '
-        'difference: ${((newBytesReceived - internetUsageStats.startBytesReceived) / 1024 / 1024).toStringAsFixed(0)}');
-    print('newMB-T: ${(newBytesTransferred / 1024 / 1024).toStringAsFixed(0)}, '
-        'oldMB-T: ${(internetUsageStats.startBytesTransferred / 1024 / 1024).toStringAsFixed(0)}, '
-        'difference: ${((newBytesTransferred - internetUsageStats.startBytesTransferred) / 1024 / 1024).toStringAsFixed(0)}');
   }
 
   Future<bool> _requestDataFromScryfall() async {
@@ -124,24 +61,17 @@ class CardDataProvider with ChangeNotifier {
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     if (queryResult.isEmpty) {
-      print('request not successful');
       cards = [];
       return false;
     } else {
-      // List<Map<String, dynamic>> historyData = queryResult.map((e) => e.toDB()).toList();
-      // print(historyData);
       Map<String, dynamic> historyData = {
         'searchText': query,
         'matches': queryResult.length,
         'dateTime': DateTime.now().toIso8601String(),
       };
       DBHelper.insertIntoHistory(historyData);
-      // for (CardInfo card in queryResult) {
-      // await DBHelper.insertIntoCardDatabase(card.toDB());
-      // }
     }
     cards = queryResult;
-    // internetUsage();
     return true;
   }
 }

@@ -31,29 +31,23 @@ class ScryfallRequestHandler {
             : languages.length > 1
                 ? '(l:${languages.join(' or l:')}) !"$searchText"'
                 : 'l:${languages[0]} !"$searchText"';
-    print(searchText);
   }
 
   void setHttpsQuery(Map<String, String> queryMap, bool isStandardQuery) {
-    if (queryMap == ScryfallQueryMaps.languagesMap) {
-      if (!languages.contains('any')) {
-        languages.add('any');
-      }
+    if (queryMap == ScryfallQueryMaps.inEnglishMap) {
+      languages = ['en'];
     } else {
       languages.removeWhere((element) => element == 'any');
     }
     _configureSearchTextToScryfall(isStandardQuery);
     queryMap['q'] = searchText;
     query = Uri.https(apiBasePath, queryBaseString, queryMap).toString();
-    print(query);
-    print(queryMap);
   }
 
   Future<void> sendQueryRequest() async {
     final url = Uri.parse(query);
     try {
       final response = await http.get(url);
-
       responseData = json.decode(response.body);
       if (response.statusCode != 200) {}
     } catch (error) {}
@@ -61,13 +55,11 @@ class ScryfallRequestHandler {
 
   List<CardInfo> processQueryData() {
     final List<CardInfo> resultList = [];
-    print(responseData["data"]);
     if (responseData["data"] != null) {
       for (Map<String, dynamic> item in responseData["data"]) {
         resultList.add(CardInfo.fromJson(item));
       }
     } else {}
-    print(resultList);
     return resultList;
   }
 }

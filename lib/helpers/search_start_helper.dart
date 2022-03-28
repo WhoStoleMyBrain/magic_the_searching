@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:provider/provider.dart';
 
@@ -55,7 +54,6 @@ class SearchStartHelper {
     cardDataProvider.query = text;
     cardDataProvider.languages = languages;
     cardDataProvider.isStandardQuery = true;
-    cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
     if (settings.useLocalDB) {
       print('processing locally...');

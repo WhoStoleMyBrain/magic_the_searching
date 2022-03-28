@@ -38,11 +38,11 @@ class CardDetailScreen extends StatelessWidget {
   }
 
   Future<void> _startSearchForCards(BuildContext ctx, String text,
-      Function dbHelperFunction, Map<String, String> queryParameters) async {
+      Map<String, String> queryParameters) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     cardDataProvider.query = text;
     cardDataProvider.isStandardQuery = false;
-    cardDataProvider.dbHelperFunction = dbHelperFunction;
+    // cardDataProvider.dbHelperFunction = dbHelperFunction;
     cardDataProvider.queryParameters = queryParameters;
     bool requestSuccessful = await cardDataProvider.processQuery();
     if (!requestSuccessful) {
@@ -69,25 +69,13 @@ class CardDetailScreen extends StatelessWidget {
           getRefinedSearchButton(
             context,
             cardInfo,
-            // DBHelper.getHistoryData,
-            () {},
-            ScryfallQueryMaps.languagesMap,
-            'All Languages',
+            ScryfallQueryMaps.inEnglishMap,
+            'In English',
           ),
           getRefinedSearchButton(
-              context,
-              cardInfo,
-              // DBHelper.getVersionsOrPrintsData,
-              () {},
-              ScryfallQueryMaps.printsMap,
-              'All Prints'),
+              context, cardInfo, ScryfallQueryMaps.printsMap, 'All Prints'),
           getRefinedSearchButton(
-              context,
-              cardInfo,
-              // DBHelper.getVersionsOrPrintsData,
-              () {},
-              ScryfallQueryMaps.versionMap,
-              'All Arts'),
+              context, cardInfo, ScryfallQueryMaps.versionMap, 'All Arts'),
         ],
       ),
       // drawer: const AppDrawer(),
@@ -117,18 +105,13 @@ class CardDetailScreen extends StatelessWidget {
     );
   }
 
-  TextButton getRefinedSearchButton(
-      BuildContext context,
-      CardInfo cardInfo,
-      Function dbHelperFunction,
-      Map<String, String> queryMap,
-      String displayText) {
+  TextButton getRefinedSearchButton(BuildContext context, CardInfo cardInfo,
+      Map<String, String> queryMap, String displayText) {
     return TextButton(
       onPressed: () {
         _startSearchForCards(
           context,
           cardInfo.name ?? '',
-          dbHelperFunction,
           queryMap,
         );
       },
@@ -165,7 +148,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       try {
         final result = await InternetAddress.lookup('c1.scryfall.com');
         if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-          List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
+          List<ImageUris?>? localImages = (widget.cardInfo.hasTwoSides &&
                   (widget.cardInfo.imageUris?.normal == null))
               ? widget.cardInfo.cardFaces
               : [widget.cardInfo.imageUris];
@@ -190,9 +173,11 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           (widget.mediaQuery.size.height - widget.mediaQuery.padding.top - 30) -
               100 -
               32 -
-              16 - 32,
+              16 -
+              32,
       padding: const EdgeInsets.all(16.0),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             widget.cardInfo.name ?? 'No name found for this card.',

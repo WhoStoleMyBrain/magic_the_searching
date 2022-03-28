@@ -31,4 +31,13 @@ class Prices {
   /// to JSON. The implementation simply calls the private, generated
   /// helper method `_$UserToJson`.
   Map<String, dynamic> toJson() => _$PricesToJson(this);
+
+  factory Prices.fromDB(Map<String, dynamic>? dbData) {
+    return Prices(
+      usd: dbData?['usd'],
+      usdFoil: dbData?['usdFoil'],
+      eur: dbData?['eur'],
+      eurFoil: dbData?['eurFoil'],
+    );
+  }
 }

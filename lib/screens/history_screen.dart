@@ -39,7 +39,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     String searchText = history.data[index].query;
     cardDataProvider.query = searchText;
     cardDataProvider.isStandardQuery = true;
-    cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
+    // cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
     await cardDataProvider.processQuery();
     Navigator.of(context).pop();

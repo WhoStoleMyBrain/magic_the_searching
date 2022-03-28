@@ -6,7 +6,7 @@ part of 'image_uris.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ImageLinks _$ImageLinksFromJson(Map<String, dynamic> json) => ImageLinks(
+ImageUris _$ImageUrisFromJson(Map<String, dynamic> json) => ImageUris(
       png: json['png'] as String?,
       borderCrop: json['border_crop'] as String?,
       artCrop: json['art_crop'] as String?,
@@ -15,8 +15,7 @@ ImageLinks _$ImageLinksFromJson(Map<String, dynamic> json) => ImageLinks(
       small: json['small'] as String?,
     );
 
-Map<String, dynamic> _$ImageLinksToJson(ImageLinks instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$ImageUrisToJson(ImageUris instance) => <String, dynamic>{
       'png': instance.png,
       'border_crop': instance.borderCrop,
       'art_crop': instance.artCrop,

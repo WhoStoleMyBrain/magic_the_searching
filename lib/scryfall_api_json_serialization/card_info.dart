@@ -13,13 +13,13 @@ part 'card_info.g.dart';
 
 /// An annotation for the code generator to know that this class needs the
 /// JSON serialization logic to be generated.
-List<ImageLinks?>? cardFacesFromJson(List<dynamic>? json) {
-  List<ImageLinks?>? tmp = [];
+List<ImageUris?>? cardFacesFromJson(List<dynamic>? json) {
+  List<ImageUris?>? tmp = [];
   if (json != null) {
     for (Map<String, dynamic> element in json) {
       tmp.add(element['image_uris'] == null
           ? null
-          : ImageLinks.fromJson(element['image_uris'] as Map<String, dynamic>));
+          : ImageUris.fromJson(element['image_uris'] as Map<String, dynamic>));
     }
   } else {
     tmp = null;
@@ -27,7 +27,7 @@ List<ImageLinks?>? cardFacesFromJson(List<dynamic>? json) {
   return tmp;
 }
 
-List<ImageLinks?>? cardFacesFromDB(Map<String, dynamic> dbData) {
+List<ImageUris?>? cardFacesFromDB(Map<String, dynamic> dbData) {
   Map<String, dynamic> frontImages = {
     'normal': dbData['normalFront'],
     'small': dbData['smallFront']
@@ -36,10 +36,10 @@ List<ImageLinks?>? cardFacesFromDB(Map<String, dynamic> dbData) {
     'normal': dbData['normalBack'],
     'small': dbData['smallBack']
   };
-  return [ImageLinks.fromJson(frontImages), ImageLinks.fromJson(backImages)];
+  return [ImageUris.fromJson(frontImages), ImageUris.fromJson(backImages)];
 }
 
-Map<String, dynamic> cardFacesToJson(List<ImageLinks?>? instance) {
+Map<String, dynamic> cardFacesToJson(List<ImageUris?>? instance) {
   Map<String, dynamic> returnValue = {};
   returnValue['card_faces'] = instance?.map((e) => e?.toJson());
   return returnValue;
@@ -64,8 +64,6 @@ List<dynamic>? hasTwoSidesReadValue(
         ];
 }
 
-//dateTime
-
 DateTime dateTimeFromJson(List<dynamic>? json) {
   return DateTime.parse(json?[0]);
 }
@@ -78,6 +76,20 @@ List<dynamic>? dateTimeReadValue(
     Map<dynamic, dynamic>? json, String parameterName) {
   return [DateTime.now().toIso8601String()];
 }
+
+String? oracleTextReadValue(Map<dynamic, dynamic>? json, String parameterName) {
+  return (json?['card_faces'] == null)
+      ? (json?['oracle_text'] == null)
+          ? null
+          : json!['oracle_text']
+      : json?['card_faces'].map((e) => e['oracle_text']).join('\n');
+  // : json?['card_faces'].join('\n');
+  // return json;
+}
+
+// String? oracleTextFromJson(Map<String, dynamic>? json) {
+//   return (json?['card_faces'] == null) ? json!['oracle_text'] : json?['card_faces'].join('\n');
+// }
 
 @JsonSerializable(
     explicitToJson:
@@ -106,11 +118,12 @@ class CardInfo {
   String? name;
   @JsonKey(name: 'oracle_id')
   String? oracleId;
-  @JsonKey(name: 'oracle_text')
+  // @JsonKey(name: 'oracle_text')
+  @JsonKey(name: 'oracleText', readValue: oracleTextReadValue)
   String? oracleText;
   @JsonKey(name: 'scryfall_uri')
   String? scryfallUri;
-  ImageLinks? imageUris;
+  ImageUris? imageUris;
   Prices? prices;
   @JsonKey(name: 'purchase_uris')
   PurchaseUris? purchaseUris;
@@ -122,9 +135,9 @@ class CardInfo {
       toJson: hasTwoSidesToJson)
   bool hasTwoSides; // Can I even add this here?
   @JsonKey(fromJson: cardFacesFromJson, toJson: cardFacesToJson)
-  List<ImageLinks?>? cardFaces;
+  List<ImageUris?>? cardFaces;
   @JsonKey(
-      name: '',
+      name: 'test',
       readValue: dateTimeReadValue,
       fromJson: dateTimeFromJson,
       toJson: dateTimeToJson)
@@ -148,17 +161,20 @@ class CardInfo {
         oracleId: dbData['card_info']['oracleId'] as String?,
         oracleText: dbData['card_info']['oracleText'] as String?,
         scryfallUri: dbData['card_info']['scryfallUri'] as String?,
-        imageUris: dbData['image_uris'] == null
-            ? null
-            : ImageLinks.fromJson(dbData['image_uris'] as Map<String, dynamic>),
+        imageUris: ImageUris.fromDB(dbData['image_uris']),
+        // imageUris: dbData['image_uris'] == null
+        //     ? null
+        //     : ImageUris.fromJson(dbData['image_uris'] as Map<String, dynamic>),
         cardFaces: cardFacesFromDB(dbData['card_faces']),
-        prices: dbData['prices'] == null
-            ? null
-            : Prices.fromJson(dbData['prices'] as Map<String, dynamic>),
-        purchaseUris: dbData['purchase_uris'] == null
-            ? null
-            : PurchaseUris.fromJson(
-                dbData['purchase_uris'] as Map<String, dynamic>),
+        prices: Prices.fromDB(dbData['prices']),
+        // prices: dbData['prices'] == null
+        //     ? null
+        //     : Prices.fromJson(dbData['prices'] as Map<String, dynamic>),
+        purchaseUris: PurchaseUris.fromDB(dbData['purchase_uris']),
+        // purchaseUris: dbData['purchase_uris'] == null
+        //     ? null
+        //     : PurchaseUris.fromJson(
+        //         dbData['purchase_uris'] as Map<String, dynamic>),
         hasTwoSides: dbData['card_info']['hasTwoSides'] == 0 ? false : true,
         dateTime: DateTime.parse(dbData['card_info']['dateTime'] as String));
   }
@@ -195,7 +211,7 @@ class CardInfo {
       },
       'purchase_uris': {
         'id': id,
-        'tcgPlayer': purchaseUris?.tcgplayer,
+        'tcgplayer': purchaseUris?.tcgplayer,
         'cardmarket': purchaseUris?.cardmarket,
       }
     };

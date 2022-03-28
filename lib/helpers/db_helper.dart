@@ -26,7 +26,7 @@ class DBHelper {
       await db.execute(
           'CREATE TABLE prices(id TEXT UNIQUE PRIMARY KEY, usd TEXT, usdFoil TEXT, eur TEXT, eurFoil TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
       await db.execute(
-          'CREATE TABLE purchase_uris(id TEXT UNIQUE PRIMARY KEY, tcgPlayer TEXT, cardmarket TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
+          'CREATE TABLE purchase_uris(id TEXT UNIQUE PRIMARY KEY, tcgplayer TEXT, cardmarket TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
     }, version: 1);
   }
 

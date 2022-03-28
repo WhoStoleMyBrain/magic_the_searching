@@ -13,8 +13,8 @@ class PurchaseUris {
   PurchaseUris({
     required this.tcgplayer,
     required this.cardmarket,
-
   });
+
   // @JsonKey(name: 'tcgplayer')
   String? tcgplayer;
   String? cardmarket;
@@ -29,4 +29,11 @@ class PurchaseUris {
   /// to JSON. The implementation simply calls the private, generated
   /// helper method `_$UserToJson`.
   Map<String, dynamic> toJson() => _$PurchaseUrisToJson(this);
+
+  factory PurchaseUris.fromDB(Map<String, dynamic>? dbData) {
+    return PurchaseUris(
+      tcgplayer: dbData?['tcgplayer'],
+      cardmarket: dbData?['cardmarket'],
+    );
+  }
 }

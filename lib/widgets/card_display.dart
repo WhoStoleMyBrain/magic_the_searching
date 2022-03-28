@@ -24,6 +24,7 @@ class CardDisplay extends StatelessWidget {
         cardTapped(context, cardInfo.id);
       },
       child: SizedBox(
+        // height: mediaQuery.size.height,
         child: Card(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -142,7 +143,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       try {
         final result = await InternetAddress.lookup('c1.scryfall.com');
         if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-          List<ImageLinks?>? localImages = (widget.cardInfo.hasTwoSides &&
+          List<ImageUris?>? localImages = (widget.cardInfo.hasTwoSides &&
                   (widget.cardInfo.imageUris?.normal == null))
               ? widget.cardInfo.cardFaces
               : [widget.cardInfo.imageUris];
@@ -168,12 +169,17 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   }
 
   Widget cardText() {
-    // final mediaQuery = MediaQuery.of(context);
+    final mediaQuery = MediaQuery.of(context);
     return Card(
       child: Container(
-        // height: (mediaQuery.size.height - mediaQuery.padding.top - 15) / 2 - 100,
+        height: (mediaQuery.size.height - mediaQuery.padding.top - 30) /
+          2 -
+          100 -
+          16 -
+          32 + 8,
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Center(
                 child: Text(
@@ -228,7 +234,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                         2 /
                         2 -
                     50,
-                top: (widget.mediaQuery.size.height / 3) - 50 - 10,
+                top: (widget.mediaQuery.size.height / 3) - 50 - 10 - 15,
                 child: MaterialButton(
                   onPressed: () {
                     setState(() {
@@ -239,10 +245,10 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                   },
                   child: const Icon(
                     Icons.compare_arrows,
-                    size: 35,
+                    size: 30,
                     color: Colors.black87,
                   ),
-                  height: 50,
+                  height: 45,
                   shape: const CircleBorder(),
                   color: const Color.fromRGBO(128, 128, 128, 0.5),
                 ),
