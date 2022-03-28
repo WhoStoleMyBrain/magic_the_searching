@@ -104,6 +104,7 @@ class CardInfo {
     required this.name,
     required this.oracleId,
     required this.oracleText,
+    required this.setName,
     required this.scryfallUri,
     required this.imageUris,
     required this.cardFaces,
@@ -121,6 +122,7 @@ class CardInfo {
   // @JsonKey(name: 'oracle_text')
   @JsonKey(name: 'oracleText', readValue: oracleTextReadValue)
   String? oracleText;
+  String? setName;
   @JsonKey(name: 'scryfall_uri')
   String? scryfallUri;
   ImageUris? imageUris;
@@ -160,6 +162,7 @@ class CardInfo {
         name: dbData['card_info']['name'] as String?,
         oracleId: dbData['card_info']['oracleId'] as String?,
         oracleText: dbData['card_info']['oracleText'] as String?,
+        setName: dbData['card_info']['setName'] as String?,
         scryfallUri: dbData['card_info']['scryfallUri'] as String?,
         imageUris: ImageUris.fromDB(dbData['image_uris']),
         // imageUris: dbData['image_uris'] == null
@@ -186,6 +189,7 @@ class CardInfo {
         'name': name,
         'oracleId': oracleId,
         'oracleText': oracleText,
+        'setName': setName,
         'scryfallUri': scryfallUri,
         'hasTwoSides': hasTwoSides ? 1 : 0,
         'dateTime': dateTime.toIso8601String(),

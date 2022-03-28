@@ -86,7 +86,8 @@ class HelpScreen extends StatelessWidget {
                       },
                   ),
                   const TextSpan(
-                    text: '\nIf you use the Scryfall API you can use the same syntax that scryfall uses. Therefore you can also search for creature types (e.g. \'t:goblin\') '
+                    text:
+                        '\nIf you use the Scryfall API you can use the same syntax that scryfall uses. Therefore you can also search for creature types (e.g. \'t:goblin\') '
                         'or any other search criterion Scryfall allows. For more information, click here: ',
                     style: TextStyle(fontSize: 14, color: Colors.black),
                   ),
@@ -97,8 +98,7 @@ class HelpScreen extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        url.launch(
-                            'https://scryfall.com/docs/syntax');
+                        url.launch('https://scryfall.com/docs/syntax');
                       },
                   ),
                 ],
@@ -133,7 +133,8 @@ class AllHelpMessages {
   static HelpMessage localDB = HelpMessage(
       title: 'What does the switch \'Use local DB\' do?',
       message:
-          'After having downloaded the data from Scryfall the local DB is searched instead of requesting data from Scryfall.');
+          'After having downloaded the data from Scryfall the local DB is searched instead of requesting data from Scryfall. '
+              'Please note, that while using the local database, you do not necessarily need an internet connection, the provided data might not be up to date and not reflect the current price of any card.');
   static HelpMessage downloadDB = HelpMessage(
       title: 'What does \'Refresh local DB\' do?',
       message:
@@ -143,7 +144,9 @@ class AllHelpMessages {
   static HelpMessage showImages = HelpMessage(
       title: 'What does the switch \'Show Images\' do?',
       message: 'If switched on, images of the found cards are displayed.\n'
-          'If switched off, instead of an image only the title, oracle text and set name will be displayed instead. This is intended to reduce mobile data usage.');
+          'If switched off, instead of an image only the title, oracle text and set name will be displayed instead. This is intended to reduce mobile data usage.'
+          'Please note, that for cards from specific sets or special artworks, the correct identification without image is almost impossible. '
+          'Nevertheless, this can still give a rough estimate on what you can expect. ');
   static HelpMessage cardNotFound = HelpMessage(
       title: 'My card is not found. What can I do?',
       message:

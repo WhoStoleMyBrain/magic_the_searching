@@ -18,7 +18,7 @@ class DBHelper {
     return sql.openDatabase(path.join(dbPath, 'cardDatabase.db'),
         onCreate: (db, version) async {
       await db.execute(
-          'CREATE TABLE card_info(id TEXT UNIQUE PRIMARY KEY, name TEXT, oracleId TEXT, oracleText TEXT, scryfallUri TEXT, hasTwoSides INTEGER, dateTime DATETIME);');
+          'CREATE TABLE card_info(id TEXT UNIQUE PRIMARY KEY, name TEXT, oracleId TEXT, oracleText TEXT, setName TEXT, scryfallUri TEXT, hasTwoSides INTEGER, dateTime DATETIME);');
       await db.execute(
           'CREATE TABLE image_uris(id TEXT UNIQUE PRIMARY KEY, normal TEXT, small TEXT, FOREIGN KEY(id) REFERENCES card_info(id));');
       await db.execute(
