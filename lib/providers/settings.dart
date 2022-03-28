@@ -54,7 +54,7 @@ class Settings with ChangeNotifier {
         (bulkData?.updatedAt != oldDBDate)) {
       canUpdateDB = true;
     } else {
-      canUpdateDB = true;
+      canUpdateDB = false;
     }
     dbDate = oldDBDate;
     notifyListeners();

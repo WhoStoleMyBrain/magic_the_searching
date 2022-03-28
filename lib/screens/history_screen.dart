@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 import 'package:magic_the_searching/widgets/app_drawer.dart';
@@ -42,7 +41,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
     await cardDataProvider.processQuery();
-    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacementNamed('/');
   }
 
   @override

@@ -62,4 +62,24 @@ class ScryfallRequestHandler {
     } else {}
     return resultList;
   }
+
+  Future<List<CardInfo>> getDataEndOfScroll() async {
+    print(responseData);
+    final String? uriNextPage = responseData['next_page'];
+    final url = Uri.parse(uriNextPage ?? '');
+    try {
+      print('url: $url');
+      final response = await http.get(url);
+      print('response: $response');
+      responseData = json.decode(response.body);
+      if (response.statusCode != 200) {}
+    } catch (error) {}
+    final List<CardInfo> resultList = [];
+    if (responseData["data"] != null) {
+      for (Map<String, dynamic> item in responseData["data"]) {
+        resultList.add(CardInfo.fromJson(item));
+      }
+    } else {}
+    return resultList;
+  }
 }

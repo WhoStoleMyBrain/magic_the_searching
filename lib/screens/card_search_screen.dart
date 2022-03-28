@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/process_image_taking.dart';
 import '../helpers/search_start_helper.dart';
-import '../providers/handedness.dart';
 import '../providers/card_data_provider.dart';
 import '../providers/settings.dart';
 import '../widgets/card_display.dart' as card_display;
@@ -24,6 +23,10 @@ class CardSearchScreen extends StatefulWidget {
 }
 
 class _CardSearchScreenState extends State<CardSearchScreen> {
+  ScrollController _controller =
+      ScrollController(); //todo maybe change this again to late
+  bool endOfScrollReached = false;
+
   Future<void> getUseLocalDB() async {
     final prefs = await SharedPreferences.getInstance();
     final settings = Provider.of<Settings>(context, listen: false);
@@ -37,13 +40,34 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       getUseLocalDB();
     });
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.removeListener(_scrollListener);
+    _controller.dispose();
+  }
+
+  _scrollListener() {
+    if (_controller.offset >= _controller.position.maxScrollExtent &&
+        !_controller.position.outOfRange) {
+      loadDataAtEndOfScroll();
+    }
+  }
+
+  Future<void> loadDataAtEndOfScroll() async {
+    final cardDataProvider =
+        Provider.of<CardDataProvider>(context, listen: false);
+    await cardDataProvider.requestDataAtEndOfScroll();
   }
 
   @override
   Widget build(BuildContext context) {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
     final mediaQuery = MediaQuery.of(context);
-
     return Scaffold(
       appBar: MyAppBar(),
       drawer: const AppDrawer(),
@@ -62,14 +86,14 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   GridView myGridView(
       MediaQueryData mediaQuery, CardDataProvider cardDataProvider) {
     return GridView.builder(
-      key: UniqueKey(),
+      controller: _controller,
+      // key: UniqueKey(),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
         mainAxisExtent:
-            // (mediaQuery.size.height - mediaQuery.padding.top - 35) / 2,
             (mediaQuery.size.height - mediaQuery.padding.top - 15) / 2,
       ),
       itemCount: cardDataProvider.cards.length,
@@ -120,7 +144,6 @@ class _MyAppBarState extends State<MyAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final handednessProvider = Provider.of<Handedness>(context, listen: false);
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: false);
     setTitle();
@@ -135,19 +158,6 @@ class _MyAppBarState extends State<MyAppBar> {
               'No search performed yet',
               style: TextStyle(fontSize: 18),
             ),
-      // actions: [
-      //   Switch(
-      //     value: handedMode,
-      //     onChanged: (value) {
-      //       setState(
-      //         () {
-      //           handedMode = value;
-      //           handednessProvider.handedness = value;
-      //         },
-      //       );
-      //     },
-      //   ),
-      // ],
     );
   }
 }

@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../providers/card_data_provider.dart';
 import '../providers/settings.dart';
 import '../widgets/enter_search_term.dart';
-import '../widgets/card_display.dart';
 
 class SearchStartHelper {
   static void startEnterSearchTerm(BuildContext ctx) {
@@ -50,7 +49,6 @@ class SearchStartHelper {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     final settings = Provider.of<Settings>(ctx, listen: false);
     bool requestSuccessful;
-    CardImageDisplay.pictureLoaded = false;
     cardDataProvider.query = text;
     cardDataProvider.languages = languages;
     cardDataProvider.isStandardQuery = true;

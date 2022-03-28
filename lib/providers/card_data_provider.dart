@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../helpers/internet_usage_helper.dart';
 import '../helpers/scryfall_request_handler.dart';
 import '../helpers/db_helper.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
@@ -15,6 +14,7 @@ class CardDataProvider with ChangeNotifier {
   bool isStandardQuery = true;
   bool hasMore = false;
   Map<String, String> queryParameters = {};
+  late ScryfallRequestHandler scryfallRequestHandler;
 
   set cards(List<CardInfo> queryData) {
     _cards = queryData;
@@ -56,7 +56,7 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<bool> _requestDataFromScryfall() async {
-    final scryfallRequestHandler =
+    scryfallRequestHandler =
         ScryfallRequestHandler(searchText: query, languages: languages);
     scryfallRequestHandler.setHttpsQuery(queryParameters, isStandardQuery);
     await scryfallRequestHandler.sendQueryRequest();
@@ -65,6 +65,7 @@ class CardDataProvider with ChangeNotifier {
       cards = [];
       return false;
     } else {
+      hasMore = scryfallRequestHandler.responseData['has_more'];
       Map<String, dynamic> historyData = {
         'searchText': query,
         'matches': queryResult.length,
@@ -74,5 +75,16 @@ class CardDataProvider with ChangeNotifier {
     }
     cards = queryResult;
     return true;
+  }
+
+  Future<void> requestDataAtEndOfScroll() async {
+    if (hasMore) {
+      final List<CardInfo> response =
+          await scryfallRequestHandler.getDataEndOfScroll().whenComplete(() {
+        hasMore = scryfallRequestHandler.responseData['has_more'];
+      });
+      _cards.addAll(response);
+      notifyListeners();
+    }
   }
 }
