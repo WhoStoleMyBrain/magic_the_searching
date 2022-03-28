@@ -177,7 +177,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
               32,
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             widget.cardInfo.name ?? 'No name found for this card.',

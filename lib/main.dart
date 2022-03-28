@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/internet_usage_helper.dart';
 import 'package:magic_the_searching/providers/settings.dart';
+import 'package:magic_the_searching/screens/help_screen.dart';
 import 'package:magic_the_searching/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -62,6 +63,7 @@ class MyApp extends StatelessWidget {
           CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),
           HistoryScreen.routeName: (ctx) => const HistoryScreen(),
           SettingsScreen.routeName: (ctx) => const SettingsScreen(),
+          HelpScreen.routeName: (ctx) => const HelpScreen(),
         },
         home: const CardSearchScreen(),
       ),

@@ -187,7 +187,7 @@ class CardInfo {
         'oracleId': oracleId,
         'oracleText': oracleText,
         'scryfallUri': scryfallUri,
-        'hasTwoSides': hasTwoSides,
+        'hasTwoSides': hasTwoSides ? 1 : 0,
         'dateTime': dateTime.toIso8601String(),
       },
       'image_uris': {

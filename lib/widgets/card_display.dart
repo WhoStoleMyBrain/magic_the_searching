@@ -177,25 +177,27 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           100 -
           16 -
           32 + 8,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Center(
-                child: Text(
-              widget.cardInfo.name ?? 'No name found for this card.',
-              style: const TextStyle(
-                fontSize: 16,
+        padding: const EdgeInsets.all(12.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Center(
+                  child: Text(
+                widget.cardInfo.name ?? 'No name found for this card.',
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              )),
+              const SizedBox(
+                height: 10,
               ),
-            )),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              widget.cardInfo.oracleText ?? 'No Oracle text found',
-              style: const TextStyle(fontSize: 12),
-            ),
-          ],
+              Text(
+                widget.cardInfo.oracleText ?? 'No Oracle text found',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
         ),
       ),
     );

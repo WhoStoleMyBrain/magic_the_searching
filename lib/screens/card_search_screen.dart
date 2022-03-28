@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -136,19 +135,19 @@ class _MyAppBarState extends State<MyAppBar> {
               'No search performed yet',
               style: TextStyle(fontSize: 18),
             ),
-      actions: [
-        Switch(
-          value: handedMode,
-          onChanged: (value) {
-            setState(
-              () {
-                handedMode = value;
-                handednessProvider.handedness = value;
-              },
-            );
-          },
-        ),
-      ],
+      // actions: [
+      //   Switch(
+      //     value: handedMode,
+      //     onChanged: (value) {
+      //       setState(
+      //         () {
+      //           handedMode = value;
+      //           handednessProvider.handedness = value;
+      //         },
+      //       );
+      //     },
+      //   ),
+      // ],
     );
   }
 }
@@ -161,24 +160,22 @@ class MyFloatingActionButtons extends StatefulWidget {
 }
 
 class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
-  bool isBusy = false;
+  // bool isBusy = false;
 
-  @override
-  void dispose() async {
-    super.dispose();
-  }
+  // @override
+  // void dispose() async {
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final handednessProvider = Provider.of<Handedness>(context);
+    // final handednessProvider = Provider.of<Handedness>(context);
     return Container(
-      padding: handednessProvider.handedness
-          ? const EdgeInsets.symmetric(horizontal: 70, vertical: 0)
-          : const EdgeInsets.symmetric(horizontal: 90, vertical: 0),
+      // padding: handednessProvider.handedness
+      //     ? const EdgeInsets.symmetric(horizontal: 70, vertical: 0)
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
       child: Row(
-        mainAxisAlignment: handednessProvider.handedness
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
             padding: const EdgeInsets.all(5.0),
