@@ -43,6 +43,7 @@ dependencies:
   google_ml_kit: ^0.7.3
   url_launcher: ^6.0.20
   json_annotation: ^4.4.0
+  flutter_cache_manager: ^3.3.0
 
 
 dev_dependencies:
