@@ -242,8 +242,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ElevatedButton(
                     onPressed: canUpdateDB
                         ? () {
-                            handleBulkData().whenComplete(
-                                () => settings.checkCanUpdateDB());
+                            handleBulkData().whenComplete(() => setState(() {
+                                  settings.checkCanUpdateDB();
+                                }));
                           }
                         : null,
                     child: canUpdateDB

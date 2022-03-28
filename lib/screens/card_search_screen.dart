@@ -24,7 +24,7 @@ class CardSearchScreen extends StatefulWidget {
 
 class _CardSearchScreenState extends State<CardSearchScreen> {
   ScrollController _controller =
-      ScrollController(); //todo maybe change this again to late
+      ScrollController();
   bool endOfScrollReached = false;
 
   Future<void> getUseLocalDB() async {

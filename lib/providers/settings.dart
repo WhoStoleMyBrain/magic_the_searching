@@ -42,8 +42,6 @@ class Settings with ChangeNotifier {
 
   Future<void> checkCanUpdateDB() async {
     final prefs = await SharedPreferences.getInstance();
-    var dt = prefs.getString('dbUpdatedAt');
-    // print(dt);
     DateTime oldDBDate = DateTime.parse(prefs.getString('dbUpdatedAt') ??
         DateTime.parse("1969-07-20 20:18:04Z").toIso8601String());
     BulkData? bulkData = await BulkDataHelper.getBulkData();

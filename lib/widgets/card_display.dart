@@ -25,19 +25,14 @@ class CardDisplay extends StatelessWidget {
         cardTapped(context, cardInfo.id);
       },
       child: SizedBox(
-        // height: mediaQuery.size.height,
         child: Card(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                // width: mediaQuery.size.width,
-                height: (mediaQuery.size.height - mediaQuery.padding.top - 30) /
-                        2 -
-                    100 -
-                    16 -
-                    16, // Size of whole card - size of text display - padding and insets.
+                width: mediaQuery.size.width,
                 child: SingleChildScrollView(
                     child: CardImageDisplay(
                         cardInfo: cardInfo, mediaQuery: mediaQuery)),
@@ -64,9 +59,10 @@ class CardPriceDisplay extends StatelessWidget {
     return Material(
       elevation: 0,
       child: Container(
-        height: 100,
+        height: 90,
         padding: const EdgeInsets.all(8.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
@@ -77,6 +73,7 @@ class CardPriceDisplay extends StatelessWidget {
               ],
             ),
             const Divider(
+              height: 5,
               color: Colors.black,
               thickness: 1,
             ),
@@ -135,7 +132,7 @@ class CardImageDisplay extends StatefulWidget {
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
-  late Image _networkImageStream;
+  late Image? _networkImageStream;
   late bool _hasInternetConnection = true;
   late Stream<FileResponse> fileStream;
 
@@ -148,40 +145,34 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       fileStream = DefaultCacheManager().getImageFile(
           localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''));
       _hasInternetConnection = true;
+      return fileStream;
     }
-    return fileStream;
+    return null;
   }
 
   Widget cardText() {
-    final mediaQuery = MediaQuery.of(context);
-    return Card(
-      child: Container(
-        height: (mediaQuery.size.height - mediaQuery.padding.top - 30) / 2 -
-            100 -
-            16 -
-            32 +
-            8,
-        padding: const EdgeInsets.all(12.0),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Center(
-                  child: Text(
-                widget.cardInfo.name ?? 'No name found for this card.',
-                style: const TextStyle(
-                  fontSize: 16,
-                ),
-              )),
-              const SizedBox(
-                height: 10,
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Center(
+                child: Text(
+              widget.cardInfo.name ?? 'No name found for this card.',
+              style: const TextStyle(
+                fontSize: 16,
               ),
-              Text(
-                widget.cardInfo.oracleText ?? 'No Oracle text found',
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
-          ),
+            )),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              widget.cardInfo.oracleText ?? 'No Oracle text found',
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
         ),
       ),
     );
@@ -193,29 +184,25 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),
       builder: (context, snapshot) {
-        if (!(snapshot.hasError ||
-            (!snapshot.hasData || snapshot.data is DownloadProgress))) {
+        if (!(snapshot.hasError) &&
+            (snapshot.hasData || snapshot.data is DownloadProgress) &&
+            settings.useImagesFromNet) {
           FileInfo fileInfo = snapshot.data as FileInfo;
           _networkImageStream = Image.file(
             File(
               fileInfo.file.path,
             ),
-            height: (widget.mediaQuery.size.height -
-                        widget.mediaQuery.padding.top -
-                        30) /
-                    2 -
-                100 -
-                16 -
-                16,
             fit: BoxFit.cover,
           );
         }
         if (snapshot.hasError) {
+          _networkImageStream = null;
           _hasInternetConnection = false;
         }
         return Stack(
           children: [
-            (snapshot.connectionState == ConnectionState.done)
+            (snapshot.connectionState == ConnectionState.done ||
+                    !settings.useImagesFromNet)
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: (_hasInternetConnection && settings.useImagesFromNet)

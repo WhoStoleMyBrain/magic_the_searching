@@ -139,7 +139,7 @@ class CardImageDisplay extends StatefulWidget {
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
-  late Image _networkImageStream;
+  late Image? _networkImageStream;
   late bool _hasInternetConnection = true;
   late Stream<FileResponse> fileStream;
 
@@ -152,8 +152,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       fileStream = DefaultCacheManager().getImageFile(
           localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''));
       _hasInternetConnection = true;
+      return fileStream;
     }
-    return fileStream;
+    return null;
   }
 
   Widget cardText() {
@@ -195,8 +196,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),
       builder: (context, snapshot) {
-        if (!(snapshot.hasError ||
-            (!snapshot.hasData || snapshot.data is DownloadProgress))) {
+        if (!(snapshot.hasError) &&
+            (snapshot.hasData || snapshot.data is DownloadProgress) &&
+            settings.useImagesFromNet) {
           FileInfo fileInfo = snapshot.data as FileInfo;
           _networkImageStream = Image.file(
             File(
@@ -206,11 +208,13 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           );
         }
         if (snapshot.hasError) {
+          _networkImageStream = null;
           _hasInternetConnection = false;
         }
         return Stack(
           children: [
-            (snapshot.connectionState == ConnectionState.done)
+            (snapshot.connectionState == ConnectionState.done ||
+                    !settings.useImagesFromNet)
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: (_hasInternetConnection && settings.useImagesFromNet)
