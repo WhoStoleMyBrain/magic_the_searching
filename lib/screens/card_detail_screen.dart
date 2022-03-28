@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
 import 'package:url_launcher/url_launcher.dart' as url;
@@ -42,7 +43,6 @@ class CardDetailScreen extends StatelessWidget {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     cardDataProvider.query = text;
     cardDataProvider.isStandardQuery = false;
-    // cardDataProvider.dbHelperFunction = dbHelperFunction;
     cardDataProvider.queryParameters = queryParameters;
     bool requestSuccessful = await cardDataProvider.processQuery();
     if (!requestSuccessful) {
@@ -78,7 +78,6 @@ class CardDetailScreen extends StatelessWidget {
               context, cardInfo, ScryfallQueryMaps.versionMap, 'All Arts'),
         ],
       ),
-      // drawer: const AppDrawer(),
       body: SizedBox(
         height: mediaQuery.size.height,
         child: Card(
@@ -140,30 +139,21 @@ class CardImageDisplay extends StatefulWidget {
 
 class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
-  late Image? _networkImage;
-  late bool _hasInternetConnection;
+  late Image _networkImageStream;
+  late bool _hasInternetConnection = true;
+  late Stream<FileResponse> fileStream;
 
-  Future<void> getLocalImage(Settings settings) async {
+  Stream<FileResponse>? getLocalImage(Settings settings) {
     if (settings.useImagesFromNet) {
-      try {
-        final result = await InternetAddress.lookup('c1.scryfall.com');
-        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-          List<ImageUris?>? localImages = (widget.cardInfo.hasTwoSides &&
-                  (widget.cardInfo.imageUris?.normal == null))
-              ? widget.cardInfo.cardFaces
-              : [widget.cardInfo.imageUris];
-          _networkImage = Image.network(
-            localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''),
-            fit: BoxFit.cover,
-          );
-          _hasInternetConnection = true;
-        }
-      } on SocketException catch (_) {
-        _hasInternetConnection = false;
-      }
-    } else {
-      _hasInternetConnection = false;
+      List<ImageUris?>? localImages = (widget.cardInfo.hasTwoSides &&
+              (widget.cardInfo.imageUris?.normal == null))
+          ? widget.cardInfo.cardFaces
+          : [widget.cardInfo.imageUris];
+      fileStream = DefaultCacheManager().getImageFile(
+          localImages?[_side]?.normal ?? (localImages?[_side]?.small ?? ''));
+      _hasInternetConnection = true;
     }
+    return fileStream;
   }
 
   Widget cardText() {
@@ -202,16 +192,29 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<Settings>(context, listen: true);
-    return FutureBuilder(
-      future: getLocalImage(settings),
+    return StreamBuilder<FileResponse>(
+      stream: getLocalImage(settings),
       builder: (context, snapshot) {
+        if (!(snapshot.hasError ||
+            (!snapshot.hasData || snapshot.data is DownloadProgress))) {
+          FileInfo fileInfo = snapshot.data as FileInfo;
+          _networkImageStream = Image.file(
+            File(
+              fileInfo.file.path,
+            ),
+            fit: BoxFit.cover,
+          );
+        }
+        if (snapshot.hasError) {
+          _hasInternetConnection = false;
+        }
         return Stack(
           children: [
             (snapshot.connectionState == ConnectionState.done)
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: (_hasInternetConnection && settings.useImagesFromNet)
-                        ? _networkImage
+                        ? _networkImageStream
                         : cardText(),
                   )
                 : const Center(

@@ -13,6 +13,7 @@ class CardDataProvider with ChangeNotifier {
   String column = 'searchText';
   bool isLoading = false;
   bool isStandardQuery = true;
+  bool hasMore = false;
   Map<String, String> queryParameters = {};
 
   set cards(List<CardInfo> queryData) {

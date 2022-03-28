@@ -47,10 +47,11 @@ class Settings with ChangeNotifier {
     DateTime oldDBDate = DateTime.parse(prefs.getString('dbUpdatedAt') ??
         DateTime.parse("1969-07-20 20:18:04Z").toIso8601String());
     BulkData? bulkData = await BulkDataHelper.getBulkData();
-    if (bulkData?.updatedAt
-            .subtract(const Duration(days: 1))
-            .isAfter(oldDBDate) ??
-        true) {
+    if ((bulkData?.updatedAt
+                .subtract(const Duration(days: 1))
+                .isAfter(oldDBDate) ??
+            true) &&
+        (bulkData?.updatedAt != oldDBDate)) {
       canUpdateDB = true;
     } else {
       canUpdateDB = true;

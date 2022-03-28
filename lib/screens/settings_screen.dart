@@ -123,11 +123,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _file = null;
   }
 
-  Future<void> changeUseLocalDB(bool newValue) async {
-    final settings = Provider.of<Settings>(context, listen: false);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('useLocalDB', newValue);
-    settings.useLocalDB = newValue;
+  Future<void> changeUseLocalDB(bool newValue, BuildContext ctx) async {
+    // first check if local DB does exists!
+    try {
+      var dbSize = await DBHelper.checkDatabaseSize('cardDatabase.db');
+      final settings = Provider.of<Settings>(context, listen: false);
+      if (dbSize ~/ (1024 * 1024) < 3) {
+        settings.useLocalDB = false;
+        await showNoLocalDB(ctx);
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('useLocalDB', newValue);
+        settings.useLocalDB = newValue;
+      }
+    } on FileSystemException {
+      final settings = Provider.of<Settings>(context, listen: false);
+      settings.useLocalDB = false;
+      await showNoLocalDB(ctx);
+    }
+  }
+
+  Future<void> showNoLocalDB(BuildContext ctx) async {
+    return showDialog<void>(
+      context: ctx,
+      builder: (bCtx) {
+        return AlertDialog(
+          title: const Text('Download Data first!'),
+          content: const SingleChildScrollView(
+              child: Text(
+                  'The local database file could not be found. Be sure to download the data before trying to use it.')),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(bCtx).pop();
+              },
+              child: const Text('Okay'),
+            )
+          ],
+        );
+      },
+    );
   }
 
   Future<void> checkIfCanUpdateDB(Settings settings) async {
@@ -185,7 +220,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Switch(
                     value: useLocalDB,
                     onChanged: (newValue) {
-                      changeUseLocalDB(newValue);
+                      changeUseLocalDB(newValue, context);
                     },
                   ),
                 ],
