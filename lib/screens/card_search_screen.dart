@@ -93,6 +93,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         crossAxisCount: 2,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
+        // childAspectRatio: ,
         mainAxisExtent:
             (mediaQuery.size.height - mediaQuery.padding.top - 15) / 2,
       ),

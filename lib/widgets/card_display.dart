@@ -24,22 +24,18 @@ class CardDisplay extends StatelessWidget {
       onTap: () {
         cardTapped(context, cardInfo.id);
       },
-      child: SizedBox(
-        child: Card(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: mediaQuery.size.width,
-                child: SingleChildScrollView(
-                    child: CardImageDisplay(
-                        cardInfo: cardInfo, mediaQuery: mediaQuery)),
-              ),
-              CardPriceDisplay(cardInfo: cardInfo),
-            ],
-          ),
+      child: Card(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SingleChildScrollView(
+              child:
+                  CardImageDisplay(cardInfo: cardInfo, mediaQuery: mediaQuery),
+            ),
+            CardPriceDisplay(cardInfo: cardInfo),
+          ],
         ),
       ),
     );
@@ -152,28 +148,43 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
 
   Widget cardText() {
     return Container(
+      height: (widget.mediaQuery.size.height -
+                  2 * widget.mediaQuery.padding.vertical -
+                  2 * widget.mediaQuery.viewInsets.top) /
+              2 -
+          10 -
+          90 -
+          8 -
+          10,
       padding: const EdgeInsets.all(12.0),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Center(
-                child: Text(
-              widget.cardInfo.name ?? 'No name found for this card.',
-              style: const TextStyle(
-                fontSize: 16,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Center(
+              child: Text(
+            widget.cardInfo.name ?? 'No name found for this card.',
+            style: const TextStyle(
+              fontSize: 16,
+            ),
+          )),
+          const SizedBox(
+            height: 10,
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Text(
+                widget.cardInfo.oracleText ?? 'No Oracle text found',
+                style: const TextStyle(fontSize: 12),
               ),
-            )),
-            const SizedBox(
-              height: 10,
             ),
-            Text(
-              widget.cardInfo.oracleText ?? 'No Oracle text found',
-              style: const TextStyle(fontSize: 12),
+          ),
+          Text(
+            'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
+            style: const TextStyle(
+              fontSize: 12,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -200,6 +211,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           _hasInternetConnection = false;
         }
         return Stack(
+          // alignment: AlignmentDirectional.centerEnd,
           children: [
             (snapshot.connectionState == ConnectionState.done ||
                     !settings.useImagesFromNet)
@@ -213,7 +225,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                     width: (widget.mediaQuery.size.width -
                             widget.mediaQuery.padding.horizontal) /
                         2,
-                    height: (widget.mediaQuery.size.height / 3),
+                    height: (widget.mediaQuery.size.height / 4),
                     child: const Center(
                       child: CircularProgressIndicator(),
                     ),

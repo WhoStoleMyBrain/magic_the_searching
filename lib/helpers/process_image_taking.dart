@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart' as sys_paths;
 
 import 'google_mlkit_helper.dart';
-// import 'package:google_ml_kit/google_ml_kit.dart';
 
 class ProcessImageTaking {
   static Future<XFile?> takeImage() async {

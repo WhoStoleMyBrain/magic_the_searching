@@ -124,7 +124,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> changeUseLocalDB(bool newValue, BuildContext ctx) async {
-    // first check if local DB does exists!
     try {
       var dbSize = await DBHelper.checkDatabaseSize('cardDatabase.db');
       final settings = Provider.of<Settings>(context, listen: false);

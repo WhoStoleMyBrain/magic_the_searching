@@ -166,6 +166,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
               32 -
               16 -
               32,
+
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -179,8 +180,16 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           const SizedBox(
             height: 30,
           ),
+          Expanded(
+            child: Text(
+              widget.cardInfo.oracleText ?? 'No Oracle text found',
+              style: const TextStyle(
+                fontSize: 16,
+              ),
+            ),
+          ),
           Text(
-            widget.cardInfo.oracleText ?? 'No Oracle text found',
+            'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
             style: const TextStyle(
               fontSize: 16,
             ),
@@ -193,6 +202,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<Settings>(context, listen: true);
+    // print(widget.cardInfo.purchaseUris?.toJson());
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),
       builder: (context, snapshot) {
