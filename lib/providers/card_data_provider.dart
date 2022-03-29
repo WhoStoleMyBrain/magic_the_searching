@@ -48,6 +48,7 @@ class CardDataProvider with ChangeNotifier {
         'searchText': query,
         'matches': dbResult.length,
         'dateTime': DateTime.now().toIso8601String(),
+        'languages': languages.join(';'),
       };
       DBHelper.insertIntoHistory(historyData);
     }
@@ -70,6 +71,7 @@ class CardDataProvider with ChangeNotifier {
         'searchText': query,
         'matches': queryResult.length,
         'dateTime': DateTime.now().toIso8601String(),
+        'languages': languages.join(';'),
       };
       DBHelper.insertIntoHistory(historyData);
     }

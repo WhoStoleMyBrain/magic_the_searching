@@ -145,7 +145,7 @@ class DBHelper {
     return sql.openDatabase(path.join(dbPath, 'history.db'),
         onCreate: (db, version) async {
       await db.execute(
-          'CREATE TABLE search_history(searchText TEXT UNIQUE PRIMARY KEY, matches INTEGER, dateTime DATETIME);');
+          'CREATE TABLE search_history(searchText TEXT UNIQUE PRIMARY KEY, matches INTEGER, dateTime DATETIME, languages STRING);');
     }, version: 1);
   }
 

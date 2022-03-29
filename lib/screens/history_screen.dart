@@ -35,9 +35,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   void _selectHistoryItem(
       History history, CardDataProvider cardDataProvider, int index) async {
-    String searchText = history.data[index].query;
+    HistoryObject thisHistoryObject = history.data[index];
+    String searchText = thisHistoryObject.query;
+    List<String> languages = thisHistoryObject.languages;
+    //can I use the search
     cardDataProvider.query = searchText;
     cardDataProvider.isStandardQuery = true;
+    cardDataProvider.languages = languages;
     // cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
     await cardDataProvider.processQuery();

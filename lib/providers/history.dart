@@ -21,14 +21,19 @@ class HistoryObject {
   String query;
   String matches;
   DateTime dateTime;
+  List<String> languages;
 
   HistoryObject(
-      {required this.query, required this.matches, required this.dateTime});
+      {required this.query,
+      required this.matches,
+      required this.dateTime,
+      required this.languages});
 
   factory HistoryObject.fromDB(Map<String, dynamic> json) => HistoryObject(
         query: json['searchText'].toString(),
         matches: json['matches'].toString(),
         dateTime: DateTime.parse(json['dateTime'].toString()),
+        languages: json['languages'].toString().split(';'),
       );
 
   Map<String, dynamic> toDB() {
@@ -36,6 +41,7 @@ class HistoryObject {
       'searchText': query,
       'count': matches,
       'requestTime': dateTime,
+      'languages': languages.join(';'),
     };
   }
 }
