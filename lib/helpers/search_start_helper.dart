@@ -54,10 +54,10 @@ class SearchStartHelper {
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
     if (settings.useLocalDB) {
-      print('processing locally...');
+      // print('processing locally...');
       requestSuccessful = await cardDataProvider.processQueryLocally();
     } else {
-      print('using Scryfall API...');
+      // print('using Scryfall API...');
       requestSuccessful = await cardDataProvider.processQuery();
     }
     if (!requestSuccessful) {

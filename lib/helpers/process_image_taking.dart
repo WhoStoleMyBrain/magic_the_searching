@@ -13,7 +13,9 @@ class ProcessImageTaking {
     final picker = ImagePicker();
     final imageFile = await picker.pickImage(
       source: ImageSource.camera,
-      maxWidth: 600,
+      maxWidth: 200,
+      maxHeight: 300,
+      imageQuality: 25,
     );
     if (imageFile == null) {
       return null;

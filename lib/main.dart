@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
-import 'package:magic_the_searching/helpers/internet_usage_helper.dart';
 import 'package:magic_the_searching/providers/settings.dart';
 import 'package:magic_the_searching/screens/help_screen.dart';
 import 'package:magic_the_searching/screens/settings_screen.dart';
@@ -47,9 +46,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => History(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => InternetUsageHelper(),
-        ),
+        // ChangeNotifierProvider(
+        //   create: (_) => InternetUsageHelper(),
+        // ),
         ChangeNotifierProvider(
           create: (_) => Settings(false, false, DateTime.now(), true),
         ),

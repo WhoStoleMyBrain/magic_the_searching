@@ -23,8 +23,7 @@ class CardSearchScreen extends StatefulWidget {
 }
 
 class _CardSearchScreenState extends State<CardSearchScreen> {
-  ScrollController _controller =
-      ScrollController();
+  ScrollController _controller = ScrollController();
   bool endOfScrollReached = false;
 
   Future<void> getUseLocalDB() async {
@@ -171,19 +170,9 @@ class MyFloatingActionButtons extends StatefulWidget {
 }
 
 class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
-  // bool isBusy = false;
-
-  // @override
-  // void dispose() async {
-  //   super.dispose();
-  // }
-
   @override
   Widget build(BuildContext context) {
-    // final handednessProvider = Provider.of<Handedness>(context);
     return Container(
-      // padding: handednessProvider.handedness
-      //     ? const EdgeInsets.symmetric(horizontal: 70, vertical: 0)
       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
