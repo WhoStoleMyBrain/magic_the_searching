@@ -69,7 +69,10 @@ class CardDataProvider with ChangeNotifier {
       hasMore = scryfallRequestHandler.responseData['has_more'];
       Map<String, dynamic> historyData = {
         'searchText': query,
-        'matches': queryResult.length,
+        'matches':
+            scryfallRequestHandler.responseData.containsKey("total_cards")
+                ? scryfallRequestHandler.responseData["total_cards"]
+                : 0, // queryResult.length,
         'dateTime': DateTime.now().toIso8601String(),
         'languages': languages.join(';'),
       };

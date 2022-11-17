@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 
 class EnterSearchTerm extends StatefulWidget {
   final Function startSearchForCard;
@@ -12,7 +12,8 @@ class EnterSearchTerm extends StatefulWidget {
 
 class _EnterSearchTermState extends State<EnterSearchTerm> {
   final _searchTermController = TextEditingController();
-  LanguageIdentifier languageIdentifier = GoogleMlKit.nlp.languageIdentifier();
+  LanguageIdentifier languageIdentifier =
+      LanguageIdentifier(confidenceThreshold: 0.5);
 
   void _submitSearchText() async {
     if (_searchTermController.text.isEmpty) {
@@ -29,7 +30,7 @@ class _EnterSearchTermState extends State<EnterSearchTerm> {
       // print('lang: $response; text: $searchTerm');
       languages.add(response);
     } on PlatformException catch (pe) {
-      if (pe.code == languageIdentifier.errorCodeNoLanguageIdentified) {
+      if (pe.code == languageIdentifier.undeterminedLanguageCode) {
         // no language detected
         languages.add('');
         // print('no languages detected');

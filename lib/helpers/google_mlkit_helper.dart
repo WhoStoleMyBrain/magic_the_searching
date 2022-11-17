@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 class GoogleMlkitHelper {
-  static final TextDetector textDetector = GoogleMlKit.vision.textDetector();
+  static final textDetector =
+      TextRecognizer(script: TextRecognitionScript.latin);
   static final LanguageIdentifier languageIdentifier =
-      GoogleMlKit.nlp.languageIdentifier();
+      LanguageIdentifier(confidenceThreshold: 0.5);
 
   void dispose() async {
     await textDetector.close();
@@ -20,7 +22,7 @@ class GoogleMlkitHelper {
       return response;
     } on PlatformException catch (pe) {
       if (pe.code ==
-          GoogleMlkitHelper.languageIdentifier.errorCodeNoLanguageIdentified) {
+          GoogleMlkitHelper.languageIdentifier.undeterminedLanguageCode) {
         return '';
       }
       return '';
@@ -29,7 +31,7 @@ class GoogleMlkitHelper {
 
   static Future<String> getCardNameFromImage(File image) async {
     final inputImage = InputImage.fromFile(image);
-    final RecognisedText recognisedText =
+    final RecognizedText recognisedText =
         await GoogleMlkitHelper.textDetector.processImage(inputImage);
     return recognisedText.blocks[0].lines[0].text;
   }

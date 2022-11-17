@@ -36,16 +36,20 @@ class ProcessImageTaking {
 
   static Future<void> takePictureAndFireQuery(BuildContext ctx) async {
     final imageFile = await ProcessImageTaking.takeImage();
-    final savedImage = await ProcessImageTaking.saveImage(imageFile);
-    if (savedImage == null) {
-      return;
+    File file = File(imageFile?.path ?? '');
+    if (await file.exists()) {
+      // final savedImage = await ProcessImageTaking.saveImage(imageFile);
+      // if (savedImage == null) {
+      //   return;
+      // }
+      // final recognisedText =
+      //     await GoogleMlkitHelper.getCardNameFromImage(savedImage);
+      final recognisedText = await GoogleMlkitHelper.getCardNameFromImage(file);
+      final cardLanguage =
+          await GoogleMlkitHelper.getLanguageOfString(recognisedText);
+      final List<String> languages =
+          cardLanguage != 'en' ? ['en', cardLanguage] : ['en'];
+      SearchStartHelper.startSearchForCard(ctx, recognisedText, languages);
     }
-    final recognisedText =
-        await GoogleMlkitHelper.getCardNameFromImage(savedImage);
-    final cardLanguage =
-        await GoogleMlkitHelper.getLanguageOfString(recognisedText);
-    final List<String> languages =
-        cardLanguage != 'en' ? ['en', cardLanguage] : ['en'];
-    SearchStartHelper.startSearchForCard(ctx, recognisedText, languages);
   }
 }

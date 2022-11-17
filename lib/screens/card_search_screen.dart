@@ -36,7 +36,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       getUseLocalDB();
     });
     _controller = ScrollController();
@@ -158,6 +158,20 @@ class _MyAppBarState extends State<MyAppBar> {
               'No search performed yet',
               style: TextStyle(fontSize: 18),
             ),
+      actions: [
+        (cardDataProvider.cards.isNotEmpty && title != '')
+            ? IconButton(
+                icon: const Icon(Icons.mode),
+                color: Colors.white,
+                onPressed: () {},
+              )
+            : const IconButton(
+                icon: Icon(Icons.mode),
+                color: Colors.grey,
+                disabledColor: Colors.grey,
+                onPressed: null,
+              ),
+      ],
     );
   }
 }

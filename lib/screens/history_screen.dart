@@ -44,8 +44,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     cardDataProvider.languages = languages;
     // cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
-    await cardDataProvider.processQuery();
     Navigator.of(context).pushReplacementNamed('/');
+    await cardDataProvider.processQuery();
   }
 
   @override
