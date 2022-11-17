@@ -163,7 +163,10 @@ class _MyAppBarState extends State<MyAppBar> {
             ? IconButton(
                 icon: const Icon(Icons.mode),
                 color: Colors.white,
-                onPressed: () {},
+                onPressed: () {
+                  SearchStartHelper.startEnterSearchTerm(context,
+                      prefillValue: title);
+                },
               )
             : const IconButton(
                 icon: Icon(Icons.mode),

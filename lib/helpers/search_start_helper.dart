@@ -7,13 +7,15 @@ import '../providers/settings.dart';
 import '../widgets/enter_search_term.dart';
 
 class SearchStartHelper {
-  static void startEnterSearchTerm(BuildContext ctx) {
+  static void startEnterSearchTerm(BuildContext ctx,
+      {String prefillValue = ''}) {
     showModalBottomSheet(
       context: ctx,
       builder: (bCtx) {
         return GestureDetector(
           onTap: () {},
           child: EnterSearchTerm(
+            prefillValue: prefillValue,
             startSearchForCard: (text, languages) {
               return SearchStartHelper.startSearchForCard(ctx, text, languages);
             },
