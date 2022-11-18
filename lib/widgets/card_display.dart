@@ -161,12 +161,22 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Center(
-              child: Text(
-            widget.cardInfo.name ?? 'No name found for this card.',
-            style: const TextStyle(
-              fontSize: 16,
+            child: Text(
+              widget.cardInfo.name ?? 'No name found for this card.',
+              style: const TextStyle(
+                fontSize: 16,
+              ),
             ),
-          )),
+          ),
+          Text(
+            widget.cardInfo.manaCost ?? '',
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Text(widget.cardInfo.typeLine ?? '',
+              style: const TextStyle(fontSize: 12)),
           const SizedBox(
             height: 10,
           ),
@@ -177,6 +187,16 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                 style: const TextStyle(fontSize: 12),
               ),
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                  '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}'),
+            ],
+          ),
+          const SizedBox(
+            height: 10,
           ),
           Text(
             'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',

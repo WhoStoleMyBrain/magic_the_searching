@@ -11,6 +11,16 @@ class DBHelper {
   }
   DBHelper._internal();
 
+  static Future<void> deleteTablesIfExists() async {
+    final db = await DBHelper.cardDatabase();
+    db.execute('DROP TABLE IF EXISTS card_info');
+    db.execute('DROP TABLE IF EXISTS card_detail');
+    db.execute('DROP TABLE IF EXISTS image_uris');
+    db.execute('DROP TABLE IF EXISTS card_faces');
+    db.execute('DROP TABLE IF EXISTS prices');
+    db.execute('DROP TABLE IF EXISTS purchase_uris');
+  }
+
   static Future<int> checkDatabaseSize(String dbName) async {
     final dbPath = await sql.getDatabasesPath();
     String fullDbPath = path.join(dbPath, dbName);
@@ -24,7 +34,9 @@ class DBHelper {
     return sql.openDatabase(path.join(dbPath, 'cardDatabase.db'),
         onCreate: (db, version) async {
       await db.execute(
-          'CREATE TABLE card_info(id TEXT UNIQUE PRIMARY KEY, name TEXT, oracleId TEXT, oracleText TEXT, setName TEXT, scryfallUri TEXT, hasTwoSides INTEGER, dateTime DATETIME);');
+          'CREATE TABLE card_info(id TEXT UNIQUE PRIMARY KEY, oracleId TEXT, scryfallUri TEXT, dateTime DATETIME);');
+      await db.execute(
+          'CREATE TABLE card_detail(id TEXT UNIQUE PRIMARY KEY, name TEXT, manaCost TEXT, typeLine TEXT, oracleText TEXT, power TEXT, toughness TEXT, setName TEXT, flavorText TEXT, hasTwoSides INTEGER, FOREIGN KEY(id) REFERENCES card_info(id));');
       await db.execute(
           'CREATE TABLE image_uris(id TEXT UNIQUE PRIMARY KEY, normal TEXT, small TEXT, FOREIGN KEY(id) REFERENCES card_info(id));');
       await db.execute(
@@ -33,12 +45,14 @@ class DBHelper {
           'CREATE TABLE prices(id TEXT UNIQUE PRIMARY KEY, usd TEXT, usdFoil TEXT, eur TEXT, eurFoil TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
       await db.execute(
           'CREATE TABLE purchase_uris(id TEXT UNIQUE PRIMARY KEY, tcgplayer TEXT, cardmarket TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
-    }, version: 1);
+    }, version: 2);
   }
 
   static Future<void> insertIntoCardDatabase(Map<String, dynamic> data) async {
     final db = await DBHelper.cardDatabase();
     db.insert('card_info', data["card_info"] ?? {},
+        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    db.insert('card_detail', data["card_detail"] ?? {},
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
     db.insert('image_uris', data["image_uris"] ?? {},
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
@@ -56,6 +70,9 @@ class DBHelper {
     var batch = db.batch();
     for (Map<String, dynamic> data in dataList) {
       batch.insert('card_info', data["card_info"] ?? {},
+          conflictAlgorithm: sql.ConflictAlgorithm.replace,
+          nullColumnHack: 'id');
+      batch.insert('card_detail', data["card_detail"] ?? {},
           conflictAlgorithm: sql.ConflictAlgorithm.replace,
           nullColumnHack: 'id');
       batch.insert('image_uris', data["image_uris"] ?? {},
@@ -77,6 +94,8 @@ class DBHelper {
   static Future<Map<String, dynamic>> getCardById(String id) async {
     final db = await DBHelper.cardDatabase();
     final _cardInfo = db.query('card_info', where: 'id = ?', whereArgs: [id]);
+    final _cardDetail =
+        db.query('card_detail', where: 'id = ?', whereArgs: [id]);
     final _imageUris = db.query('image_uris', where: 'id = ?', whereArgs: [id]);
     final _cardFaces = db.query('card_faces', where: 'id = ?', whereArgs: [id]);
     final _prices = db.query('prices', where: 'id = ?', whereArgs: [id]);
@@ -84,6 +103,7 @@ class DBHelper {
         db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
     return {
       'card_info': _cardInfo,
+      'card_detail': _cardDetail,
       'image_uris': _imageUris,
       'card_faces': _cardFaces,
       'prices': _prices,
@@ -99,6 +119,8 @@ class DBHelper {
       return {};
     }
     final String id = _cardInfo.first["id"];
+    final _cardDetail =
+        await db.query('card_detail', where: 'id = ?', whereArgs: [id]);
     final _imageUris =
         await db.query('image_uris', where: 'id = ?', whereArgs: [id]);
     final _cardFaces =
@@ -108,6 +130,7 @@ class DBHelper {
         await db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
     return {
       'card_info': _cardInfo.first,
+      'card_detail': _cardDetail,
       'image_uris': _imageUris.first,
       'card_faces': _cardFaces.first,
       'prices': _prices.first,
@@ -127,6 +150,8 @@ class DBHelper {
     for (int i = 0; i < _cardInfo.length; i++) {
       final String id = _cardInfo[i]["id"];
       // retList.add(await DBHelper.getCardById(id));
+      final _cardDetail =
+          await db.query('card_detail', where: 'id = ?', whereArgs: [id]);
       final _imageUris =
           await db.query('image_uris', where: 'id = ?', whereArgs: [id]);
       final _cardFaces =
@@ -137,6 +162,7 @@ class DBHelper {
           await db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
       retList.add({
         'card_info': _cardInfo[i],
+        'card_detail': _cardDetail,
         'image_uris': _imageUris.first,
         'card_faces': _cardFaces.first,
         'prices': _prices.first,

@@ -36,7 +36,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final List<int> _bytes = [];
     _response = await http.Client()
         .send(http.Request('GET', Uri.parse(bulkData?.downloadUri ?? '')));
-    _totalBits = (_response.contentLength ?? 0) * 8;
+    _totalBits = (bulkData?.compressedSize ?? 0);
+    if (kDebugMode) {
+      print(bulkData?.compressedSize);
+    }
     _response.stream.listen((value) {
       setState(() {
         _bytes.addAll(value);
@@ -47,15 +50,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _isDownloading = false;
         _isSavingToLocalFile = true;
       });
-      await saveBytesToFile(_bytes)
-          .whenComplete(() => setPreferences(bulkData))
-          .whenComplete(() => _saveDataToDB())
-          .whenComplete(() => setState(() {
-                _isRequestingBulkData = false;
-                _isDownloading = false;
-                _isSavingToLocalFile = false;
-                _isProcessingToLocalDB = false;
-              }));
+      try {
+        await saveBytesToFile(_bytes)
+            .whenComplete(() => setPreferences(bulkData))
+            .whenComplete(() => _saveDataToDB())
+            .whenComplete(() => setState(() {
+                  _isRequestingBulkData = false;
+                  _isDownloading = false;
+                  _isSavingToLocalFile = false;
+                  _isProcessingToLocalDB = false;
+                }));
+      } finally {
+        setState(() {
+          _isRequestingBulkData = false;
+          _isDownloading = false;
+          _isSavingToLocalFile = false;
+          _isProcessingToLocalDB = false;
+        });
+      }
     });
     return bulkData;
   }
@@ -106,10 +118,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         setState(() {
           _entriesSaved = i;
         });
-        final List tmp = jsonList.sublist(i, i + 1000);
-        final List<Map<String, dynamic>> tmp2 =
-            tmp.map((e) => CardInfo.fromJson(e).toDB()).toList();
-        await DBHelper.insertBulkDataIntoCardDatabase(tmp2);
+        final List jsonSubList = jsonList.sublist(i, i + 1000);
+        final List<Map<String, dynamic>> cardSubList =
+            jsonSubList.map((e) => CardInfo.fromJson(e).toDB()).toList();
+        await DBHelper.insertBulkDataIntoCardDatabase(cardSubList);
       } catch (error) {
         if (kDebugMode) {
           print(error);
@@ -274,6 +286,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
                     },
                     child: const Text('Check history db file...')),
+              if (kDebugMode)
+                ElevatedButton(
+                    onPressed: () async {
+                      await DBHelper.deleteTablesIfExists();
+                    },
+                    child: const Text('Delete local DB!'))
             ],
           ),
           (_isRequestingBulkData ||

@@ -102,9 +102,14 @@ class CardInfo {
   CardInfo({
     required this.id,
     required this.name,
+    required this.manaCost,
+    required this.typeLine,
     required this.oracleId,
     required this.oracleText,
+    required this.power,
+    required this.toughness,
     required this.setName,
+    required this.flavorText,
     required this.scryfallUri,
     required this.imageUris,
     required this.cardFaces,
@@ -117,12 +122,17 @@ class CardInfo {
   });
   String id;
   String? name;
+  String? manaCost;
+  String? typeLine;
   @JsonKey(name: 'oracle_id')
   String? oracleId;
   // @JsonKey(name: 'oracle_text')
   @JsonKey(name: 'oracleText', readValue: oracleTextReadValue)
   String? oracleText;
+  String? power;
+  String? toughness;
   String? setName;
+  String? flavorText;
   @JsonKey(name: 'scryfall_uri')
   String? scryfallUri;
   ImageUris? imageUris;
@@ -158,41 +168,55 @@ class CardInfo {
 
   factory CardInfo.fromDB(Map<String, dynamic> dbData) {
     return CardInfo(
-        id: dbData['card_info']['id'] as String,
-        name: dbData['card_info']['name'] as String?,
-        oracleId: dbData['card_info']['oracleId'] as String?,
-        oracleText: dbData['card_info']['oracleText'] as String?,
-        setName: dbData['card_info']['setName'] as String?,
-        scryfallUri: dbData['card_info']['scryfallUri'] as String?,
-        imageUris: ImageUris.fromDB(dbData['image_uris']),
-        // imageUris: dbData['image_uris'] == null
-        //     ? null
-        //     : ImageUris.fromJson(dbData['image_uris'] as Map<String, dynamic>),
-        cardFaces: cardFacesFromDB(dbData['card_faces']),
-        prices: Prices.fromDB(dbData['prices']),
-        // prices: dbData['prices'] == null
-        //     ? null
-        //     : Prices.fromJson(dbData['prices'] as Map<String, dynamic>),
-        purchaseUris: PurchaseUris.fromDB(dbData['purchase_uris']),
-        // purchaseUris: dbData['purchase_uris'] == null
-        //     ? null
-        //     : PurchaseUris.fromJson(
-        //         dbData['purchase_uris'] as Map<String, dynamic>),
-        hasTwoSides: dbData['card_info']['hasTwoSides'] == 0 ? false : true,
-        dateTime: DateTime.parse(dbData['card_info']['dateTime'] as String));
+      id: dbData['card_info']['id'] as String,
+      name: dbData['card_detail']['name'] as String?,
+      oracleId: dbData['card_info']['oracleId'] as String?,
+      oracleText: dbData['card_detail']['oracleText'] as String?,
+      setName: dbData['card_detail']['setName'] as String?,
+      scryfallUri: dbData['card_info']['scryfallUri'] as String?,
+      imageUris: ImageUris.fromDB(dbData['image_uris']),
+      // imageUris: dbData['image_uris'] == null
+      //     ? null
+      //     : ImageUris.fromJson(dbData['image_uris'] as Map<String, dynamic>),
+      cardFaces: cardFacesFromDB(dbData['card_faces']),
+      prices: Prices.fromDB(dbData['prices']),
+      // prices: dbData['prices'] == null
+      //     ? null
+      //     : Prices.fromJson(dbData['prices'] as Map<String, dynamic>),
+      purchaseUris: PurchaseUris.fromDB(dbData['purchase_uris']),
+      // purchaseUris: dbData['purchase_uris'] == null
+      //     ? null
+      //     : PurchaseUris.fromJson(
+      //         dbData['purchase_uris'] as Map<String, dynamic>),
+      hasTwoSides: dbData['card_detail']['hasTwoSides'] == 0 ? false : true,
+      dateTime: DateTime.parse(dbData['card_info']['dateTime'] as String),
+      flavorText: dbData['card_detail']['flavorText'] as String?,
+      manaCost: dbData['card_detail']['manaCost'] as String?,
+      power: dbData['card_detail']['power'] as String?,
+      toughness: dbData['card_detail']['toughness'] as String?,
+      typeLine: dbData['card_detail']['typeLine'] as String?,
+    );
   }
 
   Map<String, dynamic> toDB() {
     return {
       'card_info': {
         'id': id,
-        'name': name,
         'oracleId': oracleId,
-        'oracleText': oracleText,
-        'setName': setName,
         'scryfallUri': scryfallUri,
-        'hasTwoSides': hasTwoSides ? 1 : 0,
         'dateTime': dateTime.toIso8601String(),
+      },
+      'card_detail': {
+        'id': id,
+        'name': name,
+        'manaCost': manaCost,
+        'typeLine': typeLine,
+        'oracleText': oracleText,
+        'power': power,
+        'toughness': toughness,
+        'setName': setName,
+        'flavorText': flavorText,
+        'hasTwoSides': hasTwoSides ? 1 : 0,
       },
       'image_uris': {
         'id': id,

@@ -9,9 +9,14 @@ part of 'card_info.dart';
 CardInfo _$CardInfoFromJson(Map<String, dynamic> json) => CardInfo(
       id: json['id'] as String,
       name: json['name'] as String?,
+      manaCost: json['mana_cost'] as String?,
+      typeLine: json['type_line'] as String?,
       oracleId: json['oracle_id'] as String?,
       oracleText: oracleTextReadValue(json, 'oracleText') as String?,
+      power: json['power'] as String?,
+      toughness: json['toughness'] as String?,
       setName: json['set_name'] as String?,
+      flavorText: json['flavor_text'] as String?,
       scryfallUri: json['scryfall_uri'] as String?,
       imageUris: json['image_uris'] == null
           ? null
@@ -32,9 +37,14 @@ CardInfo _$CardInfoFromJson(Map<String, dynamic> json) => CardInfo(
 Map<String, dynamic> _$CardInfoToJson(CardInfo instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
+      'mana_cost': instance.manaCost,
+      'type_line': instance.typeLine,
       'oracle_id': instance.oracleId,
       'oracleText': instance.oracleText,
+      'power': instance.power,
+      'toughness': instance.toughness,
       'set_name': instance.setName,
+      'flavor_text': instance.flavorText,
       'scryfall_uri': instance.scryfallUri,
       'image_uris': instance.imageUris?.toJson(),
       'prices': instance.prices?.toJson(),

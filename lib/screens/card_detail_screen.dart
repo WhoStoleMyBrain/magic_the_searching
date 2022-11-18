@@ -166,19 +166,32 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
               32 -
               16 -
               32,
-
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text(
-            widget.cardInfo.name ?? 'No name found for this card.',
-            style: const TextStyle(
-              fontSize: 24,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.cardInfo.name ?? 'No name found for this card.',
+                style: const TextStyle(
+                  fontSize: 24,
+                ),
+              ),
+              Text(
+                widget.cardInfo.manaCost ?? '',
+                style: const TextStyle(fontSize: 24),
+              ),
+            ],
           ),
           const SizedBox(
             height: 30,
+          ),
+          Text(widget.cardInfo.typeLine ?? '',
+              style: const TextStyle(fontSize: 16)),
+          const SizedBox(
+            height: 10,
           ),
           Expanded(
             child: Text(
@@ -189,10 +202,40 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
             ),
           ),
           Text(
+            widget.cardInfo.flavorText ?? '',
+            style: const TextStyle(
+              fontSize: 16,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
+                style: const TextStyle(
+                  fontSize: 24,
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Text(
             'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
             style: const TextStyle(
               fontSize: 16,
             ),
+          ),
+          const SizedBox(
+            height: 10,
           ),
         ],
       ),

@@ -23,9 +23,17 @@ class BulkDataHelper {
       results = responseData["data"].map((e) => BulkData.fromJson(e)).toList();
       bulkData =
           results.firstWhere((element) => element.type == 'oracle_cards');
+      if (kDebugMode) {
+        print(bulkData);
+      }
       // bulkData =
       //     results.firstWhere((element) => element.type == 'all_cards');
-      if (response.statusCode != 200) {}
+      if (response.statusCode != 200) {
+        if (kDebugMode) {
+          print('did not receive data from bulk data!');
+          bulkData = null;
+        }
+      }
     } catch (error) {
       bulkData = null;
       if (kDebugMode) {
