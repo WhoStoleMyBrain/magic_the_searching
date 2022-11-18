@@ -9,6 +9,13 @@ import 'package:path_provider/path_provider.dart' as sys_paths;
 import 'google_mlkit_helper.dart';
 
 class ProcessImageTaking {
+  static final ProcessImageTaking _processImageTaking =
+      ProcessImageTaking._internal();
+  factory ProcessImageTaking() {
+    return _processImageTaking;
+  }
+  ProcessImageTaking._internal();
+
   static Future<XFile?> takeImage() async {
     final picker = ImagePicker();
     final imageFile = await picker.pickImage(

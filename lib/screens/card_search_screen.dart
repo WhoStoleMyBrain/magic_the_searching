@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/providers/history.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,10 +34,18 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     settings.useLocalDB = useLocalDB;
   }
 
+  void _openModalSheetAfterLoad() {
+    final historyProvider = Provider.of<History>(context, listen: false);
+    if (historyProvider.openModalSheet) {
+      SearchStartHelper.startEnterSearchTerm(context);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openModalSheetAfterLoad();
       getUseLocalDB();
     });
     _controller = ScrollController();
@@ -164,8 +173,8 @@ class _MyAppBarState extends State<MyAppBar> {
                 icon: const Icon(Icons.mode),
                 color: Colors.white,
                 onPressed: () {
-                  SearchStartHelper.startEnterSearchTerm(context,
-                      prefillValue: title);
+                  SearchStartHelper.prefillValue = title;
+                  SearchStartHelper.startEnterSearchTerm(context);
                 },
               )
             : const IconButton(

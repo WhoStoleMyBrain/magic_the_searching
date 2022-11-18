@@ -57,8 +57,10 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<bool> _requestDataFromScryfall() async {
-    scryfallRequestHandler =
-        ScryfallRequestHandler(searchText: query, languages: languages);
+    scryfallRequestHandler = ScryfallRequestHandler();
+    scryfallRequestHandler.searchText = query;
+    scryfallRequestHandler.languages = languages;
+
     scryfallRequestHandler.setHttpsQuery(queryParameters, isStandardQuery);
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();

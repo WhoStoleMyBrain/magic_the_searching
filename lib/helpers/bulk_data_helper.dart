@@ -4,6 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/scryfall_api_json_serialization/bulk_data.dart';
 
 class BulkDataHelper {
+  static final BulkDataHelper _bulkDataHelper = BulkDataHelper._internal();
+  factory BulkDataHelper() {
+    return _bulkDataHelper;
+  }
+  BulkDataHelper._internal();
+
   static const String bulkDataPath = 'https://api.scryfall.com/bulk-data';
 
   static Future<BulkData?> getBulkData() async {
@@ -28,5 +34,4 @@ class BulkDataHelper {
     }
     return bulkData;
   }
-
 }

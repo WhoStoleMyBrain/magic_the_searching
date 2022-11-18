@@ -5,6 +5,12 @@ import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
 
 class DBHelper {
+  static final DBHelper _dbHelper = DBHelper._internal();
+  factory DBHelper() {
+    return _dbHelper;
+  }
+  DBHelper._internal();
+
   static Future<int> checkDatabaseSize(String dbName) async {
     final dbPath = await sql.getDatabasesPath();
     String fullDbPath = path.join(dbPath, dbName);

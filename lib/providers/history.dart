@@ -9,6 +9,8 @@ class History with ChangeNotifier {
     return [..._data];
   }
 
+  bool openModalSheet = false;
+
   Future<void> getDBData(Function setInitToTrue) async {
     var historyData = await DBHelper.getHistoryData();
     setInitToTrue();

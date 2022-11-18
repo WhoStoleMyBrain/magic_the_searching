@@ -5,6 +5,13 @@ import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
 class GoogleMlkitHelper {
+  static final GoogleMlkitHelper _googleMlkitHelper =
+      GoogleMlkitHelper._internal();
+  factory GoogleMlkitHelper() {
+    return _googleMlkitHelper;
+  }
+  GoogleMlkitHelper._internal();
+
   static final textDetector =
       TextRecognizer(script: TextRecognitionScript.latin);
   static final LanguageIdentifier languageIdentifier =

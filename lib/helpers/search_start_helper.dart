@@ -3,12 +3,22 @@ import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/card_data_provider.dart';
+import '../providers/history.dart';
 import '../providers/settings.dart';
 import '../widgets/enter_search_term.dart';
 
 class SearchStartHelper {
-  static void startEnterSearchTerm(BuildContext ctx,
-      {String prefillValue = ''}) {
+  static final SearchStartHelper _searchStartHelper =
+      SearchStartHelper._internal();
+  factory SearchStartHelper() {
+    return _searchStartHelper;
+  }
+  SearchStartHelper._internal();
+  static String prefillValue = '';
+
+  static void startEnterSearchTerm(
+    BuildContext ctx,
+  ) {
     showModalBottomSheet(
       context: ctx,
       builder: (bCtx) {
@@ -22,7 +32,11 @@ class SearchStartHelper {
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      SearchStartHelper.prefillValue = '';
+      final history = Provider.of<History>(ctx, listen: false);
+      history.openModalSheet = false;
+    });
   }
 
   static Future<void> showFailedQuery(BuildContext ctx, String query) async {
