@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/providers/history.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../helpers/process_image_taking.dart';
+import '../providers/history.dart';
 import '../helpers/search_start_helper.dart';
 import '../providers/card_data_provider.dart';
 import '../providers/settings.dart';
 import '../widgets/card_display.dart' as card_display;
 import '../widgets/app_drawer.dart';
+import '../widgets/my_main_app_bar.dart';
+import '../widgets/my_main_floating_action_buttons.dart';
 
 enum HandedMode {
   left,
@@ -77,7 +78,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
     final mediaQuery = MediaQuery.of(context);
     return Scaffold(
-      appBar: MyAppBar(),
+      appBar: MyMainAppBar(),
       drawer: const AppDrawer(),
       body: cardDataProvider.isLoading
           ? const Center(
@@ -87,7 +88,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
               ? const Center(
                   child: Text('No cards found. Try searching for some!'))
               : myGridView(mediaQuery, cardDataProvider),
-      floatingActionButton: const MyFloatingActionButtons(),
+      floatingActionButton: const MyMainFloatingActionButtons(),
     );
   }
 
@@ -112,117 +113,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
           key: UniqueKey(),
         );
       },
-    );
-  }
-}
-
-class MyAppBar extends StatefulWidget with PreferredSizeWidget {
-  MyAppBar({Key? key}) : super(key: key);
-
-  @override
-  State<MyAppBar> createState() => _MyAppBarState();
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-}
-
-class _MyAppBarState extends State<MyAppBar> {
-  bool handedMode = false;
-  late bool useLocalDB = false;
-  String title = '';
-  @override
-  void initState() {
-    super.initState();
-    final settings = Provider.of<Settings>(context, listen: false);
-    useLocalDB = settings.useLocalDB;
-  }
-
-  void setTitle() {
-    final cardDataProvider =
-        Provider.of<CardDataProvider>(context, listen: true);
-    setState(
-      () {
-        title = cardDataProvider.query.isNotEmpty
-            ? (cardDataProvider.query[0] == '!'
-                ? cardDataProvider.query.substring(1)
-                : cardDataProvider.query)
-            : '';
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cardDataProvider =
-        Provider.of<CardDataProvider>(context, listen: false);
-    setTitle();
-    return AppBar(
-      title: (cardDataProvider.cards.isNotEmpty && title != '')
-          ? Text(
-              'Searched for: $title',
-              style: const TextStyle(fontSize: 18),
-              maxLines: 2,
-            )
-          : const Text(
-              'No search performed yet',
-              style: TextStyle(fontSize: 18),
-            ),
-      actions: [
-        (cardDataProvider.cards.isNotEmpty && title != '')
-            ? IconButton(
-                icon: const Icon(Icons.mode),
-                color: Colors.white,
-                onPressed: () {
-                  SearchStartHelper.prefillValue = title;
-                  SearchStartHelper.startEnterSearchTerm(context);
-                },
-              )
-            : const IconButton(
-                icon: Icon(Icons.mode),
-                color: Colors.grey,
-                disabledColor: Colors.grey,
-                onPressed: null,
-              ),
-      ],
-    );
-  }
-}
-
-class MyFloatingActionButtons extends StatefulWidget {
-  const MyFloatingActionButtons({Key? key}) : super(key: key);
-  @override
-  State<MyFloatingActionButtons> createState() =>
-      _MyFloatingActionButtonsState();
-}
-
-class _MyFloatingActionButtonsState extends State<MyFloatingActionButtons> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: FloatingActionButton(
-              heroTag: 'search',
-              onPressed: () => SearchStartHelper.startEnterSearchTerm(context),
-              child: const Icon(Icons.search),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: FloatingActionButton(
-              heroTag: 'camera',
-              onPressed: () {
-                ProcessImageTaking.takePictureAndFireQuery(context);
-              },
-              child: const Icon(Icons.camera_enhance),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
