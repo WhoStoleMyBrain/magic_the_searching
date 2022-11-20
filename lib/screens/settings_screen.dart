@@ -288,10 +288,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: const Text('Check history db file...')),
               if (kDebugMode)
                 ElevatedButton(
-                    onPressed: () async {
-                      await DBHelper.deleteTablesIfExists();
-                    },
-                    child: const Text('Delete local DB!'))
+                  onPressed: () async {
+                    await DBHelper.deleteTablesIfExists();
+                  },
+                  child: const Text('Delete local DB!'),
+                ),
             ],
           ),
           (_isRequestingBulkData ||

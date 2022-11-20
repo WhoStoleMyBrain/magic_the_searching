@@ -1,12 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/card_symbol_helper.dart';
+import 'package:magic_the_searching/providers/card_symbol_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../scryfall_api_json_serialization/card_info.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/image_uris.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CardDetailImageDisplay extends StatefulWidget {
   const CardDetailImageDisplay({
@@ -24,6 +27,7 @@ class CardDetailImageDisplay extends StatefulWidget {
 
 class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   int _side = 0;
+  Map<String, SvgPicture> symbolImages = {};
   late Image? _networkImageStream;
   late bool _hasInternetConnection = true;
   late Stream<FileResponse> fileStream;
@@ -42,6 +46,150 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     return null;
   }
 
+  List<Widget> cardNameAndManaSymbol() {
+    List<String> cardSymbols =
+        CardSymbolHelper.getSymbolsOfText(widget.cardInfo.manaCost ?? '');
+
+    return [
+      Text(
+        widget.cardInfo.name ?? 'No name found for this card.',
+        style: const TextStyle(
+          fontSize: 24,
+        ),
+      ),
+      const SizedBox(
+        height: 2,
+      ),
+      cardSymbols.isNotEmpty
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ...cardSymbols.map((e) => SvgPicture.asset(
+                      e,
+                      width: 24,
+                      height: 24,
+                    ))
+              ],
+            )
+          : Text(
+              widget.cardInfo.manaCost ?? '',
+              style: const TextStyle(fontSize: 24),
+            ),
+      const SizedBox(
+        height: 10,
+      ),
+    ];
+  }
+
+  List<Widget> cardTypeLine() {
+    return [
+      Text(widget.cardInfo.typeLine ?? '',
+          style: const TextStyle(fontSize: 16)),
+      const SizedBox(
+        height: 10,
+      ),
+    ];
+  }
+
+  Widget oracleText() {
+    // Widget oracleTextWidget = Text(
+    //   widget.cardInfo.oracleText ?? 'No Oracle text found',
+    //   style: const TextStyle(
+    //     fontSize: 16,
+    //   ),
+    // );
+    var richText = buildRichTextSpan(widget.cardInfo.oracleText ?? '');
+    return richText;
+    // return Expanded(
+    //   child: oracleTextWidget,
+    // );
+  }
+
+  List<Widget> flavorText() {
+    return [
+      Text(
+        widget.cardInfo.flavorText ?? '',
+        style: const TextStyle(
+          fontSize: 16,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+    ];
+  }
+
+  List<Widget> powerAndToughness() {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Card(
+            elevation: 2,
+            color: const Color.fromRGBO(230, 230, 230, 1.0),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
+                style: const TextStyle(
+                  fontSize: 24,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(
+            width: 10,
+          ),
+        ],
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+    ];
+  }
+
+  List<dynamic> textSpanWidgets(String text) {
+    List<String> splittedText = text.split(RegExp(r'[{}]'));
+    splittedText.removeWhere((element) {
+      return element == '' || element == ' ';
+    });
+    var finalSpans = [];
+    for (var tmp in splittedText) {
+      finalSpans.add(
+        symbolImages.keys.contains(CardSymbolHelper.symbolToAssetPath(tmp))
+            ? WidgetSpan(
+                child: symbolImages[CardSymbolHelper.symbolToAssetPath(tmp)] ??
+                    Text('{$tmp}'),
+              )
+            : WidgetSpan(
+                child: Text(tmp),
+              ),
+      );
+    }
+    return finalSpans;
+  }
+
+  Widget buildRichTextSpan(String text) {
+    return RichText(text: TextSpan(children: [...textSpanWidgets(text)]));
+  }
+
+  List<Widget> setName() {
+    return [
+      Text(
+        'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
+        style: const TextStyle(
+          fontSize: 16,
+        ),
+      ),
+      const SizedBox(
+        height: 10,
+      ),
+    ];
+  }
+
   Widget cardText() {
     return Card(
         child: Container(
@@ -55,73 +203,19 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                widget.cardInfo.name ?? 'No name found for this card.',
-                style: const TextStyle(
-                  fontSize: 24,
-                ),
-              ),
-              Text(
-                widget.cardInfo.manaCost ?? '',
-                style: const TextStyle(fontSize: 24),
-              ),
-            ],
+          ...cardNameAndManaSymbol(),
+          ...cardTypeLine(),
+          const Divider(
+            thickness: 1,
+            color: Colors.black,
           ),
           const SizedBox(
-            height: 30,
+            height: 4,
           ),
-          Text(widget.cardInfo.typeLine ?? '',
-              style: const TextStyle(fontSize: 16)),
-          const SizedBox(
-            height: 10,
-          ),
-          Expanded(
-            child: Text(
-              widget.cardInfo.oracleText ?? 'No Oracle text found',
-              style: const TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ),
-          Text(
-            widget.cardInfo.flavorText ?? '',
-            style: const TextStyle(
-              fontSize: 16,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
-                style: const TextStyle(
-                  fontSize: 24,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Text(
-            'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
-            style: const TextStyle(
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
+          oracleText(),
+          ...flavorText(),
+          ...powerAndToughness(),
+          ...setName(),
         ],
       ),
     ));
@@ -130,6 +224,9 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<Settings>(context, listen: true);
+    final CardSymbolProvider cardSymbolProvider =
+        Provider.of<CardSymbolProvider>(context, listen: true);
+    symbolImages = cardSymbolProvider.symbolImages;
     // print(widget.cardInfo.purchaseUris?.toJson());
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),

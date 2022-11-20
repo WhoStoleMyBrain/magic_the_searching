@@ -83,8 +83,8 @@ class HelpScreen extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        url.launch(
-                            'https://www.w3schools.com/sql/sql_wildcards.asp');
+                        url.launchUrl(Uri.parse(
+                            'https://www.w3schools.com/sql/sql_wildcards.asp'));
                       },
                   ),
                   const TextSpan(
@@ -100,7 +100,8 @@ class HelpScreen extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        url.launch('https://scryfall.com/docs/syntax');
+                        url.launchUrl(
+                            Uri.parse('https://scryfall.com/docs/syntax'));
                       },
                   ),
                 ],

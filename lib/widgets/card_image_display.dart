@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/image_uris.dart';
 
 class CardImageDisplay extends StatefulWidget {
@@ -43,64 +43,106 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     return null;
   }
 
-  Widget cardText() {
-    return Container(
-      height: (widget.mediaQuery.size.height -
-                  2 * widget.mediaQuery.padding.vertical -
-                  2 * widget.mediaQuery.viewInsets.top) /
-              2 -
-          10 -
-          90 -
-          8 -
-          10,
-      padding: const EdgeInsets.all(12.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Center(
-            child: Text(
-              widget.cardInfo.name ?? 'No name found for this card.',
-              style: const TextStyle(
-                fontSize: 16,
-              ),
-            ),
+  double _getContainerHeight() {
+    return (widget.mediaQuery.size.height -
+                2 * widget.mediaQuery.padding.vertical -
+                2 * widget.mediaQuery.viewInsets.top) /
+            2 -
+        10 -
+        90 -
+        8 -
+        10 -
+        20;
+  }
+
+  List<Widget> cardNameAndManaSymbol() {
+    return [
+      Center(
+        child: Text(
+          widget.cardInfo.name ?? 'No name found for this card.',
+          style: const TextStyle(
+            fontSize: 14,
           ),
-          Text(
-            widget.cardInfo.manaCost ?? '',
-            style: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Text(widget.cardInfo.typeLine ?? '',
-              style: const TextStyle(fontSize: 12)),
-          const SizedBox(
-            height: 10,
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Text(
+        ),
+      ),
+      Text(
+        widget.cardInfo.manaCost ?? '',
+        style: const TextStyle(fontSize: 14),
+      ),
+      const SizedBox(
+        height: 8,
+      ),
+    ];
+  }
+
+  List<Widget> cardTypeLine() {
+    return [
+      Text(widget.cardInfo.typeLine ?? '',
+          style: const TextStyle(fontSize: 12)),
+      const SizedBox(
+        height: 10,
+      ),
+    ];
+  }
+
+  List<Widget> oracleText() {
+    return [
+      Expanded(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              ...cardTypeLine(),
+              Text(
                 widget.cardInfo.oracleText ?? 'No Oracle text found',
                 style: const TextStyle(fontSize: 12),
               ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                  '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}'),
             ],
           ),
-          const SizedBox(
-            height: 10,
-          ),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> powerAndToughness() {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
           Text(
-            'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
-            style: const TextStyle(
-              fontSize: 12,
-            ),
+            '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
+            style: const TextStyle(fontSize: 12),
           ),
+        ],
+      ),
+      const SizedBox(
+        height: 4,
+      ),
+    ];
+  }
+
+  List<Widget> setName() {
+    return [
+      Text(
+        'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
+        style: const TextStyle(
+          fontSize: 12,
+        ),
+      ),
+    ];
+  }
+
+  Widget cardText() {
+    return Container(
+      height: _getContainerHeight(),
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          ...cardNameAndManaSymbol(),
+          //...cardTypeLine(),
+          ...oracleText(),
+          ...powerAndToughness(),
+          ...setName(),
         ],
       ),
     );

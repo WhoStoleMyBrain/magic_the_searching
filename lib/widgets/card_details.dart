@@ -99,6 +99,8 @@ class CardDetails extends StatelessWidget {
   }
 
   Future<void> _launchURL(String webpage) async {
-    if (!await url.launch(webpage)) throw 'Could not launch $webpage';
+    if (!await url.launchUrl(Uri.parse(webpage))) {
+      throw 'Could not launch $webpage';
+    }
   }
 }

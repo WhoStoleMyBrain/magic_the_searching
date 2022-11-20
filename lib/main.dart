@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
+import 'package:magic_the_searching/providers/card_symbol_provider.dart';
 import 'package:magic_the_searching/providers/settings.dart';
 import 'package:magic_the_searching/screens/help_screen.dart';
 import 'package:magic_the_searching/screens/settings_screen.dart';
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
     final prefs = await SharedPreferences.getInstance();
 
     DateTime today = DateTime.now();
-    int timestamp = prefs.getInt('lastDbCleaned') ?? today.subtract(const Duration(days: 100)).millisecondsSinceEpoch;
+    int timestamp = prefs.getInt('lastDbCleaned') ??
+        today.subtract(const Duration(days: 100)).millisecondsSinceEpoch;
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     if (today.difference(dateTime).inDays > 7) {
       // print('clearing db...');
@@ -51,6 +53,13 @@ class MyApp extends StatelessWidget {
         // ),
         ChangeNotifierProvider(
           create: (_) => Settings(false, false, DateTime.now(), true),
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            var tmp = CardSymbolProvider();
+            tmp.getAllAssetImages();
+            return tmp;
+          },
         ),
       ],
       child: MaterialApp(
