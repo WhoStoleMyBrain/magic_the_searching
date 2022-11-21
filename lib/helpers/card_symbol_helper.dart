@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -30,7 +28,6 @@ class CardSymbolHelper {
 
   static List<String> getSymbolsOfText(String text) {
     List<String> splitted = text.split('{');
-    // if (kDebugMode) print(splitted);
     Iterable<String> manaCosts = splitted.map((e) => e.split('}').first);
     manaCosts = manaCosts.skip(1);
     manaCosts = manaCosts.map((e) => symbolToAssetPath(e));
@@ -38,20 +35,17 @@ class CardSymbolHelper {
   }
 
   static String symbolToAssetPath(String symbol) {
-    return 'assets/images/$symbol.svg';
+    return 'assets/images/${symbol.replaceAll("/", "-")}.svg';
   }
 
   static Future<List<String>> listAssetImages() async {
     final manifestContent = await rootBundle.loadString('AssetManifest.json');
-
     final Map<String, dynamic> manifestMap = json.decode(manifestContent);
     // >> To get paths you need these 2 lines
-
     final imagePaths = manifestMap.keys
         .where((String key) => key.contains('images/'))
         .where((String key) => key.contains('.svg'))
         .toList();
-    // print(imagePaths);
     return imagePaths;
   }
 }

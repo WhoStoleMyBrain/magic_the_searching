@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/card_symbol_helper.dart';
 import 'package:magic_the_searching/providers/card_symbol_provider.dart';
@@ -51,31 +53,45 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
         CardSymbolHelper.getSymbolsOfText(widget.cardInfo.manaCost ?? '');
 
     return [
-      Text(
-        widget.cardInfo.name ??
-            'No name found for this card.', // https://pub.dev/packages/auto_size_text for auto title resize!
-        style: const TextStyle(
-          fontSize: 24,
+      SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: 24,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: cardSymbols.length > 9
+                  ? MediaQuery.of(context).size.width * 0.25
+                  : MediaQuery.of(context).size.width *
+                      (0.85 - 0.066 * cardSymbols.length),
+              child: AutoSizeText(
+                // '',
+                overflow: TextOverflow.ellipsis,
+                widget.cardInfo.name ??
+                    'No name found for this card.', // https://pub.dev/packages/auto_size_text for auto title resize!
+                style: const TextStyle(
+                  fontSize: 24,
+                ),
+                maxLines: 1,
+              ),
+            ),
+            cardSymbols.isNotEmpty
+                ? Row(
+                    children: [
+                      ...cardSymbols.map((e) => SvgPicture.asset(
+                            e,
+                            width: 24,
+                            height: 24,
+                          ))
+                    ],
+                  )
+                : Text(
+                    widget.cardInfo.manaCost ?? '',
+                    style: const TextStyle(fontSize: 24),
+                  ),
+          ],
         ),
       ),
-      const SizedBox(
-        height: 2,
-      ),
-      cardSymbols.isNotEmpty
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ...cardSymbols.map((e) => SvgPicture.asset(
-                      e,
-                      width: 24,
-                      height: 24,
-                    ))
-              ],
-            )
-          : Text(
-              widget.cardInfo.manaCost ?? '',
-              style: const TextStyle(fontSize: 24),
-            ),
       const SizedBox(
         height: 10,
       ),
@@ -86,21 +102,11 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     return [
       Text(widget.cardInfo.typeLine ?? '',
           style: const TextStyle(fontSize: 16)),
-      const SizedBox(
-        height: 10,
-      ),
     ];
   }
 
   Widget oracleText() {
-    // Widget oracleTextWidget = Text(
-    //   widget.cardInfo.oracleText ?? 'No Oracle text found',
-    //   style: const TextStyle(
-    //     fontSize: 16,
-    //   ),
-    // );
     var richText = buildRichTextSpan(widget.cardInfo.oracleText ?? '');
-    // return richText;
     return Expanded(
       child: Container(
         child: richText,
@@ -124,30 +130,38 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     ];
   }
 
-  List<Widget> powerAndToughness() {
+  List<Widget> setNameAndPowerAndToughness() {
     return [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Card(
-            elevation: 2,
-            color: const Color.fromRGBO(230, 230, 230, 1.0),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
-                style: const TextStyle(
-                  fontSize: 24,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-        ],
+      SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ...setName(),
+            (widget.cardInfo.power == null && widget.cardInfo.toughness == null)
+                ? const SizedBox.shrink()
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Card(
+                        elevation: 1,
+                        color: const Color.fromRGBO(229, 230, 230, 1.0),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(7)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(7.0),
+                          child: Text(
+                            '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
+                            style: const TextStyle(
+                              fontSize: 23,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ],
+        ),
       ),
       const SizedBox(
         height: 10,
@@ -156,50 +170,58 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   }
 
   List<dynamic> textSpanWidgets(String text) {
-    // print(text);
     List<String> splittedText = text.split(RegExp(r'[{}]'));
     splittedText.removeWhere((element) {
       return element == '' || element == ' ';
     });
-    // print(splittedText);
     var finalSpans = [];
     for (var tmp in splittedText) {
-      print(tmp);
       finalSpans.add(
         symbolImages.keys.contains(CardSymbolHelper.symbolToAssetPath(tmp))
             ? WidgetSpan(
-                child: symbolImages[CardSymbolHelper.symbolToAssetPath(tmp)] ??
-                    Text('{$tmp}'),
+                alignment: ui.PlaceholderAlignment.middle,
+                child: SizedBox(
+                  height: 16,
+                  width: 16,
+                  child:
+                      symbolImages[CardSymbolHelper.symbolToAssetPath(tmp)] ??
+                          Text('{$tmp}', style: const TextStyle(fontSize: 16)),
+                ),
               )
             : WidgetSpan(
-                child: Text(tmp),
+                child: Text(tmp, style: const TextStyle(fontSize: 16)),
               ),
       );
-      // finalSpans.add(const WidgetSpan(child: Text(',')));
     }
+    // print(finalSpans);
     return finalSpans;
   }
 
   Widget buildRichTextSpan(String text) {
     return RichText(
       softWrap: true,
-      // locale: ,
       overflow: TextOverflow.visible,
-      text: TextSpan(children: [...textSpanWidgets(text)]),
-      // textAlign: TextAlign.start,
+      text: TextSpan(
+        children: [...textSpanWidgets(text)],
+      ),
     );
   }
 
   List<Widget> setName() {
     return [
-      Text(
-        'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
-        style: const TextStyle(
-          fontSize: 16,
+      SizedBox(
+        width: MediaQuery.of(context).size.width *
+            (0.7 -
+                0.05 * int.tryParse(widget.cardInfo.power ?? '0')! / 10 -
+                0.05 * int.tryParse(widget.cardInfo.toughness ?? '0')! / 10),
+        height: 24,
+        child: AutoSizeText(
+          'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
+          style: const TextStyle(
+            fontSize: 16,
+          ),
+          maxLines: 1,
         ),
-      ),
-      const SizedBox(
-        height: 10,
       ),
     ];
   }
@@ -216,8 +238,13 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...cardNameAndManaSymbol(),
+          const Divider(
+            thickness: 1,
+            color: Colors.black,
+          ),
           ...cardTypeLine(),
           const Divider(
             thickness: 1,
@@ -228,8 +255,7 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
           ),
           oracleText(),
           ...flavorText(),
-          ...powerAndToughness(),
-          ...setName(),
+          ...setNameAndPowerAndToughness(),
         ],
       ),
     ));
@@ -241,7 +267,6 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     final CardSymbolProvider cardSymbolProvider =
         Provider.of<CardSymbolProvider>(context, listen: true);
     symbolImages = cardSymbolProvider.symbolImages;
-    // print(widget.cardInfo.purchaseUris?.toJson());
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),
       builder: (context, snapshot) {
