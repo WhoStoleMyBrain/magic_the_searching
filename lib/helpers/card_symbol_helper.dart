@@ -30,7 +30,7 @@ class CardSymbolHelper {
 
   static List<String> getSymbolsOfText(String text) {
     List<String> splitted = text.split('{');
-    if (kDebugMode) print(splitted);
+    // if (kDebugMode) print(splitted);
     Iterable<String> manaCosts = splitted.map((e) => e.split('}').first);
     manaCosts = manaCosts.skip(1);
     manaCosts = manaCosts.map((e) => symbolToAssetPath(e));

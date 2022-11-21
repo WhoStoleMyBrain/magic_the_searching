@@ -52,7 +52,8 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
 
     return [
       Text(
-        widget.cardInfo.name ?? 'No name found for this card.',
+        widget.cardInfo.name ??
+            'No name found for this card.', // https://pub.dev/packages/auto_size_text for auto title resize!
         style: const TextStyle(
           fontSize: 24,
         ),
@@ -99,10 +100,13 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     //   ),
     // );
     var richText = buildRichTextSpan(widget.cardInfo.oracleText ?? '');
-    return richText;
-    // return Expanded(
-    //   child: oracleTextWidget,
-    // );
+    // return richText;
+    return Expanded(
+      child: Container(
+        child: richText,
+        alignment: Alignment.topLeft,
+      ),
+    );
   }
 
   List<Widget> flavorText() {
@@ -152,12 +156,15 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   }
 
   List<dynamic> textSpanWidgets(String text) {
+    // print(text);
     List<String> splittedText = text.split(RegExp(r'[{}]'));
     splittedText.removeWhere((element) {
       return element == '' || element == ' ';
     });
+    // print(splittedText);
     var finalSpans = [];
     for (var tmp in splittedText) {
+      print(tmp);
       finalSpans.add(
         symbolImages.keys.contains(CardSymbolHelper.symbolToAssetPath(tmp))
             ? WidgetSpan(
@@ -168,12 +175,19 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
                 child: Text(tmp),
               ),
       );
+      // finalSpans.add(const WidgetSpan(child: Text(',')));
     }
     return finalSpans;
   }
 
   Widget buildRichTextSpan(String text) {
-    return RichText(text: TextSpan(children: [...textSpanWidgets(text)]));
+    return RichText(
+      softWrap: true,
+      // locale: ,
+      overflow: TextOverflow.visible,
+      text: TextSpan(children: [...textSpanWidgets(text)]),
+      // textAlign: TextAlign.start,
+    );
   }
 
   List<Widget> setName() {
