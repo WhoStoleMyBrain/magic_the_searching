@@ -1,8 +1,12 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
+import '../helpers/card_symbol_helper.dart';
+import '../providers/card_symbol_provider.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../providers/settings.dart';
@@ -28,6 +32,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   late Image? _networkImageStream;
   late bool _hasInternetConnection = true;
   late Stream<FileResponse> fileStream;
+  Map<String, SvgPicture> symbolImages = {};
 
   Stream<FileResponse>? getLocalImage(Settings settings) {
     if (settings.useImagesFromNet) {
@@ -56,6 +61,8 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   }
 
   List<Widget> cardNameAndManaSymbol() {
+    List<String> cardSymbols =
+        CardSymbolHelper.getSymbolsOfText(widget.cardInfo.manaCost ?? '');
     return [
       Center(
         child: Text(
@@ -65,13 +72,23 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           ),
         ),
       ),
-      Text(
-        widget.cardInfo.manaCost ?? '',
-        style: const TextStyle(fontSize: 14),
-      ),
       const SizedBox(
-        height: 8,
+        height: 4,
       ),
+      cardSymbols.isNotEmpty
+          ? Row(
+              children: [
+                ...cardSymbols.map((e) => SvgPicture.asset(
+                      e,
+                      width: 14,
+                      height: 14,
+                    ))
+              ],
+            )
+          : Text(
+              widget.cardInfo.manaCost ?? '',
+              style: const TextStyle(fontSize: 24),
+            ),
     ];
   }
 
@@ -79,23 +96,67 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     return [
       Text(widget.cardInfo.typeLine ?? '',
           style: const TextStyle(fontSize: 12)),
-      const SizedBox(
-        height: 10,
-      ),
+      // const SizedBox(
+      //   height: 10,
+      // ),
     ];
   }
 
+  Widget buildRichTextSpan(String text) {
+    return RichText(
+      softWrap: true,
+      overflow: TextOverflow.visible,
+      text: TextSpan(
+        children: [...textSpanWidgets(text)],
+      ),
+    );
+  }
+
+  List<dynamic> textSpanWidgets(String text) {
+    List<String> splittedText = text.split(RegExp(r'[{}]'));
+    splittedText.removeWhere((element) {
+      return element == '' || element == ' ';
+    });
+    var finalSpans = [];
+    for (var tmp in splittedText) {
+      finalSpans.add(
+        symbolImages.keys.contains(CardSymbolHelper.symbolToAssetPath(tmp))
+            ? WidgetSpan(
+                alignment: ui.PlaceholderAlignment.top,
+                child: SvgPicture.asset(
+                  CardSymbolHelper.symbolToAssetPath(tmp),
+                  height: 12,
+                  width: 12,
+                ),
+              )
+            : TextSpan(
+                text: tmp,
+                style: const TextStyle(fontSize: 12, color: Colors.black)),
+      );
+    }
+    return finalSpans;
+  }
+
   List<Widget> oracleText() {
+    var richText = buildRichTextSpan(widget.cardInfo.oracleText ?? '');
     return [
       Expanded(
         child: SingleChildScrollView(
           child: Column(
             children: [
               ...cardTypeLine(),
-              Text(
-                widget.cardInfo.oracleText ?? 'No Oracle text found',
-                style: const TextStyle(fontSize: 12),
+              const Divider(
+                thickness: 0.5,
+                color: Colors.black,
               ),
+              Container(
+                alignment: Alignment.topLeft,
+                child: richText,
+              )
+              // Text(
+              //   widget.cardInfo.oracleText ?? 'No Oracle text found',
+              //   style: const TextStyle(fontSize: 12),
+              // ),
             ],
           ),
         ),
@@ -139,8 +200,24 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
         mainAxisSize: MainAxisSize.max,
         children: [
           ...cardNameAndManaSymbol(),
-          //...cardTypeLine(),
+          const Divider(
+            thickness: 0.5,
+            color: Colors.black,
+          ),
+          // ...cardTypeLine(),
+          // const Divider(
+          //   thickness: 1,
+          //   color: Colors.black,
+          // ),
+          // const SizedBox(
+          //   height: 4,
+          // ),
           ...oracleText(),
+          // ...flavorText(),
+          // ...setNameAndPowerAndToughness(),
+          // ...cardNameAndManaSymbol(),
+          // //...cardTypeLine(),
+          // ...oracleText(),
           ...powerAndToughness(),
           ...setName(),
         ],
@@ -151,6 +228,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<Settings>(context, listen: true);
+    final CardSymbolProvider cardSymbolProvider =
+        Provider.of<CardSymbolProvider>(context, listen: true);
+    symbolImages = cardSymbolProvider.symbolImages;
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),
       builder: (context, snapshot) {
@@ -207,14 +287,14 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                       _side == 0 ? _side = 1 : _side = 0;
                     });
                   },
+                  height: 45,
+                  shape: const CircleBorder(),
+                  color: const Color.fromRGBO(128, 128, 128, 0.5),
                   child: const Icon(
                     Icons.compare_arrows,
                     size: 30,
                     color: Colors.black87,
                   ),
-                  height: 45,
-                  shape: const CircleBorder(),
-                  color: const Color.fromRGBO(128, 128, 128, 0.5),
                 ),
               ),
           ],

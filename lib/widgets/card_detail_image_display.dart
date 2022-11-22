@@ -54,15 +54,15 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
 
     return [
       SizedBox(
-        width: MediaQuery.of(context).size.width * 0.9,
+        width: widget.mediaQuery.size.width * 0.9,
         height: 24,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SizedBox(
               width: cardSymbols.length > 9
-                  ? MediaQuery.of(context).size.width * 0.25
-                  : MediaQuery.of(context).size.width *
+                  ? widget.mediaQuery.size.width * 0.25
+                  : widget.mediaQuery.size.width *
                       (0.85 - 0.066 * cardSymbols.length),
               child: AutoSizeText(
                 // '',
@@ -108,9 +108,11 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   Widget oracleText() {
     var richText = buildRichTextSpan(widget.cardInfo.oracleText ?? '');
     return Expanded(
-      child: Container(
-        child: richText,
-        alignment: Alignment.topLeft,
+      child: SingleChildScrollView(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: richText,
+        ),
       ),
     );
   }
@@ -133,7 +135,7 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   List<Widget> setNameAndPowerAndToughness() {
     return [
       SizedBox(
-        width: MediaQuery.of(context).size.width * 0.9,
+        width: widget.mediaQuery.size.width * 0.9,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -179,21 +181,18 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
       finalSpans.add(
         symbolImages.keys.contains(CardSymbolHelper.symbolToAssetPath(tmp))
             ? WidgetSpan(
-                alignment: ui.PlaceholderAlignment.middle,
-                child: SizedBox(
+                alignment: ui.PlaceholderAlignment.top,
+                child: SvgPicture.asset(
+                  CardSymbolHelper.symbolToAssetPath(tmp),
                   height: 16,
                   width: 16,
-                  child:
-                      symbolImages[CardSymbolHelper.symbolToAssetPath(tmp)] ??
-                          Text('{$tmp}', style: const TextStyle(fontSize: 16)),
                 ),
               )
-            : WidgetSpan(
-                child: Text(tmp, style: const TextStyle(fontSize: 16)),
-              ),
+            : TextSpan(
+                text: tmp,
+                style: const TextStyle(fontSize: 16, color: Colors.black)),
       );
     }
-    // print(finalSpans);
     return finalSpans;
   }
 
@@ -210,10 +209,10 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   List<Widget> setName() {
     return [
       SizedBox(
-        width: MediaQuery.of(context).size.width *
+        width: widget.mediaQuery.size.width *
             (0.7 -
-                0.05 * int.tryParse(widget.cardInfo.power ?? '0')! / 10 -
-                0.05 * int.tryParse(widget.cardInfo.toughness ?? '0')! / 10),
+                0.1 * (widget.cardInfo.power?.length ?? 0) -
+                0.1 * (widget.cardInfo.toughness?.length ?? 0)),
         height: 24,
         child: AutoSizeText(
           'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
@@ -227,6 +226,7 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   }
 
   Widget cardText() {
+    // print(widget.mediaQuery.size);
     return Card(
         child: Container(
       height:
@@ -235,6 +235,7 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
               32 -
               16 -
               32,
+      // width: widget.mediaQuery.size.width,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,

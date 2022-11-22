@@ -115,10 +115,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
     for (int i = 0; i < jsonList.length; i += 1000) {
       try {
+        List jsonSubList;
+        print(i);
         setState(() {
           _entriesSaved = i;
         });
-        final List jsonSubList = jsonList.sublist(i, i + 1000);
+        try {
+          jsonSubList = jsonList.sublist(i, i + 1000);
+        } on RangeError {
+          jsonSubList = jsonList.sublist(i);
+        }
         final List<Map<String, dynamic>> cardSubList =
             jsonSubList.map((e) => CardInfo.fromJson(e).toDB()).toList();
         await DBHelper.insertBulkDataIntoCardDatabase(cardSubList);
@@ -179,7 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> checkIfCanUpdateDB(Settings settings) async {
     if (!isInit) {
       settings.checkCanUpdateDB();
-      isInit = true;
+      // isInit = true;
     }
   }
 

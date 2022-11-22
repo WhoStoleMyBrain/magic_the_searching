@@ -52,7 +52,9 @@ class MyApp extends StatelessWidget {
         //   create: (_) => InternetUsageHelper(),
         // ),
         ChangeNotifierProvider(
-          create: (_) => Settings(false, false, DateTime.now(), true),
+          create: (_) {
+            return Settings(false, false, DateTime.now(), false);
+          },
         ),
         ChangeNotifierProvider(
           create: (_) {
@@ -62,19 +64,24 @@ class MyApp extends StatelessWidget {
           },
         ),
       ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blueGrey,
-        ),
-        routes: {
-          CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),
-          HistoryScreen.routeName: (ctx) => const HistoryScreen(),
-          SettingsScreen.routeName: (ctx) => const SettingsScreen(),
-          HelpScreen.routeName: (ctx) => const HelpScreen(),
-        },
-        home: const CardSearchScreen(),
-      ),
+      child: Builder(builder: (context) {
+        var settings = Provider.of<Settings>(context, listen: false);
+        settings.checkCanUpdateDB();
+        settings.checkUseImagesFromNet();
+        return MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blueGrey,
+          ),
+          routes: {
+            CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),
+            HistoryScreen.routeName: (ctx) => const HistoryScreen(),
+            SettingsScreen.routeName: (ctx) => const SettingsScreen(),
+            HelpScreen.routeName: (ctx) => const HelpScreen(),
+          },
+          home: const CardSearchScreen(),
+        );
+      }),
     );
   }
 }

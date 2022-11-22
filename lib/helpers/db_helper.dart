@@ -45,7 +45,7 @@ class DBHelper {
           'CREATE TABLE prices(id TEXT UNIQUE PRIMARY KEY, usd TEXT, usdFoil TEXT, eur TEXT, eurFoil TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
       await db.execute(
           'CREATE TABLE purchase_uris(id TEXT UNIQUE PRIMARY KEY, tcgplayer TEXT, cardmarket TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
-    }, version: 2);
+    }, version: 1);
   }
 
   static Future<void> insertIntoCardDatabase(Map<String, dynamic> data) async {
@@ -140,18 +140,19 @@ class DBHelper {
 
   static Future<List<Map<String, dynamic>>> getCardsByName(String name) async {
     final db = await DBHelper.cardDatabase();
-    List<Map<String, dynamic>> _cardInfo = await db
-        .rawQuery('SELECT * FROM card_info WHERE name LIKE \'%$name%\'');
-    if (_cardInfo.isEmpty) {
+    List<Map<String, dynamic>> _cardDetail = await db
+        .rawQuery('SELECT * FROM card_detail WHERE name LIKE \'%$name%\'');
+    if (_cardDetail.isEmpty) {
       return [];
     }
 
     final List<Map<String, dynamic>> retList = [];
-    for (int i = 0; i < _cardInfo.length; i++) {
-      final String id = _cardInfo[i]["id"];
+    for (int i = 0; i < _cardDetail.length; i++) {
+      // print(_cardInfo[i]);
+      final String id = _cardDetail[i]["id"];
       // retList.add(await DBHelper.getCardById(id));
-      final _cardDetail =
-          await db.query('card_detail', where: 'id = ?', whereArgs: [id]);
+      final _cardInfo =
+          await db.query('card_info', where: 'id = ?', whereArgs: [id]);
       final _imageUris =
           await db.query('image_uris', where: 'id = ?', whereArgs: [id]);
       final _cardFaces =
@@ -161,8 +162,8 @@ class DBHelper {
       final _purchaseUris =
           await db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
       retList.add({
-        'card_info': _cardInfo[i],
-        'card_detail': _cardDetail,
+        'card_info': _cardInfo,
+        'card_detail': _cardDetail[i],
         'image_uris': _imageUris.first,
         'card_faces': _cardFaces.first,
         'prices': _prices.first,

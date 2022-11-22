@@ -87,8 +87,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               : ListView.builder(
                   itemCount: history.data.length,
                   itemBuilder: (ctx, i) {
-                    print(history.data[i].query);
-                    print(history.data[i].matches);
+                    // print(history.data[i].query);
+                    // print(history.data[i].matches);
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 4.0,
