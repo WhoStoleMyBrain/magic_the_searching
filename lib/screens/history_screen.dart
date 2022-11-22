@@ -87,13 +87,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
               : ListView.builder(
                   itemCount: history.data.length,
                   itemBuilder: (ctx, i) {
+                    print(history.data[i].query);
+                    print(history.data[i].matches);
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 4.0,
                         horizontal: 24.0,
                       ),
-                      title: Text(
-                          'Search term: ${history.data[i].query[0] == '!' ? history.data[i].query.substring(1) : history.data[i].query}'),
+                      title: history.data[i].query == ''
+                          ? const Text('*No Query*')
+                          : Text(
+                              'Search term: ${history.data[i].query[0] == '!' ? history.data[i].query.substring(1) : history.data[i].query}'),
                       subtitle: Text(
                           'Matches for this search: ${history.data[i].matches}'),
                       trailing: Row(

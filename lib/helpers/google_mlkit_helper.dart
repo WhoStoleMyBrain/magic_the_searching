@@ -40,6 +40,8 @@ class GoogleMlkitHelper {
     final inputImage = InputImage.fromFile(image);
     final RecognizedText recognisedText =
         await GoogleMlkitHelper.textDetector.processImage(inputImage);
+    // print(recognisedText.blocks);
+    if (recognisedText.blocks.isEmpty) return '';
     return recognisedText.blocks[0].lines[0].text;
   }
 }

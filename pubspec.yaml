@@ -39,6 +39,7 @@ dependencies:
   path: ^1.8.0
   shared_preferences: ^2.0.13
   image_picker: ^0.8.4+10
+  # image_cropper: ^0.8.4+10
   path_provider: ^2.0.9
   # google_ml_kit: ^0.7.3
   url_launcher: ^6.0.20
@@ -49,6 +50,7 @@ dependencies:
   archive: ^3.3.4
   flutter_svg: ^1.1.6
   auto_size_text: ^3.0.0
+  image_cropper: ^3.0.1
 
 
 dev_dependencies:
@@ -60,7 +62,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^1.0.0
+  flutter_lints: ^2.0.1
   # usage_stats: ^1.1.1
   build_runner: ^2.1.8
   json_serializable: ^6.1.5

@@ -42,6 +42,13 @@ class CardDataProvider with ChangeNotifier {
     List<Map<String, dynamic>> dbResult = await DBHelper.getCardsByName(query);
     if (dbResult.isEmpty) {
       cards = [];
+      Map<String, dynamic> historyData = {
+        'searchText': query,
+        'matches': dbResult.length,
+        'dateTime': DateTime.now().toIso8601String(),
+        'languages': languages.join(';'),
+      };
+      DBHelper.insertIntoHistory(historyData);
       return false;
     } else {
       Map<String, dynamic> historyData = {
@@ -66,6 +73,13 @@ class CardDataProvider with ChangeNotifier {
     final queryResult = scryfallRequestHandler.processQueryData();
     if (queryResult.isEmpty) {
       cards = [];
+      Map<String, dynamic> historyData = {
+        'searchText': query,
+        'matches': 0,
+        'dateTime': DateTime.now().toIso8601String(),
+        'languages': languages.join(';'),
+      };
+      DBHelper.insertIntoHistory(historyData);
       return false;
     } else {
       hasMore = scryfallRequestHandler.responseData['has_more'];
