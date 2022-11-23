@@ -82,7 +82,10 @@ String? oracleTextReadValue(Map<dynamic, dynamic>? json, String parameterName) {
       ? (json?['oracle_text'] == null)
           ? null
           : json!['oracle_text']
-      : json?['card_faces'].map((e) => e['oracle_text']).join('\n');
+      : json?['card_faces']
+          .map((e) => e['oracle_text'])
+          .join('PLACEHOLDER_SPLIT_TEXT');
+  // : json?['card_faces'].map((e) => e['oracle_text']).join('\n');
   // : json?['card_faces'].join('\n');
   // return json;
 }
@@ -108,6 +111,7 @@ class CardInfo {
     required this.oracleText,
     required this.power,
     required this.toughness,
+    required this.loyalty,
     required this.setName,
     required this.flavorText,
     required this.scryfallUri,
@@ -131,6 +135,7 @@ class CardInfo {
   String? oracleText;
   String? power;
   String? toughness;
+  String? loyalty;
   String? setName;
   String? flavorText;
   @JsonKey(name: 'scryfall_uri')
@@ -194,6 +199,7 @@ class CardInfo {
       manaCost: dbData['card_detail']['manaCost'] as String?,
       power: dbData['card_detail']['power'] as String?,
       toughness: dbData['card_detail']['toughness'] as String?,
+      loyalty: dbData['card_detail']['loyalty'] as String?,
       typeLine: dbData['card_detail']['typeLine'] as String?,
     );
   }
@@ -214,6 +220,7 @@ class CardInfo {
         'oracleText': oracleText,
         'power': power,
         'toughness': toughness,
+        'loyalty': loyalty,
         'setName': setName,
         'flavorText': flavorText,
         'hasTwoSides': hasTwoSides ? 1 : 0,

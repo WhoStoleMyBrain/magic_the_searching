@@ -59,6 +59,7 @@ class ScryfallRequestHandler {
       responseData = json.decode(response.body);
       if (response.statusCode != 200) {}
     } catch (error) {}
+    // print(responseData);
   }
 
   List<CardInfo> processQueryData() {
@@ -68,6 +69,11 @@ class ScryfallRequestHandler {
         resultList.add(CardInfo.fromJson(item));
       }
     } else {}
+    // use the following block to see all entries for a response from the API
+    // responseData["data"].first.keys.forEach((key) {
+    //   print(key);
+    // });
+    // print(responseData["data"].first["card_faces"]);
     return resultList;
   }
 

@@ -53,10 +53,12 @@ class ProcessImageTaking {
   // }
 
   static Future<void> takePictureAndFireQuery(BuildContext ctx) async {
-    final imageFile = await ProcessImageTaking.takeImage();
+    final file = await ProcessImageTaking.takeImage().then((imageFile) async {
+      return ProcessImageTaking.cropImage(imageFile: imageFile ?? File(''));
+    });
     // File file = File(imageFile?.path ?? '');
-    final file =
-        await ProcessImageTaking.cropImage(imageFile: imageFile ?? File(''));
+    // final file =
+    //     await ProcessImageTaking.cropImage(imageFile: imageFile ?? File(''));
     if (file == null) return;
     if (await file.exists()) {
       // final savedImage = await ProcessImageTaking.saveImage(imageFile);

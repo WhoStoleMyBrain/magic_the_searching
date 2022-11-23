@@ -56,8 +56,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
         10 -
         90 -
         8 -
-        10 -
-        20;
+        10;
   }
 
   List<Widget> cardNameAndManaSymbol() {
@@ -113,26 +112,45 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   }
 
   List<dynamic> textSpanWidgets(String text) {
+    // text = text.replaceFirst(r'PLACEHOLDER_SPLIT_TEXT', '\n');
     List<String> splittedText = text.split(RegExp(r'[{}]'));
     splittedText.removeWhere((element) {
       return element == '' || element == ' ';
     });
     var finalSpans = [];
     for (var tmp in splittedText) {
-      finalSpans.add(
-        symbolImages.keys.contains(CardSymbolHelper.symbolToAssetPath(tmp))
-            ? WidgetSpan(
-                alignment: ui.PlaceholderAlignment.top,
-                child: SvgPicture.asset(
-                  CardSymbolHelper.symbolToAssetPath(tmp),
-                  height: 12,
-                  width: 12,
-                ),
-              )
-            : TextSpan(
-                text: tmp,
-                style: const TextStyle(fontSize: 12, color: Colors.black)),
-      );
+      tmp.contains('PLACEHOLDER_SPLIT_TEXT')
+          ? finalSpans.addAll([
+              TextSpan(
+                  text: tmp.split('PLACEHOLDER_SPLIT_TEXT').first,
+                  style: const TextStyle(fontSize: 12, color: Colors.black)),
+              const WidgetSpan(
+                  child: Divider(
+                endIndent: 20,
+                indent: 20,
+                color: Colors.black,
+                thickness: 1,
+              )),
+              TextSpan(
+                  text: tmp.split('PLACEHOLDER_SPLIT_TEXT').last,
+                  style: const TextStyle(fontSize: 12, color: Colors.black)),
+            ])
+          : finalSpans.add(
+              symbolImages.keys
+                      .contains(CardSymbolHelper.symbolToAssetPath(tmp))
+                  ? WidgetSpan(
+                      alignment: ui.PlaceholderAlignment.middle,
+                      child: SvgPicture.asset(
+                        CardSymbolHelper.symbolToAssetPath(tmp),
+                        height: 12,
+                        width: 12,
+                      ),
+                    )
+                  : TextSpan(
+                      text: tmp,
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.black)),
+            );
     }
     return finalSpans;
   }
@@ -169,15 +187,32 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text(
-            '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
-            style: const TextStyle(fontSize: 12),
-          ),
+          widget.cardInfo.loyalty != null
+              ? Stack(alignment: AlignmentDirectional.center, children: [
+                  SvgPicture.asset(
+                    'assets/images/Loyalty.svg',
+                    width: 16,
+                    height: 16,
+                  ),
+                  Text(
+                    widget.cardInfo.loyalty ?? '0',
+                    style: const TextStyle(fontSize: 10, color: Colors.white),
+                  ),
+                ])
+              : (widget.cardInfo.power == null &&
+                      widget.cardInfo.toughness == null)
+                  ? const SizedBox.shrink()
+                  : Text(
+                      '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
         ],
       ),
-      const SizedBox(
-        height: 4,
-      ),
+      (widget.cardInfo.power == null && widget.cardInfo.toughness == null)
+          ? const SizedBox.shrink()
+          : const SizedBox(
+              height: 4,
+            ),
     ];
   }
 

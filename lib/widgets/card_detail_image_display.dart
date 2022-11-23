@@ -140,34 +140,52 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             ...setName(),
-            (widget.cardInfo.power == null && widget.cardInfo.toughness == null)
-                ? const SizedBox.shrink()
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Card(
-                        elevation: 1,
-                        color: const Color.fromRGBO(229, 230, 230, 1.0),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(7)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(7.0),
-                          child: Text(
-                            '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
-                            style: const TextStyle(
-                              fontSize: 23,
+            widget.cardInfo.loyalty != null
+                ? Stack(alignment: AlignmentDirectional.center, children: [
+                    SvgPicture.asset(
+                      'assets/images/Loyalty.svg',
+                      width: 24,
+                      height: 24,
+                    ),
+                    Center(
+                      child: Text(
+                        widget.cardInfo.loyalty ?? '0',
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.white),
+                      ),
+                    ),
+                  ])
+                : (widget.cardInfo.power == null &&
+                        widget.cardInfo.toughness == null)
+                    ? const SizedBox.shrink()
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Card(
+                            elevation: 1,
+                            color: const Color.fromRGBO(229, 230, 230, 1.0),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(7)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(7.0),
+                              child: Text(
+                                '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
+                                style: const TextStyle(
+                                  fontSize: 23,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
           ],
         ),
       ),
-      const SizedBox(
-        height: 10,
-      ),
+      (widget.cardInfo.power == null && widget.cardInfo.toughness == null)
+          ? const SizedBox.shrink()
+          : const SizedBox(
+              height: 10,
+            ),
     ];
   }
 
@@ -178,20 +196,38 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     });
     var finalSpans = [];
     for (var tmp in splittedText) {
-      finalSpans.add(
-        symbolImages.keys.contains(CardSymbolHelper.symbolToAssetPath(tmp))
-            ? WidgetSpan(
-                alignment: ui.PlaceholderAlignment.top,
-                child: SvgPicture.asset(
-                  CardSymbolHelper.symbolToAssetPath(tmp),
-                  height: 16,
-                  width: 16,
-                ),
-              )
-            : TextSpan(
-                text: tmp,
-                style: const TextStyle(fontSize: 16, color: Colors.black)),
-      );
+      tmp.contains('PLACEHOLDER_SPLIT_TEXT')
+          ? finalSpans.addAll([
+              TextSpan(
+                  text: tmp.split('PLACEHOLDER_SPLIT_TEXT').first,
+                  style: const TextStyle(fontSize: 16, color: Colors.black)),
+              const WidgetSpan(
+                  child: Divider(
+                indent: 30,
+                endIndent: 30,
+                color: Colors.black,
+                thickness: 1.5,
+              )),
+              TextSpan(
+                  text: tmp.split('PLACEHOLDER_SPLIT_TEXT').last,
+                  style: const TextStyle(fontSize: 16, color: Colors.black)),
+            ])
+          : finalSpans.add(
+              symbolImages.keys
+                      .contains(CardSymbolHelper.symbolToAssetPath(tmp))
+                  ? WidgetSpan(
+                      alignment: ui.PlaceholderAlignment.middle,
+                      child: SvgPicture.asset(
+                        CardSymbolHelper.symbolToAssetPath(tmp),
+                        height: 16,
+                        width: 16,
+                      ),
+                    )
+                  : TextSpan(
+                      text: tmp,
+                      style:
+                          const TextStyle(fontSize: 16, color: Colors.black)),
+            );
     }
     return finalSpans;
   }
