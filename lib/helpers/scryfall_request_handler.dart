@@ -56,9 +56,13 @@ class ScryfallRequestHandler {
     final url = Uri.parse(query);
     try {
       final response = await http.get(url);
+      if (response.statusCode != 200) {
+        return;
+      }
       responseData = json.decode(response.body);
-      if (response.statusCode != 200) {}
-    } catch (error) {}
+    } catch (error) {
+      return;
+    }
     // print(responseData);
   }
 
@@ -82,15 +86,19 @@ class ScryfallRequestHandler {
     final url = Uri.parse(uriNextPage ?? '');
     try {
       final response = await http.get(url);
+      if (response.statusCode != 200) {
+        return [];
+      }
       responseData = json.decode(response.body);
-      if (response.statusCode != 200) {}
-    } catch (error) {}
+    } catch (error) {
+      return [];
+    }
     final List<CardInfo> resultList = [];
     if (responseData["data"] != null) {
       for (Map<String, dynamic> item in responseData["data"]) {
         resultList.add(CardInfo.fromJson(item));
       }
-    } else {}
+    }
     return resultList;
   }
 }

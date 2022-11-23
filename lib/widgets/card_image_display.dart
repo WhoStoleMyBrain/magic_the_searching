@@ -56,7 +56,8 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
         10 -
         90 -
         8 -
-        10;
+        10 -
+        20;
   }
 
   List<Widget> cardNameAndManaSymbol() {
@@ -183,11 +184,17 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   }
 
   List<Widget> powerAndToughness() {
+    bool placeholderInLoyalty =
+        widget.cardInfo.loyalty?.contains('PLACEHOLDER_SPLIT_TEXT') ?? false;
+    bool placeholderInPower =
+        widget.cardInfo.power?.contains('PLACEHOLDER_SPLIT_TEXT') ?? false;
+    bool placeholderInToughness =
+        widget.cardInfo.toughness?.contains('PLACEHOLDER_SPLIT_TEXT') ?? false;
     return [
       Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          widget.cardInfo.loyalty != null
+          (widget.cardInfo.loyalty != null || placeholderInLoyalty)
               ? Stack(alignment: AlignmentDirectional.center, children: [
                   SvgPicture.asset(
                     'assets/images/Loyalty.svg',
@@ -200,7 +207,8 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                   ),
                 ])
               : (widget.cardInfo.power == null &&
-                      widget.cardInfo.toughness == null)
+                          widget.cardInfo.toughness == null ||
+                      (placeholderInPower || placeholderInToughness))
                   ? const SizedBox.shrink()
                   : Text(
                       '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',

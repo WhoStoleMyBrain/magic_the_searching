@@ -94,6 +94,40 @@ String? oracleTextReadValue(Map<dynamic, dynamic>? json, String parameterName) {
 //   return (json?['card_faces'] == null) ? json!['oracle_text'] : json?['card_faces'].join('\n');
 // }
 
+String? powerToughnessLoyaltyReadValue(
+    Map<dynamic, dynamic>? json, String parameterName) {
+  return (json?['card_faces'] == null)
+      ? (json?[parameterName] == null)
+          ? null
+          : json![parameterName]
+      : (json?['card_faces'].first[parameterName] == null &&
+              json?['card_faces'].last[parameterName] == null)
+          ? null
+          : json?['card_faces']
+              .map((e) => e[parameterName])
+              .join('PLACEHOLDER_SPLIT_TEXT');
+}
+
+// String? toughnessReadValue(Map<dynamic, dynamic>? json, String parameterName) {
+//   return (json?['card_faces'] == null)
+//       ? (json?['oracle_text'] == null)
+//           ? null
+//           : json!['oracle_text']
+//       : json?['card_faces']
+//           .map((e) => e['oracle_text'])
+//           .join('PLACEHOLDER_SPLIT_TEXT');
+// }
+
+// String? loyaltyReadValue(Map<dynamic, dynamic>? json, String parameterName) {
+//   return (json?['card_faces'] == null)
+//       ? (json?['oracle_text'] == null)
+//           ? null
+//           : json!['oracle_text']
+//       : json?['card_faces']
+//           .map((e) => e['oracle_text'])
+//           .join('PLACEHOLDER_SPLIT_TEXT');
+// }
+
 @JsonSerializable(
     explicitToJson:
         true, // makes subclasses usable in the toJson method. otherwise would get "Instance of..."
@@ -133,8 +167,17 @@ class CardInfo {
   // @JsonKey(name: 'oracle_text')
   @JsonKey(name: 'oracleText', readValue: oracleTextReadValue)
   String? oracleText;
+  @JsonKey(
+    readValue: powerToughnessLoyaltyReadValue,
+  )
   String? power;
+  @JsonKey(
+    readValue: powerToughnessLoyaltyReadValue,
+  )
   String? toughness;
+  @JsonKey(
+    readValue: powerToughnessLoyaltyReadValue,
+  )
   String? loyalty;
   String? setName;
   String? flavorText;

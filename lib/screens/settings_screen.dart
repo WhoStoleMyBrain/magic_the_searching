@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -33,7 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isProcessingToLocalDB = false;
 
   Future<BulkData?> _downloadData(BulkData? bulkData) async {
-    final List<int> _bytes = [];
+    final List<int> bytes = [];
     _response = await http.Client()
         .send(http.Request('GET', Uri.parse(bulkData?.downloadUri ?? '')));
     _totalBits = (bulkData?.compressedSize ?? 0);
@@ -42,7 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
     _response.stream.listen((value) {
       setState(() {
-        _bytes.addAll(value);
+        bytes.addAll(value);
         _receivedBits += value.length;
       });
     }).onDone(() async {
@@ -51,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _isSavingToLocalFile = true;
       });
       try {
-        await saveBytesToFile(_bytes)
+        await saveBytesToFile(bytes)
             .whenComplete(() => setPreferences(bulkData))
             .whenComplete(() => _saveDataToDB())
             .whenComplete(() => setState(() {
@@ -116,7 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     for (int i = 0; i < jsonList.length; i += 1000) {
       try {
         List jsonSubList;
-        print(i);
+        // print(i);
         setState(() {
           _entriesSaved = i;
         });
@@ -143,8 +145,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> changeUseLocalDB(bool newValue, BuildContext ctx) async {
     try {
-      var dbSize = await DBHelper.checkDatabaseSize('cardDatabase.db');
       final settings = Provider.of<Settings>(context, listen: false);
+      var dbSize = await DBHelper.checkDatabaseSize('cardDatabase.db');
       if (dbSize ~/ (1024 * 1024) < 3) {
         settings.useLocalDB = false;
         await showNoLocalDB(ctx);
@@ -279,8 +281,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onPressed: () async {
                       var dbSize =
                           await DBHelper.checkDatabaseSize('cardDatabase.db');
-                      print(
-                          'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+                      if (kDebugMode) {
+                        print(
+                            'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+                      }
                     },
                     child: const Text('Check card db file...')),
               if (kDebugMode)
@@ -288,8 +292,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onPressed: () async {
                       var dbSize =
                           await DBHelper.checkDatabaseSize('history.db');
-                      print(
-                          'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+                      if (kDebugMode) {
+                        print(
+                            'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+                      }
                     },
                     child: const Text('Check history db file...')),
               if (kDebugMode)

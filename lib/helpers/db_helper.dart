@@ -93,81 +93,80 @@ class DBHelper {
 
   static Future<Map<String, dynamic>> getCardById(String id) async {
     final db = await DBHelper.cardDatabase();
-    final _cardInfo = db.query('card_info', where: 'id = ?', whereArgs: [id]);
-    final _cardDetail =
+    final cardInfo = db.query('card_info', where: 'id = ?', whereArgs: [id]);
+    final cardDetail =
         db.query('card_detail', where: 'id = ?', whereArgs: [id]);
-    final _imageUris = db.query('image_uris', where: 'id = ?', whereArgs: [id]);
-    final _cardFaces = db.query('card_faces', where: 'id = ?', whereArgs: [id]);
-    final _prices = db.query('prices', where: 'id = ?', whereArgs: [id]);
-    final _purchaseUris =
+    final imageUris = db.query('image_uris', where: 'id = ?', whereArgs: [id]);
+    final cardFaces = db.query('card_faces', where: 'id = ?', whereArgs: [id]);
+    final prices = db.query('prices', where: 'id = ?', whereArgs: [id]);
+    final purchaseUris =
         db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
     return {
-      'card_info': _cardInfo,
-      'card_detail': _cardDetail,
-      'image_uris': _imageUris,
-      'card_faces': _cardFaces,
-      'prices': _prices,
-      'purchase_uris': _purchaseUris
+      'card_info': cardInfo,
+      'card_detail': cardDetail,
+      'image_uris': imageUris,
+      'card_faces': cardFaces,
+      'prices': prices,
+      'purchase_uris': purchaseUris
     };
   }
 
   static Future<Map<String, dynamic>> getCardByName(String name) async {
     final db = await DBHelper.cardDatabase();
-    List<Map<String, dynamic>> _cardInfo =
+    List<Map<String, dynamic>> cardInfo =
         await db.rawQuery('SELECT * FROM card_info WHERE name LIKE \'$name\'');
-    if (_cardInfo.isEmpty) {
+    if (cardInfo.isEmpty) {
       return {};
     }
-    final String id = _cardInfo.first["id"];
-    final _cardDetail =
+    final String id = cardInfo.first["id"];
+    final cardDetail =
         await db.query('card_detail', where: 'id = ?', whereArgs: [id]);
-    final _imageUris =
+    final imageUris =
         await db.query('image_uris', where: 'id = ?', whereArgs: [id]);
-    final _cardFaces =
+    final cardFaces =
         await db.query('card_faces', where: 'id = ?', whereArgs: [id]);
-    final _prices = await db.query('prices', where: 'id = ?', whereArgs: [id]);
-    final _purchaseUris =
+    final prices = await db.query('prices', where: 'id = ?', whereArgs: [id]);
+    final purchaseUris =
         await db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
     return {
-      'card_info': _cardInfo.first,
-      'card_detail': _cardDetail,
-      'image_uris': _imageUris.first,
-      'card_faces': _cardFaces.first,
-      'prices': _prices.first,
-      'purchase_uris': _purchaseUris.first,
+      'card_info': cardInfo.first,
+      'card_detail': cardDetail,
+      'image_uris': imageUris.first,
+      'card_faces': cardFaces.first,
+      'prices': prices.first,
+      'purchase_uris': purchaseUris.first,
     };
   }
 
   static Future<List<Map<String, dynamic>>> getCardsByName(String name) async {
     final db = await DBHelper.cardDatabase();
-    List<Map<String, dynamic>> _cardDetail = await db
+    List<Map<String, dynamic>> cardDetail = await db
         .rawQuery('SELECT * FROM card_detail WHERE name LIKE \'%$name%\'');
-    if (_cardDetail.isEmpty) {
+    if (cardDetail.isEmpty) {
       return [];
     }
 
     final List<Map<String, dynamic>> retList = [];
-    for (int i = 0; i < _cardDetail.length; i++) {
+    for (int i = 0; i < cardDetail.length; i++) {
       // print(_cardInfo[i]);
-      final String id = _cardDetail[i]["id"];
+      final String id = cardDetail[i]["id"];
       // retList.add(await DBHelper.getCardById(id));
-      final _cardInfo =
+      final cardInfo =
           await db.query('card_info', where: 'id = ?', whereArgs: [id]);
-      final _imageUris =
+      final imageUris =
           await db.query('image_uris', where: 'id = ?', whereArgs: [id]);
-      final _cardFaces =
+      final cardFaces =
           await db.query('card_faces', where: 'id = ?', whereArgs: [id]);
-      final _prices =
-          await db.query('prices', where: 'id = ?', whereArgs: [id]);
-      final _purchaseUris =
+      final prices = await db.query('prices', where: 'id = ?', whereArgs: [id]);
+      final purchaseUris =
           await db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
       retList.add({
-        'card_info': _cardInfo,
-        'card_detail': _cardDetail[i],
-        'image_uris': _imageUris.first,
-        'card_faces': _cardFaces.first,
-        'prices': _prices.first,
-        'purchase_uris': _purchaseUris.first,
+        'card_info': cardInfo,
+        'card_detail': cardDetail[i],
+        'image_uris': imageUris.first,
+        'card_faces': cardFaces.first,
+        'prices': prices.first,
+        'purchase_uris': purchaseUris.first,
       });
     }
     return retList;

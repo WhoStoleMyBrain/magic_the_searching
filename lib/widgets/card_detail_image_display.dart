@@ -132,7 +132,80 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     ];
   }
 
+  Widget loyaltyColumn() {
+    return Column(
+      children: [
+        ...widget.cardInfo.loyalty?.split('PLACEHOLDER_SPLIT_TEXT').map((e) {
+              // print(e);
+              return e == 'null'
+                  ? const SizedBox.shrink()
+                  : Stack(alignment: AlignmentDirectional.center, children: [
+                      SvgPicture.asset(
+                        'assets/images/Loyalty.svg',
+                        width: 24,
+                        height: 24,
+                      ),
+                      Center(
+                        child: Text(
+                          e,
+                          style: const TextStyle(
+                              fontSize: 12, color: Colors.white),
+                        ),
+                      ),
+                    ]);
+            }).toList() ??
+            [],
+      ],
+    );
+  }
+
+  Widget powerAndToughnessColumn() {
+    // List listItems = [];
+    // widget.cardInfo.power?.split('PLACEHOLDER_SPLIT_TEXT').forEach(
+    return Column(
+      children: [
+        ...widget.cardInfo.power
+                ?.split('PLACEHOLDER_SPLIT_TEXT')
+                .asMap()
+                .entries
+                .map((e) {
+              String toughness = widget.cardInfo.toughness
+                      ?.split('PLACEHOLDER_SPLIT_TEXT')[e.key] ??
+                  "-";
+              // print(toughness);
+              // print(e);
+              return (e.value == 'null' || toughness == 'null')
+                  ? const SizedBox.shrink()
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Card(
+                          elevation: 1,
+                          color: const Color.fromRGBO(229, 230, 230, 1.0),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(7.0),
+                            child: Text(
+                              '${e.value}/$toughness',
+                              style: const TextStyle(
+                                fontSize: 23,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+            }).toList() ??
+            [],
+      ],
+    );
+  }
+
   List<Widget> setNameAndPowerAndToughness() {
+    // print(widget.cardInfo.power);
+    // print(widget.cardInfo.toughness);
+    // print(widget.cardInfo.loyalty);
     return [
       SizedBox(
         width: widget.mediaQuery.size.width * 0.9,
@@ -141,43 +214,8 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
           children: [
             ...setName(),
             widget.cardInfo.loyalty != null
-                ? Stack(alignment: AlignmentDirectional.center, children: [
-                    SvgPicture.asset(
-                      'assets/images/Loyalty.svg',
-                      width: 24,
-                      height: 24,
-                    ),
-                    Center(
-                      child: Text(
-                        widget.cardInfo.loyalty ?? '0',
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.white),
-                      ),
-                    ),
-                  ])
-                : (widget.cardInfo.power == null &&
-                        widget.cardInfo.toughness == null)
-                    ? const SizedBox.shrink()
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Card(
-                            elevation: 1,
-                            color: const Color.fromRGBO(229, 230, 230, 1.0),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(7)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(7.0),
-                              child: Text(
-                                '${widget.cardInfo.power ?? "-"}/${widget.cardInfo.toughness ?? "-"}',
-                                style: const TextStyle(
-                                  fontSize: 23,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                ? loyaltyColumn()
+                : powerAndToughnessColumn(),
           ],
         ),
       ),
@@ -242,13 +280,37 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     );
   }
 
+  double _getSetNameWidth() {
+    return widget.mediaQuery.size.width *
+        (0.7 -
+            0.1 *
+                (widget.cardInfo.power?.split('PLACEHOLDER_SPLIT_TEXT').first ==
+                        null
+                    ? widget.cardInfo.power
+                            ?.split('PLACEHOLDER_SPLIT_TEXT')
+                            .first
+                            .length ??
+                        0
+                    : 0) -
+            0.1 *
+                (widget.cardInfo.toughness
+                            ?.split('PLACEHOLDER_SPLIT_TEXT')
+                            .first ==
+                        null
+                    ? widget.cardInfo.toughness
+                            ?.split('PLACEHOLDER_SPLIT_TEXT')
+                            .first
+                            .length ??
+                        0
+                    : 0));
+  }
+
   List<Widget> setName() {
+    // print('Here we go!');
+    // print(widget.cardInfo.power?.split('PLACEHOLDER_SPLIT_TEXT').first);
     return [
       SizedBox(
-        width: widget.mediaQuery.size.width *
-            (0.7 -
-                0.1 * (widget.cardInfo.power?.length ?? 0) -
-                0.1 * (widget.cardInfo.toughness?.length ?? 0)),
+        width: _getSetNameWidth(),
         height: 24,
         child: AutoSizeText(
           'Set: ${widget.cardInfo.setName ?? 'Unknown Set'}',
@@ -263,6 +325,11 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
 
   Widget cardText() {
     // print(widget.mediaQuery.size);
+    // print((widget.mediaQuery.size.height - widget.mediaQuery.padding.top - 30) -
+    // 100 -
+    // 32 -
+    // 16 -
+    // 32);
     return Card(
         child: Container(
       height:
@@ -359,14 +426,14 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
             _side == 0 ? _side = 1 : _side = 0;
           });
         },
+        height: 70,
+        shape: const CircleBorder(),
+        color: const Color.fromRGBO(128, 128, 128, 0.5),
         child: const Icon(
           Icons.compare_arrows,
           size: 50,
           color: Colors.black87,
         ),
-        height: 70,
-        shape: const CircleBorder(),
-        color: const Color.fromRGBO(128, 128, 128, 0.5),
       ),
     );
   }

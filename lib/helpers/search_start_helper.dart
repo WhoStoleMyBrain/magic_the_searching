@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:provider/provider.dart';

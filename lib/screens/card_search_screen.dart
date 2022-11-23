@@ -29,8 +29,8 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   bool endOfScrollReached = false;
 
   Future<void> getUseLocalDB() async {
-    final prefs = await SharedPreferences.getInstance();
     final settings = Provider.of<Settings>(context, listen: false);
+    final prefs = await SharedPreferences.getInstance();
     bool useLocalDB = prefs.getBool('useLocalDB') ?? false;
     settings.useLocalDB = useLocalDB;
   }

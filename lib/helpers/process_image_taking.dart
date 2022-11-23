@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -22,9 +24,9 @@ class ProcessImageTaking {
     final imageFile = await picker.pickImage(
       requestFullMetadata: false,
       source: ImageSource.camera,
-      maxWidth: 400,
-      maxHeight: 600,
-      imageQuality: 50,
+      // maxWidth: 800,
+      // maxHeight: 1200,
+      imageQuality: 25,
     );
 
     if (imageFile == null) {

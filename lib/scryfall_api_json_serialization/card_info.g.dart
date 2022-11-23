@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: unnecessary_cast
+
 part of 'card_info.dart';
 
 // **************************************************************************
@@ -13,9 +15,9 @@ CardInfo _$CardInfoFromJson(Map<String, dynamic> json) => CardInfo(
       typeLine: json['type_line'] as String?,
       oracleId: json['oracle_id'] as String?,
       oracleText: oracleTextReadValue(json, 'oracleText') as String?,
-      power: json['power'] as String?,
-      toughness: json['toughness'] as String?,
-      loyalty: json['loyalty'] as String?,
+      power: powerToughnessLoyaltyReadValue(json, 'power') as String?,
+      toughness: powerToughnessLoyaltyReadValue(json, 'toughness') as String?,
+      loyalty: powerToughnessLoyaltyReadValue(json, 'loyalty') as String?,
       setName: json['set_name'] as String?,
       flavorText: json['flavor_text'] as String?,
       scryfallUri: json['scryfall_uri'] as String?,
