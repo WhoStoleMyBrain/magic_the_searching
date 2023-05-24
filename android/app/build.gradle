@@ -58,6 +58,7 @@ android {
             aaptOptions {
                 ignoreAssetsPattern '!mlkit_pose:!mlkit_label_default_model:'
             }
+            shrinkResources false proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             // some other code

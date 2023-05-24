@@ -78,7 +78,9 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
     final mediaQuery = MediaQuery.of(context);
     return Scaffold(
-      appBar: MyMainAppBar(),
+      appBar: PreferredSize(
+          preferredSize: const Size(double.infinity, kToolbarHeight),
+          child: MyMainAppBar()),
       drawer: const AppDrawer(),
       body: cardDataProvider.isLoading
           ? const Center(

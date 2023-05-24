@@ -5,14 +5,14 @@ import '../helpers/search_start_helper.dart';
 import '../providers/card_data_provider.dart';
 import '../providers/settings.dart';
 
-class MyMainAppBar extends StatefulWidget with PreferredSizeWidget {
+class MyMainAppBar extends StatefulWidget {
   MyMainAppBar({Key? key}) : super(key: key);
 
   @override
   State<MyMainAppBar> createState() => _MyMainAppBarState();
 
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  // @override
+  // Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
 class _MyMainAppBarState extends State<MyMainAppBar> {
