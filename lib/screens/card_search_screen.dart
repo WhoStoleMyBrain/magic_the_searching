@@ -96,6 +96,13 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
 
   GridView myGridView(
       MediaQueryData mediaQuery, CardDataProvider cardDataProvider) {
+    const cardAspectRatio = 1 / 1.4;
+    const cardPriceDisplayHeight = 183; //183
+
+    final totalHeight = MediaQuery.of(context).size.width / cardAspectRatio +
+        cardPriceDisplayHeight;
+
+    final childAspectRatio = MediaQuery.of(context).size.width / totalHeight;
     return GridView.builder(
       controller: _controller,
       // key: UniqueKey(),
@@ -104,9 +111,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         crossAxisCount: 2,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
-        // childAspectRatio: ,
-        mainAxisExtent:
-            (mediaQuery.size.height - mediaQuery.padding.top - 15) / 2,
+        childAspectRatio: childAspectRatio,
       ),
       itemCount: cardDataProvider.cards.length,
       itemBuilder: (ctx, index) {

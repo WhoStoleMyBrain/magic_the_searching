@@ -293,6 +293,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           _hasInternetConnection = false;
         }
         return Stack(
+          // fit: StackFit.loose,
           // alignment: AlignmentDirectional.centerEnd,
           children: [
             (snapshot.connectionState == ConnectionState.done ||

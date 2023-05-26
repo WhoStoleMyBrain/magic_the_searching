@@ -26,9 +26,13 @@ class CardDisplay extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SingleChildScrollView(
-              child:
-                  CardImageDisplay(cardInfo: cardInfo, mediaQuery: mediaQuery),
+            AspectRatio(
+              aspectRatio: 1 / 1.4,
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: CardImageDisplay(
+                    cardInfo: cardInfo, mediaQuery: mediaQuery),
+              ),
             ),
             CardPriceDisplay(cardInfo: cardInfo),
           ],
