@@ -27,12 +27,21 @@ class _MyMainFloatingActionButtonsState
               onPressed: () async {
                 final result = await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => SearchPage(),
+                    builder: (context) => const SearchPage(),
                   ),
                 );
                 if (result != null) {
                   SearchStartHelper.startSearchForCard(
-                      context, result['searchTerm'], result['languages']);
+                    context,
+                    result['searchTerm'],
+                    result['languages'],
+                    result['creatureType'],
+                    result['cardType'],
+                    result['set'],
+                    result['cmcValue'],
+                    result['cmcCondition'],
+                    result['colors'],
+                  );
                 }
               },
               child: const Icon(Icons.search),

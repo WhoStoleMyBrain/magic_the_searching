@@ -63,7 +63,8 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
                 color: Colors.white,
                 onPressed: () {
                   SearchStartHelper.prefillValue = title;
-                  SearchStartHelper.startEnterSearchTerm(context);
+                  //TODO fix this code!
+                  // SearchStartHelper.startEnterSearchTerm(context);
                 },
               )
             : const IconButton(

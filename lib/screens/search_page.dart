@@ -26,24 +26,24 @@ class _SearchPageState extends State<SearchPage> {
 
   String _selectedCmcCondition = '<';
   final Map<String, bool> _manaSymbolsSelected = {
-    'G.svg': false,
-    'R.svg': false,
-    'B.svg': false,
-    'U.svg': false,
-    'W.svg': false,
+    'G': false,
+    'R': false,
+    'B': false,
+    'U': false,
+    'W': false,
   };
 
   final _formKey = GlobalKey<FormState>();
 
-  Future<List<Map<String, dynamic>>> manaSymbols = Future.value([]);
+  // Future<List<Map<String, dynamic>>> manaSymbols = Future.value([]);
 
   @override
   void initState() {
     super.initState();
-    manaSymbols = _fetchManaSymbols();
+    // manaSymbols = _fetchManaSymbols();
   }
 
-  void _identifyLanguages(String _nothing) async {
+  void _identifyLanguages(String _) async {
     if (_searchTermController.text.isEmpty) {
       return;
     }
@@ -66,21 +66,21 @@ class _SearchPageState extends State<SearchPage> {
     // return _languages;
   }
 
-  Future<List<Map<String, dynamic>>> _fetchManaSymbols() async {
-    List<Map<String, dynamic>> symbols = [];
-    List<String> manaSymbolPaths = await CardSymbolHelper.listAssetImages();
+  // Future<List<Map<String, dynamic>>> _fetchManaSymbols() async {
+  //   List<Map<String, dynamic>> symbols = [];
+  //   List<String> manaSymbolPaths = await CardSymbolHelper.listAssetImages();
 
-    for (var path in manaSymbolPaths) {
-      for (var symbol in _manaSymbolsSelected.keys) {
-        if (path.contains(symbol)) {
-          symbols.add({
-            'name': symbol,
-          });
-        }
-      }
-    }
-    return symbols;
-  }
+  //   for (var path in manaSymbolPaths) {
+  //     for (var symbol in _manaSymbolsSelected.keys) {
+  //       if (path.contains(symbol)) {
+  //         symbols.add({
+  //           'name': symbol,
+  //         });
+  //       }
+  //     }
+  //   }
+  //   return symbols;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -185,8 +185,7 @@ class _SearchPageState extends State<SearchPage> {
                       children: _manaSymbolsSelected.entries.map((entry) {
                         return FilterChip(
                           label: SvgPicture.asset(
-                            CardSymbolHelper.symbolToAssetPath(
-                                entry.key.split('.').first),
+                            CardSymbolHelper.symbolToAssetPath(entry.key),
                             width: 24,
                             height: 24,
                           ),
@@ -212,12 +211,12 @@ class _SearchPageState extends State<SearchPage> {
           if (_formKey.currentState!.validate()) {
             Navigator.pop(context, {
               'searchTerm': _searchTermController.text,
+              'languages': _languages,
               'creatureType': _creatureTypeController.text,
               'cardType': _cardTypeController.text,
               'set': _setController.text,
-              'cmcCondition': _selectedCmcCondition,
               'cmcValue': _cmcValueController.text,
-              'languages': _languages,
+              'cmcCondition': _selectedCmcCondition,
               'colors': _manaSymbolsSelected,
             });
           }

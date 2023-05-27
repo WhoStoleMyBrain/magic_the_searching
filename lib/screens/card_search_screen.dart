@@ -38,7 +38,8 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   void _openModalSheetAfterLoad() {
     final historyProvider = Provider.of<History>(context, listen: false);
     if (historyProvider.openModalSheet) {
-      SearchStartHelper.startEnterSearchTerm(context);
+      //TODO Fix this code!
+      // SearchStartHelper.startEnterSearchTerm(context);
     }
   }
 

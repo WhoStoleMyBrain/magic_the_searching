@@ -75,7 +75,8 @@ class ProcessImageTaking {
           await GoogleMlkitHelper.getLanguageOfString(recognisedText);
       final List<String> languages =
           cardLanguage != 'en' ? ['en', cardLanguage] : ['en'];
-      SearchStartHelper.startSearchForCard(ctx, recognisedText, languages);
+      //TODO Fix this code!!
+      // SearchStartHelper.startSearchForCard(ctx, recognisedText, languages);
     }
   }
 }

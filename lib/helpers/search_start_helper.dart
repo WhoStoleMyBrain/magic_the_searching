@@ -18,28 +18,32 @@ class SearchStartHelper {
   SearchStartHelper._internal();
   static String prefillValue = '';
 
-  static void startEnterSearchTerm(
-    BuildContext ctx,
-  ) {
-    showModalBottomSheet(
-      context: ctx,
-      builder: (bCtx) {
-        return GestureDetector(
-          onTap: () {},
-          child: EnterSearchTerm(
-            prefillValue: prefillValue,
-            startSearchForCard: (text, languages) {
-              return SearchStartHelper.startSearchForCard(ctx, text, languages);
-            },
-          ),
-        );
-      },
-    ).whenComplete(() {
-      SearchStartHelper.prefillValue = '';
-      final history = Provider.of<History>(ctx, listen: false);
-      history.openModalSheet = false;
-    });
-  }
+  // static void startEnterSearchTerm(
+  //   BuildContext ctx,
+  // ) {
+  //   showModalBottomSheet(
+  //     context: ctx,
+  //     builder: (bCtx) {
+  //       return GestureDetector(
+  //         onTap: () {},
+  //         child: EnterSearchTerm(
+  //           prefillValue: prefillValue,
+  //           startSearchForCard: (text, languages) {
+  //             return SearchStartHelper.startSearchForCard(
+  //               ctx,
+  //               text,
+  //               languages,
+  //             );
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   ).whenComplete(() {
+  //     SearchStartHelper.prefillValue = '';
+  //     final history = Provider.of<History>(ctx, listen: false);
+  //     history.openModalSheet = false;
+  //   });
+  // }
 
   static Future<void> showFailedQuery(BuildContext ctx, String query) async {
     return showDialog<void>(
@@ -63,11 +67,38 @@ class SearchStartHelper {
   }
 
   static Future<void> startSearchForCard(
-      BuildContext ctx, String text, List<String> languages) async {
+      BuildContext ctx,
+      String text,
+      List<String> languages,
+      String creatureType,
+      String cardType,
+      String mtgSet,
+      String cmcValue,
+      String cmcCondition,
+      Map<String, bool> manaSymbols) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     final settings = Provider.of<Settings>(ctx, listen: false);
     bool requestSuccessful;
-    cardDataProvider.query = text;
+
+    String languageQuery = languages.isNotEmpty
+        ? languages.map((language) => "lang:$language").join(' ')
+        : '';
+    String creatureTypeQuery = creatureType.isNotEmpty ? "t:$creatureType" : '';
+    String cardTypeQuery = cardType.isNotEmpty ? "t:$cardType" : '';
+    String setQuery = mtgSet.isNotEmpty ? "e:$mtgSet" : '';
+    String cmcQuery = cmcValue != ''
+        ? "mv$cmcCondition$cmcValue"
+        : ''; //TODO Fix this != 0 part
+    String manaSymbolQuery = manaSymbols.isNotEmpty
+        ? manaSymbols.entries
+            .where((entry) => entry.value == true)
+            .map((entry) => "m:${entry.key}")
+            .join(' ')
+        : '';
+
+    cardDataProvider.query =
+        "$text $languageQuery $creatureTypeQuery $cardTypeQuery $setQuery $cmcQuery $manaSymbolQuery"
+            .trim();
     cardDataProvider.languages = languages;
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
