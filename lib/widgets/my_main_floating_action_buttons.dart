@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../helpers/process_image_taking.dart';
 import '../helpers/search_start_helper.dart';
+import '../screens/search_page.dart';
 
 class MyMainFloatingActionButtons extends StatefulWidget {
   const MyMainFloatingActionButtons({Key? key}) : super(key: key);
@@ -23,7 +24,17 @@ class _MyMainFloatingActionButtonsState
             padding: const EdgeInsets.all(5.0),
             child: FloatingActionButton(
               heroTag: 'search',
-              onPressed: () => SearchStartHelper.startEnterSearchTerm(context),
+              onPressed: () async {
+                final result = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => SearchPage(),
+                  ),
+                );
+                if (result != null) {
+                  SearchStartHelper.startSearchForCard(
+                      context, result['searchTerm'], result['languages']);
+                }
+              },
               child: const Icon(Icons.search),
             ),
           ),
