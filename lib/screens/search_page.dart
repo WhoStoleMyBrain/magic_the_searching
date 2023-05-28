@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 
 import '../helpers/card_symbol_helper.dart';
+import '../models/mtg_set.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -15,7 +19,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final _searchTermController = TextEditingController();
   final _creatureTypeController = TextEditingController();
-  final _cardTypeController = TextEditingController();
+  // final _cardTypeController = TextEditingController();
   final _setController = TextEditingController();
   final _cmcValueController = TextEditingController();
 
@@ -23,6 +27,9 @@ class _SearchPageState extends State<SearchPage> {
       LanguageIdentifier(confidenceThreshold: 0.5);
 
   List<String> _languages = [];
+  List<String> _creatureTypes = [];
+  List<MtGSet> _sets = [];
+  final _cacheManager = DefaultCacheManager();
 
   String _selectedCmcCondition = '<';
   final Map<String, bool> _manaSymbolsSelected = {
@@ -40,7 +47,47 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    // manaSymbols = _fetchManaSymbols();
+    _fetchCreatureTypes();
+    _fetchSets();
+  }
+
+  void _fetchCreatureTypes() async {
+    const url = 'https://api.scryfall.com/catalog/creature-types';
+    try {
+      final response = await _cacheManager.getSingleFile(url);
+      final Map<String, dynamic> jsonData =
+          jsonDecode(await response.readAsString());
+
+      if (jsonData.containsKey('data')) {
+        _creatureTypes = List<String>.from(jsonData['data']);
+      }
+    } catch (e) {
+      print('Error fetching creature types: $e');
+    }
+  }
+
+  void _fetchSets() async {
+    final url = 'https://api.scryfall.com/sets';
+    try {
+      final response = await _cacheManager.getSingleFile(url);
+      final Map<String, dynamic> jsonData =
+          jsonDecode(await response.readAsString());
+
+      if (jsonData.containsKey('data')) {
+        _sets = jsonData['data']
+            .map<MtGSet>((json) => MtGSet(
+                  code: json['code'],
+                  name: json['name'],
+                  releasedAt: json['released_at'] != null
+                      ? DateTime.parse(json['released_at'])
+                      : null,
+                  iconSvgUri: json['icon_svg_uri'],
+                ))
+            .toList();
+      }
+    } catch (e) {
+      print('Error fetching sets: $e');
+    }
   }
 
   void _identifyLanguages(String _) async {
@@ -63,24 +110,31 @@ class _SearchPageState extends State<SearchPage> {
     if (!_languages.contains('en')) {
       _languages.add('en');
     }
-    // return _languages;
   }
 
-  // Future<List<Map<String, dynamic>>> _fetchManaSymbols() async {
-  //   List<Map<String, dynamic>> symbols = [];
-  //   List<String> manaSymbolPaths = await CardSymbolHelper.listAssetImages();
+  String? _selectedCardType; // Initial default value
 
-  //   for (var path in manaSymbolPaths) {
-  //     for (var symbol in _manaSymbolsSelected.keys) {
-  //       if (path.contains(symbol)) {
-  //         symbols.add({
-  //           'name': symbol,
-  //         });
-  //       }
-  //     }
-  //   }
-  //   return symbols;
-  // }
+  // The card types
+  final List<String> _cardTypes = [
+    'None',
+    'Artifact',
+    'Battle',
+    'Conspiracy',
+    'Creature',
+    'Emblem',
+    'Enchantment',
+    'Hero',
+    'Instant',
+    'Land',
+    'Phenomenon',
+    'Plane',
+    'Planeswalker',
+    'Scheme',
+    'Sorcery',
+    'Tribal',
+    'Vanguard',
+    'Legendary',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -107,35 +161,93 @@ class _SearchPageState extends State<SearchPage> {
                     return null;
                   },
                 ),
-                TextFormField(
-                  controller: _creatureTypeController,
-                  decoration: const InputDecoration(labelText: 'Creature Type'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return null;
+                Autocomplete<String>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text == '') {
+                      return const Iterable<String>.empty();
                     }
-                    return null;
+                    return _creatureTypes.where((String option) {
+                      return option
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase());
+                    });
+                  },
+                  onSelected: (String selection) {
+                    _creatureTypeController.text = selection;
+                  },
+                  fieldViewBuilder: (BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted) {
+                    return TextFormField(
+                      controller: fieldTextEditingController,
+                      decoration:
+                          const InputDecoration(labelText: 'Creature Type'),
+                      focusNode: fieldFocusNode,
+                      onFieldSubmitted: (String value) {
+                        onFieldSubmitted();
+                      },
+                    );
                   },
                 ),
-                TextFormField(
-                  controller: _cardTypeController,
-                  decoration: const InputDecoration(labelText: 'Card Type'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return null;
+                Autocomplete<String>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text == '') {
+                      return const Iterable<String>.empty();
                     }
-                    return null;
+                    return _cardTypes.where((String option) {
+                      return option
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase());
+                    });
+                  },
+                  onSelected: (String selection) {
+                    setState(() {
+                      _selectedCardType = selection;
+                    });
+                  },
+                  fieldViewBuilder: (BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted) {
+                    return TextFormField(
+                      controller: fieldTextEditingController,
+                      decoration: const InputDecoration(labelText: 'Card Type'),
+                      focusNode: fieldFocusNode,
+                      onFieldSubmitted: (String value) {
+                        onFieldSubmitted();
+                      },
+                    );
                   },
                 ),
-                TextFormField(
-                  controller: _setController,
-                  decoration: const InputDecoration(labelText: 'Set'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return null;
+                Autocomplete<MtGSet>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text == '') {
+                      return const Iterable<MtGSet>.empty();
                     }
-                    return null;
+                    return _sets.where((MtGSet option) {
+                      return option.name
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase());
+                    });
                   },
+                  onSelected: (MtGSet selection) {
+                    _setController.text = selection.code;
+                  },
+                  fieldViewBuilder: (BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted) {
+                    return TextFormField(
+                      controller: fieldTextEditingController,
+                      decoration: const InputDecoration(labelText: 'Set'),
+                      focusNode: fieldFocusNode,
+                      onFieldSubmitted: (String value) {
+                        onFieldSubmitted();
+                      },
+                    );
+                  },
+                  displayStringForOption: (MtGSet option) => option.name,
                 ),
                 Row(
                   children: [
@@ -213,7 +325,7 @@ class _SearchPageState extends State<SearchPage> {
               'searchTerm': _searchTermController.text,
               'languages': _languages,
               'creatureType': _creatureTypeController.text,
-              'cardType': _cardTypeController.text,
+              'cardType': _selectedCardType,
               'set': _setController.text,
               'cmcValue': _cmcValueController.text,
               'cmcCondition': _selectedCmcCondition,
