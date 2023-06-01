@@ -10,18 +10,20 @@ import '../helpers/card_symbol_helper.dart';
 import '../models/mtg_set.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({Key? key}) : super(key: key);
+  final Map<String, dynamic>? prefilledValues;
+  const SearchPage({Key? key, this.prefilledValues}) : super(key: key);
 
   @override
   _SearchPageState createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final _searchTermController = TextEditingController();
-  final _creatureTypeController = TextEditingController();
+  TextEditingController _searchTermController = TextEditingController();
+
+  TextEditingController _creatureTypeController = TextEditingController();
   // final _cardTypeController = TextEditingController();
-  final _setController = TextEditingController();
-  final _cmcValueController = TextEditingController();
+  TextEditingController _setController = TextEditingController();
+  TextEditingController _cmcValueController = TextEditingController();
 
   LanguageIdentifier languageIdentifier =
       LanguageIdentifier(confidenceThreshold: 0.5);
@@ -32,7 +34,7 @@ class _SearchPageState extends State<SearchPage> {
   final _cacheManager = DefaultCacheManager();
 
   String _selectedCmcCondition = '<';
-  final Map<String, bool> _manaSymbolsSelected = {
+  Map<String, bool> _manaSymbolsSelected = {
     'G': false,
     'R': false,
     'B': false,
@@ -49,6 +51,20 @@ class _SearchPageState extends State<SearchPage> {
     super.initState();
     _fetchCreatureTypes();
     _fetchSets();
+    setState(() {
+      if (widget.prefilledValues != null) {
+        _searchTermController.text =
+            widget.prefilledValues!['searchTerm'] ?? '';
+        _creatureTypeController.text =
+            widget.prefilledValues!['creatureType'] ?? '';
+        _selectedCardType = widget.prefilledValues!['cardType'] ?? '';
+        _setController.text = widget.prefilledValues!['set'] ?? '';
+        _cmcValueController.text = widget.prefilledValues!['cmcValue'] ?? '';
+        _selectedCmcCondition = widget.prefilledValues!['cmcCondition'] ?? '<';
+        _manaSymbolsSelected =
+            widget.prefilledValues!['colors'] ?? _manaSymbolsSelected;
+      }
+    });
   }
 
   void _fetchCreatureTypes() async {
@@ -112,7 +128,7 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  String? _selectedCardType; // Initial default value
+  String? _selectedCardType = ''; // Initial default value
 
   // The card types
   final List<String> _cardTypes = [
@@ -151,9 +167,20 @@ class _SearchPageState extends State<SearchPage> {
               children: [
                 TextFormField(
                   controller: _searchTermController,
-                  onChanged: _identifyLanguages,
-                  decoration:
-                      const InputDecoration(labelText: 'Name of the card'),
+                  // onChanged: _identifyLanguages,
+                  // onChanged: (value) => _searchTermController.text = value,
+                  // on: (value) =>
+                  //     _searchTermController.text = value,
+                  decoration: InputDecoration(
+                    labelText: 'Name of the card',
+                    suffixIcon: _searchTermController.text.isEmpty
+                        ? null
+                        : IconButton(
+                            onPressed: () =>
+                                setState(() => _searchTermController.clear()),
+                            icon: const Icon(Icons.clear, color: Colors.red),
+                          ),
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return null;
@@ -173,19 +200,37 @@ class _SearchPageState extends State<SearchPage> {
                     });
                   },
                   onSelected: (String selection) {
-                    _creatureTypeController.text = selection;
+                    setState(() {
+                      _creatureTypeController.text = selection;
+                    });
                   },
                   fieldViewBuilder: (BuildContext context,
                       TextEditingController fieldTextEditingController,
                       FocusNode fieldFocusNode,
                       VoidCallback onFieldSubmitted) {
+                    _creatureTypeController = fieldTextEditingController;
                     return TextFormField(
-                      controller: fieldTextEditingController,
-                      decoration:
-                          const InputDecoration(labelText: 'Creature Type'),
+                      controller: _creatureTypeController,
+                      decoration: InputDecoration(
+                        labelText: 'Creature Type',
+                        suffixIcon: _creatureTypeController.text.isEmpty
+                            ? null
+                            : IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _creatureTypeController.clear();
+                                  });
+                                },
+                                icon:
+                                    const Icon(Icons.clear, color: Colors.red),
+                              ),
+                      ),
                       focusNode: fieldFocusNode,
                       onFieldSubmitted: (String value) {
                         onFieldSubmitted();
+                      },
+                      onChanged: (value) {
+                        setState(() {});
                       },
                     );
                   },
@@ -210,9 +255,25 @@ class _SearchPageState extends State<SearchPage> {
                       TextEditingController fieldTextEditingController,
                       FocusNode fieldFocusNode,
                       VoidCallback onFieldSubmitted) {
+                    // fieldTextEditingController =
+                    // _cardT; //Assign the controller here
+                    fieldTextEditingController.text = _selectedCardType ?? '';
                     return TextFormField(
                       controller: fieldTextEditingController,
-                      decoration: const InputDecoration(labelText: 'Card Type'),
+                      decoration: InputDecoration(
+                        labelText: 'Card Type',
+                        suffixIcon: _selectedCardType?.isEmpty ?? false
+                            ? null
+                            : IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedCardType = '';
+                                  });
+                                },
+                                icon:
+                                    const Icon(Icons.clear, color: Colors.red),
+                              ),
+                      ),
                       focusNode: fieldFocusNode,
                       onFieldSubmitted: (String value) {
                         onFieldSubmitted();
@@ -238,6 +299,7 @@ class _SearchPageState extends State<SearchPage> {
                       TextEditingController fieldTextEditingController,
                       FocusNode fieldFocusNode,
                       VoidCallback onFieldSubmitted) {
+                    fieldTextEditingController.text = _setController.text;
                     return TextFormField(
                       controller: fieldTextEditingController,
                       decoration: const InputDecoration(labelText: 'Set'),
@@ -291,7 +353,7 @@ class _SearchPageState extends State<SearchPage> {
                 ),
                 Row(
                   children: [
-                    Text('Colors:'),
+                    const Text('Colors:'),
                     Wrap(
                       spacing: 8.0,
                       children: _manaSymbolsSelected.entries.map((entry) {

@@ -106,8 +106,9 @@ class SearchStartHelper {
       // print('processing locally...');
       requestSuccessful = await cardDataProvider.processQueryLocally();
     } else {
-      // print('using Scryfall API...');
+      print('using Scryfall API...');
       requestSuccessful = await cardDataProvider.processQuery();
+      print('Request successful? $requestSuccessful');
     }
     if (!requestSuccessful) {
       showFailedQuery(ctx, text);

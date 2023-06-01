@@ -67,10 +67,11 @@ class CardDataProvider with ChangeNotifier {
     scryfallRequestHandler = ScryfallRequestHandler();
     scryfallRequestHandler.searchText = query;
     scryfallRequestHandler.languages = languages;
-
+    print('queryParameters: $queryParameters');
     scryfallRequestHandler.setHttpsQuery(queryParameters, isStandardQuery);
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
+
     if (queryResult.isEmpty) {
       cards = [];
       Map<String, dynamic> historyData = {
@@ -82,6 +83,10 @@ class CardDataProvider with ChangeNotifier {
       DBHelper.insertIntoHistory(historyData);
       return false;
     } else {
+      print('queryResult: $queryResult');
+      print('queryResult: ');
+      queryResult.map((e) => print(e.name));
+      print('queryResult: ${queryResult.first.name}');
       hasMore = scryfallRequestHandler.responseData['has_more'];
       Map<String, dynamic> historyData = {
         'searchText': query,
