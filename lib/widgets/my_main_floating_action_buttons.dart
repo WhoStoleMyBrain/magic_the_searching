@@ -5,7 +5,7 @@ import '../helpers/search_start_helper.dart';
 import '../screens/search_page.dart';
 
 class MyMainFloatingActionButtons extends StatefulWidget {
-  const MyMainFloatingActionButtons({Key? key}) : super(key: key);
+  const MyMainFloatingActionButtons({super.key});
   @override
   State<MyMainFloatingActionButtons> createState() =>
       _MyMainFloatingActionButtonsState();
@@ -25,24 +25,28 @@ class _MyMainFloatingActionButtonsState
             child: FloatingActionButton(
               heroTag: 'search',
               onPressed: () async {
-                final result = await Navigator.of(context).push(
+                await Navigator.of(context)
+                    .push(
                   MaterialPageRoute(
                     builder: (context) => const SearchPage(),
                   ),
-                );
-                if (result != null) {
-                  SearchStartHelper.startSearchForCard(
-                    context,
-                    result['searchTerm'],
-                    result['languages'],
-                    result['creatureType'],
-                    result['cardType'],
-                    result['set'],
-                    result['cmcValue'],
-                    result['cmcCondition'],
-                    result['colors'],
-                  );
-                }
+                )
+                    .then((value) {
+                  if (value != null) {
+                    SearchStartHelper.startSearchForCard(
+                      context,
+                      value['searchTerm'],
+                      value['languages'],
+                      value['creatureType'],
+                      value['keywordAbility'],
+                      value['cardType'],
+                      value['set'],
+                      value['cmcValue'],
+                      value['cmcCondition'],
+                      value['colors'],
+                    );
+                  }
+                });
               },
               child: const Icon(Icons.search),
             ),

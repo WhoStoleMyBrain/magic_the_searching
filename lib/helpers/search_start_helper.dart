@@ -1,13 +1,10 @@
-// ignore_for_file: use_build_context_synchronously
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/card_data_provider.dart';
-import '../providers/history.dart';
 import '../providers/settings.dart';
-import '../widgets/enter_search_term.dart';
 
 class SearchStartHelper {
   static final SearchStartHelper _searchStartHelper =
@@ -17,33 +14,6 @@ class SearchStartHelper {
   }
   SearchStartHelper._internal();
   static String prefillValue = '';
-
-  // static void startEnterSearchTerm(
-  //   BuildContext ctx,
-  // ) {
-  //   showModalBottomSheet(
-  //     context: ctx,
-  //     builder: (bCtx) {
-  //       return GestureDetector(
-  //         onTap: () {},
-  //         child: EnterSearchTerm(
-  //           prefillValue: prefillValue,
-  //           startSearchForCard: (text, languages) {
-  //             return SearchStartHelper.startSearchForCard(
-  //               ctx,
-  //               text,
-  //               languages,
-  //             );
-  //           },
-  //         ),
-  //       );
-  //     },
-  //   ).whenComplete(() {
-  //     SearchStartHelper.prefillValue = '';
-  //     final history = Provider.of<History>(ctx, listen: false);
-  //     history.openModalSheet = false;
-  //   });
-  // }
 
   static Future<void> showFailedQuery(BuildContext ctx, String query) async {
     return showDialog<void>(
@@ -71,6 +41,7 @@ class SearchStartHelper {
       String text,
       List<String> languages,
       String creatureType,
+      String keywordAbility,
       String cardType,
       String mtgSet,
       String cmcValue,
@@ -84,6 +55,8 @@ class SearchStartHelper {
         ? languages.map((language) => "lang:$language").join(' ')
         : '';
     String creatureTypeQuery = creatureType.isNotEmpty ? "t:$creatureType" : '';
+    String keywordAbilityQuery =
+        keywordAbility.isNotEmpty ? 'keyword:$keywordAbility' : '';
     String cardTypeQuery = cardType.isNotEmpty ? "t:$cardType" : '';
     String setQuery = mtgSet.isNotEmpty ? "e:$mtgSet" : '';
     String cmcQuery = cmcValue != ''
@@ -97,7 +70,7 @@ class SearchStartHelper {
         : '';
 
     cardDataProvider.query =
-        "$text $languageQuery $creatureTypeQuery $cardTypeQuery $setQuery $cmcQuery $manaSymbolQuery"
+        "$text $languageQuery $creatureTypeQuery $cardTypeQuery $setQuery $cmcQuery $manaSymbolQuery $keywordAbilityQuery"
             .trim();
     cardDataProvider.languages = languages;
     cardDataProvider.isStandardQuery = true;
@@ -106,9 +79,13 @@ class SearchStartHelper {
       // print('processing locally...');
       requestSuccessful = await cardDataProvider.processQueryLocally();
     } else {
-      print('using Scryfall API...');
+      if (kDebugMode) {
+        print('using Scryfall API...');
+      }
       requestSuccessful = await cardDataProvider.processQuery();
-      print('Request successful? $requestSuccessful');
+      if (kDebugMode) {
+        print('Request successful? $requestSuccessful');
+      }
     }
     if (!requestSuccessful) {
       showFailedQuery(ctx, text);

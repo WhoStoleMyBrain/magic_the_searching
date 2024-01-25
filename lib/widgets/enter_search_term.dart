@@ -8,8 +8,7 @@ class EnterSearchTerm extends StatefulWidget {
   final Function startSearchForCard;
   final String prefillValue;
   const EnterSearchTerm(
-      {Key? key, required this.startSearchForCard, this.prefillValue = ''})
-      : super(key: key);
+      {super.key, required this.startSearchForCard, this.prefillValue = ''});
   @override
   State<EnterSearchTerm> createState() => _EnterSearchTermState();
 }
@@ -33,23 +32,18 @@ class _EnterSearchTermState extends State<EnterSearchTerm> {
 
   void _submitSearchText() async {
     if (_searchTermController.text.isEmpty) {
-      // print('search term controller is empty');
-      // print(_searchTermController.text);
       return;
     }
     final List<String> languages = [];
     final String searchTerm = _searchTermController.text;
-    // print('submitting...; ${_searchTermController.text}');
     try {
       final String response =
           await languageIdentifier.identifyLanguage(searchTerm);
-      // print('lang: $response; text: $searchTerm');
       languages.add(response);
     } on PlatformException catch (pe) {
       if (pe.code == languageIdentifier.undeterminedLanguageCode) {
         // no language detected
         languages.add('');
-        // print('no languages detected');
       }
       languages.add('');
     }

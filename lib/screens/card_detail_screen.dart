@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
@@ -13,7 +11,7 @@ import '../widgets/card_details.dart';
 class CardDetailScreen extends StatelessWidget {
   static const routeName = '/card-detail';
 
-  const CardDetailScreen({Key? key}) : super(key: key);
+  const CardDetailScreen({super.key});
   Future<void> _showFailedQuery(BuildContext ctx, String query) async {
     return showDialog<void>(
       context: ctx,

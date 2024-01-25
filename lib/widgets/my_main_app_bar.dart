@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,7 +8,7 @@ import '../providers/settings.dart';
 import '../screens/search_page.dart';
 
 class MyMainAppBar extends StatefulWidget {
-  MyMainAppBar({Key? key}) : super(key: key);
+  const MyMainAppBar({super.key});
 
   @override
   State<MyMainAppBar> createState() => _MyMainAppBarState();
@@ -113,13 +114,15 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
       }
       // Otherwise, we'll assume it's part of the search term
       else {
-        parsed['searchTerm'] += ' ' + term;
+        parsed['searchTerm'] += ' $term';
       }
     }
 
     // Clean up the search term
     parsed['searchTerm'] = parsed['searchTerm'].trim();
-    print('parsed info:$parsed');
+    if (kDebugMode) {
+      print('parsed info:$parsed');
+    }
     return parsed;
   }
 
@@ -148,25 +151,29 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
                   // SearchStartHelper.prefillValue = title;
                   final Map<String, dynamic> prefilledValues =
                       parseSearchString(title);
-                  final result = await Navigator.of(context).push(
+                  await Navigator.of(context)
+                      .push(
                     MaterialPageRoute(
                       builder: (context) =>
                           SearchPage(prefilledValues: prefilledValues),
                     ),
-                  );
-                  if (result != null) {
-                    SearchStartHelper.startSearchForCard(
-                      context,
-                      result['searchTerm'],
-                      result['languages'],
-                      result['creatureType'],
-                      result['cardType'],
-                      result['set'],
-                      result['cmcValue'],
-                      result['cmcCondition'],
-                      result['colors'],
-                    );
-                  }
+                  )
+                      .then((value) {
+                    if (value != null) {
+                      SearchStartHelper.startSearchForCard(
+                        context,
+                        value['searchTerm'],
+                        value['languages'],
+                        value['creatureType'],
+                        value['keywordAbility'],
+                        value['cardType'],
+                        value['set'],
+                        value['cmcValue'],
+                        value['cmcCondition'],
+                        value['colors'],
+                      );
+                    }
+                  });
                 },
               )
             : const IconButton(

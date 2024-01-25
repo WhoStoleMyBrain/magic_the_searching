@@ -1,29 +1,32 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 
 import '../helpers/card_symbol_helper.dart';
 import '../models/mtg_set.dart';
 
 class SearchPage extends StatefulWidget {
   final Map<String, dynamic>? prefilledValues;
-  const SearchPage({Key? key, this.prefilledValues}) : super(key: key);
+  const SearchPage({super.key, this.prefilledValues});
 
   @override
   _SearchPageState createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
-  TextEditingController _searchTermController = TextEditingController();
+  final TextEditingController _searchTermController = TextEditingController();
 
   TextEditingController _creatureTypeController = TextEditingController();
+  TextEditingController _keywordAbilitiesController = TextEditingController();
   // final _cardTypeController = TextEditingController();
-  TextEditingController _setController = TextEditingController();
-  TextEditingController _cmcValueController = TextEditingController();
+  final TextEditingController _setController = TextEditingController();
+  final TextEditingController _cmcValueController = TextEditingController();
 
   LanguageIdentifier languageIdentifier =
       LanguageIdentifier(confidenceThreshold: 0.5);
@@ -31,6 +34,7 @@ class _SearchPageState extends State<SearchPage> {
   List<String> _languages = [];
   List<String> _creatureTypes = [];
   List<MtGSet> _sets = [];
+  List<String> _keywordAbilities = [];
   final _cacheManager = DefaultCacheManager();
 
   String _selectedCmcCondition = '<';
@@ -51,13 +55,17 @@ class _SearchPageState extends State<SearchPage> {
     super.initState();
     _fetchCreatureTypes();
     _fetchSets();
+    _fetchKeywordAbilities();
     setState(() {
       if (widget.prefilledValues != null) {
         _searchTermController.text =
             widget.prefilledValues!['searchTerm'] ?? '';
         _creatureTypeController.text =
             widget.prefilledValues!['creatureType'] ?? '';
+        _keywordAbilitiesController.text =
+            widget.prefilledValues!['keywordAbility'] ?? '';
         _selectedCardType = widget.prefilledValues!['cardType'] ?? '';
+
         _setController.text = widget.prefilledValues!['set'] ?? '';
         _cmcValueController.text = widget.prefilledValues!['cmcValue'] ?? '';
         _selectedCmcCondition = widget.prefilledValues!['cmcCondition'] ?? '<';
@@ -67,23 +75,39 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  void _fetchCreatureTypes() async {
-    const url = 'https://api.scryfall.com/catalog/creature-types';
-    try {
-      final response = await _cacheManager.getSingleFile(url);
-      final Map<String, dynamic> jsonData =
-          jsonDecode(await response.readAsString());
+  Future<List<String>> _fetchTypesFromUrl(String url) async {
+    final response = await _cacheManager.getSingleFile(url);
+    final Map<String, dynamic> jsonData =
+        jsonDecode(await response.readAsString());
+    if (jsonData.containsKey('data')) {
+      return List<String>.from(jsonData['data']);
+    }
+    return [];
+  }
 
-      if (jsonData.containsKey('data')) {
-        _creatureTypes = List<String>.from(jsonData['data']);
-      }
+  void _fetchCreatureTypes() async {
+    try {
+      _creatureTypes = await _fetchTypesFromUrl(Constants.urlCreatureTypes);
     } catch (e) {
-      print('Error fetching creature types: $e');
+      if (kDebugMode) {
+        print('Error fetching creature types: $e');
+      }
+    }
+  }
+
+  void _fetchKeywordAbilities() async {
+    try {
+      _keywordAbilities =
+          await _fetchTypesFromUrl(Constants.urlKeywordAbilities);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching creature types: $e');
+      }
     }
   }
 
   void _fetchSets() async {
-    final url = 'https://api.scryfall.com/sets';
+    const url = 'https://api.scryfall.com/sets';
     try {
       final response = await _cacheManager.getSingleFile(url);
       final Map<String, dynamic> jsonData =
@@ -102,7 +126,9 @@ class _SearchPageState extends State<SearchPage> {
             .toList();
       }
     } catch (e) {
-      print('Error fetching sets: $e');
+      if (kDebugMode) {
+        print('Error fetching sets: $e');
+      }
     }
   }
 
@@ -156,7 +182,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search'),
+        title: const Text('Search'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -165,216 +191,13 @@ class _SearchPageState extends State<SearchPage> {
             key: _formKey,
             child: Column(
               children: [
-                TextFormField(
-                  controller: _searchTermController,
-                  // onChanged: _identifyLanguages,
-                  // onChanged: (value) => _searchTermController.text = value,
-                  // on: (value) =>
-                  //     _searchTermController.text = value,
-                  decoration: InputDecoration(
-                    labelText: 'Name of the card',
-                    suffixIcon: _searchTermController.text.isEmpty
-                        ? null
-                        : IconButton(
-                            onPressed: () =>
-                                setState(() => _searchTermController.clear()),
-                            icon: const Icon(Icons.clear, color: Colors.red),
-                          ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return null;
-                    }
-                    return null;
-                  },
-                ),
-                Autocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<String>.empty();
-                    }
-                    return _creatureTypes.where((String option) {
-                      return option
-                          .toLowerCase()
-                          .contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  onSelected: (String selection) {
-                    setState(() {
-                      _creatureTypeController.text = selection;
-                    });
-                  },
-                  fieldViewBuilder: (BuildContext context,
-                      TextEditingController fieldTextEditingController,
-                      FocusNode fieldFocusNode,
-                      VoidCallback onFieldSubmitted) {
-                    _creatureTypeController = fieldTextEditingController;
-                    return TextFormField(
-                      controller: _creatureTypeController,
-                      decoration: InputDecoration(
-                        labelText: 'Creature Type',
-                        suffixIcon: _creatureTypeController.text.isEmpty
-                            ? null
-                            : IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _creatureTypeController.clear();
-                                  });
-                                },
-                                icon:
-                                    const Icon(Icons.clear, color: Colors.red),
-                              ),
-                      ),
-                      focusNode: fieldFocusNode,
-                      onFieldSubmitted: (String value) {
-                        onFieldSubmitted();
-                      },
-                      onChanged: (value) {
-                        setState(() {});
-                      },
-                    );
-                  },
-                ),
-                Autocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<String>.empty();
-                    }
-                    return _cardTypes.where((String option) {
-                      return option
-                          .toLowerCase()
-                          .contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  onSelected: (String selection) {
-                    setState(() {
-                      _selectedCardType = selection;
-                    });
-                  },
-                  fieldViewBuilder: (BuildContext context,
-                      TextEditingController fieldTextEditingController,
-                      FocusNode fieldFocusNode,
-                      VoidCallback onFieldSubmitted) {
-                    // fieldTextEditingController =
-                    // _cardT; //Assign the controller here
-                    fieldTextEditingController.text = _selectedCardType ?? '';
-                    return TextFormField(
-                      controller: fieldTextEditingController,
-                      decoration: InputDecoration(
-                        labelText: 'Card Type',
-                        suffixIcon: _selectedCardType?.isEmpty ?? false
-                            ? null
-                            : IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _selectedCardType = '';
-                                  });
-                                },
-                                icon:
-                                    const Icon(Icons.clear, color: Colors.red),
-                              ),
-                      ),
-                      focusNode: fieldFocusNode,
-                      onFieldSubmitted: (String value) {
-                        onFieldSubmitted();
-                      },
-                    );
-                  },
-                ),
-                Autocomplete<MtGSet>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<MtGSet>.empty();
-                    }
-                    return _sets.where((MtGSet option) {
-                      return option.name
-                          .toLowerCase()
-                          .contains(textEditingValue.text.toLowerCase());
-                    });
-                  },
-                  onSelected: (MtGSet selection) {
-                    _setController.text = selection.code;
-                  },
-                  fieldViewBuilder: (BuildContext context,
-                      TextEditingController fieldTextEditingController,
-                      FocusNode fieldFocusNode,
-                      VoidCallback onFieldSubmitted) {
-                    fieldTextEditingController.text = _setController.text;
-                    return TextFormField(
-                      controller: fieldTextEditingController,
-                      decoration: const InputDecoration(labelText: 'Set'),
-                      focusNode: fieldFocusNode,
-                      onFieldSubmitted: (String value) {
-                        onFieldSubmitted();
-                      },
-                    );
-                  },
-                  displayStringForOption: (MtGSet option) => option.name,
-                ),
-                Row(
-                  children: [
-                    DropdownButton<String>(
-                      value: _selectedCmcCondition,
-                      items: <String>[
-                        '<',
-                        '<=',
-                        '=',
-                        '>',
-                        '>=',
-                      ].map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedCmcCondition = newValue!;
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _cmcValueController,
-                        decoration:
-                            const InputDecoration(labelText: 'CMC Value'),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return null;
-                          } else if (double.tryParse(value) == null) {
-                            return 'Please enter a valid number.';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Text('Colors:'),
-                    Wrap(
-                      spacing: 8.0,
-                      children: _manaSymbolsSelected.entries.map((entry) {
-                        return FilterChip(
-                          label: SvgPicture.asset(
-                            CardSymbolHelper.symbolToAssetPath(entry.key),
-                            width: 24,
-                            height: 24,
-                          ),
-                          labelPadding: EdgeInsets.zero,
-                          selected: entry.value,
-                          onSelected: (bool selected) {
-                            setState(() {
-                              _manaSymbolsSelected[entry.key] = selected;
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
+                _getSearchTermField(),
+                _getCreatureTypeField(),
+                _getCardTypeField(),
+                _getKeywordAbilitiesField(),
+                _getMtgSetField(),
+                _getCmcField(),
+                _getManaSymbolsField(),
               ],
             ),
           ),
@@ -387,6 +210,7 @@ class _SearchPageState extends State<SearchPage> {
               'searchTerm': _searchTermController.text,
               'languages': _languages,
               'creatureType': _creatureTypeController.text,
+              'keywordAbility': _keywordAbilitiesController.text,
               'cardType': _selectedCardType,
               'set': _setController.text,
               'cmcValue': _cmcValueController.text,
@@ -397,6 +221,280 @@ class _SearchPageState extends State<SearchPage> {
         },
         child: const Icon(Icons.search),
       ),
+    );
+  }
+
+  Row _getManaSymbolsField() {
+    return Row(
+      children: [
+        const Text('Colors:'),
+        Wrap(
+          spacing: 8.0,
+          children: _manaSymbolsSelected.entries.map((entry) {
+            return FilterChip(
+              label: SvgPicture.asset(
+                CardSymbolHelper.symbolToAssetPath(entry.key),
+                width: 24,
+                height: 24,
+              ),
+              labelPadding: EdgeInsets.zero,
+              selected: entry.value,
+              onSelected: (bool selected) {
+                setState(() {
+                  _manaSymbolsSelected[entry.key] = selected;
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Row _getCmcField() {
+    return Row(
+      children: [
+        DropdownButton<String>(
+          value: _selectedCmcCondition,
+          items: <String>[
+            '<',
+            '<=',
+            '=',
+            '>',
+            '>=',
+          ].map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedCmcCondition = newValue!;
+            });
+          },
+        ),
+        Expanded(
+          child: TextFormField(
+            controller: _cmcValueController,
+            decoration: const InputDecoration(labelText: 'CMC Value'),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return null;
+              } else if (double.tryParse(value) == null) {
+                return 'Please enter a valid number.';
+              }
+              return null;
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Autocomplete<MtGSet> _getMtgSetField() {
+    return Autocomplete<MtGSet>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text == '') {
+          return const Iterable<MtGSet>.empty();
+        }
+        return _sets.where((MtGSet option) {
+          return option.name
+              .toLowerCase()
+              .contains(textEditingValue.text.toLowerCase());
+        });
+      },
+      onSelected: (MtGSet selection) {
+        _setController.text = selection.code;
+      },
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController fieldTextEditingController,
+          FocusNode fieldFocusNode,
+          VoidCallback onFieldSubmitted) {
+        fieldTextEditingController.text = _setController.text;
+        return TextFormField(
+          controller: fieldTextEditingController,
+          decoration: const InputDecoration(labelText: 'Set'),
+          focusNode: fieldFocusNode,
+          onFieldSubmitted: (String value) {
+            onFieldSubmitted();
+          },
+        );
+      },
+      displayStringForOption: (MtGSet option) => option.name,
+    );
+  }
+
+  Autocomplete<String> _getCardTypeField() {
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text == '') {
+          return const Iterable<String>.empty();
+        }
+        return _cardTypes.where((String option) {
+          return option
+              .toLowerCase()
+              .contains(textEditingValue.text.toLowerCase());
+        });
+      },
+      onSelected: (String selection) {
+        setState(() {
+          _selectedCardType = selection;
+        });
+      },
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController fieldTextEditingController,
+          FocusNode fieldFocusNode,
+          VoidCallback onFieldSubmitted) {
+        fieldTextEditingController.text = _selectedCardType ?? '';
+        return TextFormField(
+          controller: fieldTextEditingController,
+          decoration: InputDecoration(
+            labelText: 'Card Type',
+            suffixIcon: _selectedCardType?.isEmpty ?? false
+                ? null
+                : IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _selectedCardType = '';
+                      });
+                    },
+                    icon: const Icon(Icons.clear, color: Colors.red),
+                  ),
+          ),
+          focusNode: fieldFocusNode,
+          onFieldSubmitted: (String value) {
+            onFieldSubmitted();
+          },
+        );
+      },
+    );
+  }
+
+  Autocomplete<String> _getCreatureTypeField() {
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text == '') {
+          return const Iterable<String>.empty();
+        }
+        return _creatureTypes.where((String option) {
+          return option
+              .toLowerCase()
+              .contains(textEditingValue.text.toLowerCase());
+        });
+      },
+      onSelected: (String selection) {
+        setState(() {
+          _creatureTypeController.text = selection;
+        });
+      },
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController fieldTextEditingController,
+          FocusNode fieldFocusNode,
+          VoidCallback onFieldSubmitted) {
+        _creatureTypeController = fieldTextEditingController;
+        return TextFormField(
+          controller: _creatureTypeController,
+          decoration: InputDecoration(
+            labelText: 'Creature Type',
+            suffixIcon: _creatureTypeController.text.isEmpty
+                ? null
+                : IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _creatureTypeController.clear();
+                      });
+                    },
+                    icon: const Icon(Icons.clear, color: Colors.red),
+                  ),
+          ),
+          focusNode: fieldFocusNode,
+          onFieldSubmitted: (String value) {
+            onFieldSubmitted();
+          },
+          onChanged: (value) {
+            setState(() {});
+          },
+        );
+      },
+    );
+  }
+
+  Autocomplete<String> _getKeywordAbilitiesField() {
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text == '') {
+          return const Iterable<String>.empty();
+        }
+        return _keywordAbilities.where((String option) {
+          return option
+              .toLowerCase()
+              .contains(textEditingValue.text.toLowerCase());
+        }).toList()
+          ..sort(
+            (a, b) => a.startsWith(textEditingValue.text) ? 1 : 0,
+          );
+      },
+      onSelected: (String selection) {
+        setState(() {
+          _keywordAbilitiesController.text = selection;
+        });
+      },
+      fieldViewBuilder: (BuildContext context,
+          TextEditingController fieldTextEditingController,
+          FocusNode fieldFocusNode,
+          VoidCallback onFieldSubmitted) {
+        _keywordAbilitiesController = fieldTextEditingController;
+        return TextFormField(
+          controller: _keywordAbilitiesController,
+          decoration: InputDecoration(
+            labelText: 'Keyword Abilitiy',
+            suffixIcon: _keywordAbilitiesController.text.isEmpty
+                ? null
+                : IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _keywordAbilitiesController.clear();
+                      });
+                    },
+                    icon: const Icon(Icons.clear, color: Colors.red),
+                  ),
+          ),
+          focusNode: fieldFocusNode,
+          onFieldSubmitted: (String value) {
+            onFieldSubmitted();
+          },
+          onChanged: (value) {
+            setState(() {});
+          },
+        );
+      },
+    );
+  }
+
+  TextFormField _getSearchTermField() {
+    return TextFormField(
+      controller: _searchTermController,
+      // onChanged: _identifyLanguages,
+      // onChanged: (value) => _searchTermController.text = value,
+      // on: (value) =>
+      //     _searchTermController.text = value,
+      decoration: InputDecoration(
+        labelText: 'Name of the card',
+        suffixIcon: _searchTermController.text.isEmpty
+            ? null
+            : IconButton(
+                onPressed: () => setState(() => _searchTermController.clear()),
+                icon: const Icon(Icons.clear, color: Colors.red),
+              ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return null;
+        }
+        return null;
+      },
     );
   }
 }

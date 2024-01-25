@@ -8,7 +8,7 @@ import '../providers/history.dart';
 
 class HistoryScreen extends StatefulWidget {
   static const routeName = '/history-screen';
-  const HistoryScreen({Key? key}) : super(key: key);
+  const HistoryScreen({super.key});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -39,7 +39,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     HistoryObject thisHistoryObject = history.data[index];
     String searchText = thisHistoryObject.query;
     List<String> languages = thisHistoryObject.languages;
-    //can I use the search
     cardDataProvider.query = searchText;
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.languages = languages;
@@ -54,11 +53,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     HistoryObject thisHistoryObject = history.data[index];
     String searchText = thisHistoryObject.query;
     List<String> languages = thisHistoryObject.languages;
-    //can I use the search
     cardDataProvider.query = searchText;
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.languages = languages;
-    // cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
     SearchStartHelper.prefillValue = history.data[index].query;
     history.openModalSheet = true;
@@ -87,8 +84,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
               : ListView.builder(
                   itemCount: history.data.length,
                   itemBuilder: (ctx, i) {
-                    // print(history.data[i].query);
-                    // print(history.data[i].matches);
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 4.0,

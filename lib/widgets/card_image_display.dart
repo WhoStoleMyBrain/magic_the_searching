@@ -14,10 +14,10 @@ import '../scryfall_api_json_serialization/image_uris.dart';
 
 class CardImageDisplay extends StatefulWidget {
   const CardImageDisplay({
-    Key? key,
+    super.key,
     required this.cardInfo,
     required this.mediaQuery,
-  }) : super(key: key);
+  });
 
   final CardInfo cardInfo;
   final MediaQueryData mediaQuery;
@@ -96,9 +96,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     return [
       Text(widget.cardInfo.typeLine ?? '',
           style: const TextStyle(fontSize: 12)),
-      // const SizedBox(
-      //   height: 10,
-      // ),
     ];
   }
 
@@ -172,10 +169,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                 alignment: Alignment.topLeft,
                 child: richText,
               )
-              // Text(
-              //   widget.cardInfo.oracleText ?? 'No Oracle text found',
-              //   style: const TextStyle(fontSize: 12),
-              // ),
             ],
           ),
         ),
@@ -247,20 +240,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
             thickness: 0.5,
             color: Colors.black,
           ),
-          // ...cardTypeLine(),
-          // const Divider(
-          //   thickness: 1,
-          //   color: Colors.black,
-          // ),
-          // const SizedBox(
-          //   height: 4,
-          // ),
           ...oracleText(),
-          // ...flavorText(),
-          // ...setNameAndPowerAndToughness(),
-          // ...cardNameAndManaSymbol(),
-          // //...cardTypeLine(),
-          // ...oracleText(),
           ...powerAndToughness(),
           ...setName(),
         ],
@@ -293,8 +273,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           _hasInternetConnection = false;
         }
         return Stack(
-          // fit: StackFit.loose,
-          // alignment: AlignmentDirectional.centerEnd,
           children: [
             (snapshot.connectionState == ConnectionState.done ||
                     !settings.useImagesFromNet)

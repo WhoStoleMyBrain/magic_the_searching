@@ -21,9 +21,9 @@ class CardPriceDisplay extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Expanded(child: Text('Normal')),
                 Expanded(child: Text('Foil')),
               ],
@@ -38,7 +38,6 @@ class CardPriceDisplay extends StatelessWidget {
               children: [
                 buildSinglePriceItem('TCG', cardInfo.prices?.usd, '\$'),
                 buildSinglePriceItem('TCG', cardInfo.prices?.usdFoil, '\$'),
-                // Expanded(child: Container()),
               ],
             ),
             const SizedBox(

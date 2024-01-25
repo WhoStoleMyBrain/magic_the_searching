@@ -5,18 +5,16 @@ import 'package:url_launcher/url_launcher.dart' as url;
 
 class CardDetails extends StatelessWidget {
   const CardDetails({
-    Key? key,
+    super.key,
     required this.textStyle,
     required this.cardInfo,
-  }) : super(key: key);
+  });
 
   final TextStyle textStyle;
   final CardInfo cardInfo;
 
   @override
   Widget build(BuildContext context) {
-    // print(cardInfo.purchaseUris?.toJson());
-    // print(cardInfo.toJson());
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -64,7 +62,6 @@ class CardDetails extends StatelessWidget {
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // Text('${cardInfo.purchaseUris?.tcgplayer}'),
               getLinkButton('Scryfall', cardInfo.scryfallUri),
               getLinkButton('Cardmarket', cardInfo.purchaseUris?.cardmarket),
               getLinkButton('TCGPlayer', cardInfo.purchaseUris?.tcgplayer),

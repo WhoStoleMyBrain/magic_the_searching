@@ -15,10 +15,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class CardDetailImageDisplay extends StatefulWidget {
   const CardDetailImageDisplay({
-    Key? key,
+    super.key,
     required this.cardInfo,
     required this.mediaQuery,
-  }) : super(key: key);
+  });
 
   final CardInfo cardInfo;
   final MediaQueryData mediaQuery;
@@ -136,7 +136,6 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     return Column(
       children: [
         ...widget.cardInfo.loyalty?.split('PLACEHOLDER_SPLIT_TEXT').map((e) {
-              // print(e);
               return e == 'null'
                   ? const SizedBox.shrink()
                   : Stack(alignment: AlignmentDirectional.center, children: [
@@ -160,8 +159,6 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   }
 
   Widget powerAndToughnessColumn() {
-    // List listItems = [];
-    // widget.cardInfo.power?.split('PLACEHOLDER_SPLIT_TEXT').forEach(
     return Column(
       children: [
         ...widget.cardInfo.power
@@ -172,8 +169,6 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
               String toughness = widget.cardInfo.toughness
                       ?.split('PLACEHOLDER_SPLIT_TEXT')[e.key] ??
                   "-";
-              // print(toughness);
-              // print(e);
               return (e.value == 'null' || toughness == 'null')
                   ? const SizedBox.shrink()
                   : Row(
@@ -203,9 +198,6 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   }
 
   List<Widget> setNameAndPowerAndToughness() {
-    // print(widget.cardInfo.power);
-    // print(widget.cardInfo.toughness);
-    // print(widget.cardInfo.loyalty);
     return [
       SizedBox(
         width: widget.mediaQuery.size.width * 0.9,
@@ -306,8 +298,6 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   }
 
   List<Widget> setName() {
-    // print('Here we go!');
-    // print(widget.cardInfo.power?.split('PLACEHOLDER_SPLIT_TEXT').first);
     return [
       SizedBox(
         width: _getSetNameWidth(),
@@ -324,12 +314,6 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   }
 
   Widget cardText() {
-    // print(widget.mediaQuery.size);
-    // print((widget.mediaQuery.size.height - widget.mediaQuery.padding.top - 30) -
-    // 100 -
-    // 32 -
-    // 16 -
-    // 32);
     return Card(
         child: Container(
       height:
@@ -338,7 +322,6 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
               32 -
               16 -
               32,
-      // width: widget.mediaQuery.size.width,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,

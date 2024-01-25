@@ -5,7 +5,7 @@ import 'package:magic_the_searching/screens/history_screen.dart';
 import '../screens/settings_screen.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({Key? key}) : super(key: key);
+  const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {

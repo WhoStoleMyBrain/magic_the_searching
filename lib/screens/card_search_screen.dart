@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/history.dart';
-import '../helpers/search_start_helper.dart';
 import '../providers/card_data_provider.dart';
 import '../providers/settings.dart';
 import '../widgets/card_display.dart' as card_display;
@@ -18,7 +17,7 @@ enum HandedMode {
 }
 
 class CardSearchScreen extends StatefulWidget {
-  const CardSearchScreen({Key? key}) : super(key: key);
+  const CardSearchScreen({super.key});
 
   @override
   State<CardSearchScreen> createState() => _CardSearchScreenState();
@@ -79,8 +78,8 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     final cardDataProvider = Provider.of<CardDataProvider>(context);
     final mediaQuery = MediaQuery.of(context);
     return Scaffold(
-      appBar: PreferredSize(
-          preferredSize: const Size(double.infinity, kToolbarHeight),
+      appBar: const PreferredSize(
+          preferredSize: Size(double.infinity, kToolbarHeight),
           child: MyMainAppBar()),
       drawer: const AppDrawer(),
       body: cardDataProvider.isLoading

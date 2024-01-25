@@ -18,7 +18,7 @@ import '../scryfall_api_json_serialization/bulk_data.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
   static const routeName = '/settings-screen';
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -118,7 +118,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     for (int i = 0; i < jsonList.length; i += 1000) {
       try {
         List jsonSubList;
-        // print(i);
         setState(() {
           _entriesSaved = i;
         });
@@ -316,9 +315,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   height: MediaQuery.of(context).size.height * 1,
                   child: Center(
                     child: _isRequestingBulkData
-                        ? Column(
+                        ? const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               CircularProgressIndicator(),
                               Text('Fetching Bulk Data Url...'),
                             ],
@@ -337,9 +336,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ],
                               )
                             : _isSavingToLocalFile
-                                ? Column(
+                                ? const Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [
+                                    children: [
                                       CircularProgressIndicator(),
                                       Text('Saving file before processing...'),
                                     ],

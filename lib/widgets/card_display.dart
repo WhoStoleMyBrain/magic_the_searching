@@ -7,7 +7,7 @@ import '../scryfall_api_json_serialization/card_info.dart';
 class CardDisplay extends StatelessWidget {
   final CardInfo cardInfo;
 
-  const CardDisplay({Key? key, required this.cardInfo}) : super(key: key);
+  const CardDisplay({super.key, required this.cardInfo});
 
   void cardTapped(BuildContext ctx, String id) {
     Navigator.of(ctx).pushNamed(CardDetailScreen.routeName, arguments: id);

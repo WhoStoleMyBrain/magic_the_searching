@@ -34,22 +34,22 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   provider: ^6.0.2
-  http: ^0.13.0
+  http: ^1.2.0
   sqflite: ^2.2.8+4
   path: ^1.8.3
   shared_preferences: ^2.1.1
-  image_picker: ^0.8.7+5
+  image_picker: ^1.0.7
   path_provider: ^2.0.15
   # google_ml_kit: ^0.7.3
   url_launcher: ^6.1.11
   json_annotation: ^4.8.1
   flutter_cache_manager: ^3.3.0
-  google_mlkit_text_recognition: ^0.6.0
-  google_mlkit_language_id: ^0.6.0
+  google_mlkit_text_recognition: ^0.11.0
+  google_mlkit_language_id: ^0.9.0
   archive: ^3.3.4
   flutter_svg: ^2.0.5
   auto_size_text: ^3.0.0
-  image_cropper: ^4.0.1
+  image_cropper: ^5.0.1
 
 
 dev_dependencies:
@@ -61,7 +61,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.1
+  flutter_lints: ^3.0.1
   # usage_stats: ^1.1.1
   build_runner: ^2.4.4
   json_serializable: ^6.7.0

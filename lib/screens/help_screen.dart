@@ -7,7 +7,7 @@ import '../widgets/help_message.dart';
 
 class HelpScreen extends StatelessWidget {
   static const routeName = '/help-screen';
-  const HelpScreen({Key? key}) : super(key: key);
+  const HelpScreen({super.key});
 
   Widget smallDivider() {
     return const SizedBox(
