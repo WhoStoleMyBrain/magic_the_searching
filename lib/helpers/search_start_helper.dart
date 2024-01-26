@@ -36,17 +36,31 @@ class SearchStartHelper {
     );
   }
 
+  static String buildCumulativeQuery(List<String> options, String keyword) {
+    if (options.isEmpty) {
+      return '';
+    }
+    // } else if (options.length == 1) {
+    //   return '$keyword:${options.first}';
+    // }
+    return options.fold(
+        "", (previousValue, element) => '$previousValue $keyword:$element');
+    // return options.reduce((value, element) => '$value $keyword:$element');
+  }
+
   static Future<void> startSearchForCard(
       BuildContext ctx,
       String text,
       List<String> languages,
-      String creatureType,
-      String keywordAbility,
-      String cardType,
+      List<String> creatureTypes,
+      List<String> keywordAbilities,
+      List<String> cardTypes,
       String mtgSet,
       String cmcValue,
       String cmcCondition,
       Map<String, bool> manaSymbols) async {
+    print(
+        'creature types: $creatureTypes; keywordAbilities: $keywordAbilities, cardtypes: $cardTypes');
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     final settings = Provider.of<Settings>(ctx, listen: false);
     bool requestSuccessful;
@@ -54,10 +68,14 @@ class SearchStartHelper {
     String languageQuery = languages.isNotEmpty
         ? languages.map((language) => "lang:$language").join(' ')
         : '';
-    String creatureTypeQuery = creatureType.isNotEmpty ? "t:$creatureType" : '';
-    String keywordAbilityQuery =
-        keywordAbility.isNotEmpty ? 'keyword:$keywordAbility' : '';
-    String cardTypeQuery = cardType.isNotEmpty ? "t:$cardType" : '';
+    String creatureTypesQuery = buildCumulativeQuery(creatureTypes, 't');
+    String cardTypesQuery = buildCumulativeQuery(cardTypes, 't');
+    String keywordAbilitiesQuery =
+        buildCumulativeQuery(keywordAbilities, 'keyword');
+    // String creatureTypeQuery = creatureType.isNotEmpty ? "t:$creatureType" : '';
+    // String keywordAbilityQuery =
+    //     keywordAbility.isNotEmpty ? 'keyword:$keywordAbility' : '';
+    // String cardTypeQuery = cardType.isNotEmpty ? "t:$cardType" : '';
     String setQuery = mtgSet.isNotEmpty ? "e:$mtgSet" : '';
     String cmcQuery = cmcValue != ''
         ? "mv$cmcCondition$cmcValue"
@@ -70,11 +88,12 @@ class SearchStartHelper {
         : '';
 
     cardDataProvider.query =
-        "$text $languageQuery $creatureTypeQuery $cardTypeQuery $setQuery $cmcQuery $manaSymbolQuery $keywordAbilityQuery"
+        "$text $languageQuery $creatureTypesQuery $cardTypesQuery $setQuery $cmcQuery $manaSymbolQuery $keywordAbilitiesQuery"
             .trim();
     cardDataProvider.languages = languages;
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
+    print('Using query: ${cardDataProvider.query}');
     if (settings.useLocalDB) {
       // print('processing locally...');
       requestSuccessful = await cardDataProvider.processQueryLocally();
