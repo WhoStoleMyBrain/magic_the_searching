@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/screens/card_search_screen.dart';
 import 'package:magic_the_searching/screens/help_screen.dart';
 import 'package:magic_the_searching/screens/history_screen.dart';
 
@@ -13,7 +14,7 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           AppBar(
-            title: const Text('Where do You want to go?'),
+            title: const Text('Navigation'),
             automaticallyImplyLeading: false,
           ),
           const Divider(),
@@ -21,7 +22,8 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.search),
             title: const Text('Search'),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/');
+              Navigator.of(context).pushNamed(CardSearchScreen.routeName);
+              // Navigator.of(context).pushReplacementNamed('/');
             },
           ),
           const Divider(),
@@ -29,8 +31,8 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.history),
             title: const Text('History'),
             onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(HistoryScreen.routeName);
+              Navigator.of(context).pushNamed(HistoryScreen.routeName);
+              // .pushReplacementNamed(HistoryScreen.routeName);
             },
           ),
           const Divider(),
@@ -38,8 +40,8 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings_outlined),
             title: const Text('Settings'),
             onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(SettingsScreen.routeName);
+              Navigator.of(context).pushNamed(SettingsScreen.routeName);
+              // .pushReplacementNamed(SettingsScreen.routeName);
             },
           ),
           const Divider(),
@@ -47,7 +49,8 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.help_outline),
             title: const Text('Help'),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed(HelpScreen.routeName);
+              Navigator.of(context).pushNamed(HelpScreen.routeName);
+              // Navigator.of(context).pushReplacementNamed(HelpScreen.routeName);
             },
           ),
         ],
