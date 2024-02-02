@@ -4,9 +4,9 @@ import '../scryfall_api_json_serialization/card_info.dart';
 
 class CardPriceDisplay extends StatelessWidget {
   const CardPriceDisplay({
-    Key? key,
+    super.key,
     required this.cardInfo,
-  }) : super(key: key);
+  });
 
   final CardInfo cardInfo;
 
