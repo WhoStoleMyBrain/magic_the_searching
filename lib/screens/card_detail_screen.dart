@@ -112,7 +112,7 @@ class CardDetailScreen extends StatelessWidget {
       child: Text(
         displayText,
         style: TextStyle(
-            color: Theme.of(context).colorScheme.onPrimary, fontSize: 20),
+            color: Theme.of(context).colorScheme.primary, fontSize: 20),
       ),
     );
   }
