@@ -15,16 +15,10 @@ class ScryfallRequestHandler {
 
   static const String apiBasePath = 'api.scryfall.com';
   static const String queryBaseString = '/cards/search';
-  // static const String isshin =
-  //     'https://c1.scryfall.com/file/scryfall-cards/large/front/a/0/a062a004-984e-4b62-960c-af7288f7a3e9.jpg?1643846546';
-  // static const String isshinLocal =
-  //     'assets/images/isshin-two-heavens-as-one.jpg';
   String searchText = '';
   String query = '';
   List<String> languages = [];
   Map<String, dynamic> responseData = {};
-
-  // ScryfallRequestHandler({required this.searchText, required this.languages});
 
   void _configureSearchTextToScryfall(bool isStandardQuery) {
     languages.removeWhere((element) => element == '');
@@ -57,13 +51,13 @@ class ScryfallRequestHandler {
     try {
       final response = await http.get(url);
       if (response.statusCode != 200) {
+        responseData.clear();
         return;
       }
       responseData = json.decode(response.body);
     } catch (error) {
       return;
     }
-    // print(responseData);
   }
 
   List<CardInfo> processQueryData() {
@@ -72,12 +66,7 @@ class ScryfallRequestHandler {
       for (Map<String, dynamic> item in responseData["data"]) {
         resultList.add(CardInfo.fromJson(item));
       }
-    } else {}
-    // use the following block to see all entries for a response from the API
-    // responseData["data"].first.keys.forEach((key) {
-    //   print(key);
-    // });
-    // print(responseData["data"].first["card_faces"]);
+    }
     return resultList;
   }
 
