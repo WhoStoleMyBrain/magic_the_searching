@@ -74,15 +74,11 @@ class ScryfallProvider with ChangeNotifier {
   void _fetchKeywordAbilities() async {
     try {
       _keywordAbilities =
-          await _fetchTypesFromUrl(Constants.urlKeywordAbilities);
+          await _fetchTypesFromUrl(Constants.urlKeywordAbilities)
+              .then((value) => value..sort());
       _mappedKeywordAbilities = _keywordAbilities
           .asMap()
           .map((key, value) => MapEntry(value, value.replaceAll(' ', '-')));
-      _mappedKeywordAbilities =
-          Map.fromEntries(_mappedKeywordAbilities.entries.toList()
-            ..sort(
-              (a, b) => a.value.compareTo(b.value),
-            ));
     } catch (e) {
       if (kDebugMode) {
         print('Error fetching creature types: $e');
