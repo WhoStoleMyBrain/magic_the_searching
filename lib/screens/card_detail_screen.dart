@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
+import 'package:magic_the_searching/widgets/card_price_display.dart';
 
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
@@ -81,15 +82,8 @@ class CardDetailScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(
-                    height:
-                        (mediaQuery.size.height - mediaQuery.padding.top - 30) -
-                            100 -
-                            32 -
-                            16,
-                    child: SingleChildScrollView(
-                        child: CardDetailImageDisplay(
-                            cardInfo: cardInfo, mediaQuery: mediaQuery))),
+                CardDetailImageDisplay(
+                    cardInfo: cardInfo, mediaQuery: mediaQuery),
                 CardDetails(textStyle: textStyle, cardInfo: cardInfo),
               ],
             ),
