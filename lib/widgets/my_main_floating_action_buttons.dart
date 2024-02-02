@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../helpers/constants.dart';
 import '../helpers/process_image_taking.dart';
 import '../helpers/search_start_helper.dart';
 import '../screens/search_page.dart';
@@ -35,15 +36,15 @@ class _MyMainFloatingActionButtonsState
                   if (value != null) {
                     SearchStartHelper.startSearchForCard(
                       context,
-                      value['searchTerm'],
-                      value['languages'],
-                      value['creatureTypes'],
-                      value['keywordAbilities'],
-                      value['cardTypes'],
-                      value['set'],
-                      value['cmcValue'],
-                      value['cmcCondition'],
-                      value['colors'],
+                      value[Constants.contextSearchTerm],
+                      value[Constants.contextLanguages],
+                      value[Constants.contextCreatureTypes],
+                      value[Constants.contextKeywords],
+                      value[Constants.contextCardTypes],
+                      value[Constants.contextSet],
+                      value[Constants.contextCmcValue],
+                      value[Constants.contextCmcCondition],
+                      value[Constants.contextColors],
                     );
                   }
                 });
