@@ -12,13 +12,14 @@ import './providers/history.dart';
 import './screens/card_detail_screen.dart';
 import './screens/card_search_screen.dart';
 import './screens/history_screen.dart';
+import 'providers/scryfall_provider.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   Future<void> cleanDB() async {
     final prefs = await SharedPreferences.getInstance();
@@ -58,11 +59,18 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) {
-            var tmp = CardSymbolProvider();
-            tmp.getAllAssetImages();
-            return tmp;
+            CardSymbolProvider cardSymbolProvider = CardSymbolProvider();
+            cardSymbolProvider.getAllAssetImages();
+            return cardSymbolProvider;
           },
         ),
+        ChangeNotifierProvider(
+          create: (_) {
+            ScryfallProvider scryfallProvider = ScryfallProvider();
+            scryfallProvider.init();
+            return scryfallProvider;
+          },
+        )
       ],
       child: Builder(builder: (context) {
         var settings = Provider.of<Settings>(context, listen: false);
