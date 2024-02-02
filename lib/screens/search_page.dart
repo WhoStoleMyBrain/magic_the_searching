@@ -276,18 +276,21 @@ class _SearchPageState extends State<SearchPage> {
             child: Column(
               children: [
                 _getSearchTermField(),
+                // Creature Types
                 _getMultiDropdownSelectionField((p0, p1) {
                   setState(() {
                     _selectedCreatureTypes = p0;
                   });
                 }, _selectedCreatureTypes, scryfallProvider.creatureTypes,
                     _creatureTypesTextController, 'Creature Types'),
+                // Card Types
                 _getMultiDropdownSelectionField((p0, p1) {
                   setState(() {
                     _selectedCardTypes = p0;
                   });
                 }, _selectedCardTypes, scryfallProvider.cardTypes,
                     _cardTypesTextController, 'Card Types'),
+                // Keyword Abilities
                 _getMultiDropdownSelectionField((p0, p1) {
                   setState(() {
                     _selectedKeywordAbilities = p0;

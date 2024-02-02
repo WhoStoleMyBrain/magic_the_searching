@@ -159,6 +159,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     const cardAspectRatio = 1 / 1.4;
     const cardPriceDisplayHeight = 183; //183
 
+    // final totalHeight = MediaQuery.of(context).size.width / cardAspectRatio;
     final totalHeight = MediaQuery.of(context).size.width / cardAspectRatio +
         cardPriceDisplayHeight;
 

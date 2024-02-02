@@ -16,23 +16,31 @@ class CardDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(4.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(
-                  child: Text(
+              Text(
                 'Normal',
                 style: textStyle,
-              )),
-              Expanded(
-                  child: Text(
+              ),
+              Text(
                 'Foil',
                 style: textStyle,
-              )),
+              ),
+              // Expanded(
+              //     child: Text(
+              //   'Normal',
+              //   style: textStyle,
+              // )),
+              // Expanded(
+              //     child: Text(
+              //   'Foil',
+              //   style: textStyle,
+              // )),
             ],
           ),
           const Divider(
@@ -40,7 +48,8 @@ class CardDetails extends StatelessWidget {
             thickness: 1,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            // mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               buildSinglePriceItem('TCG', cardInfo.prices?.usd, '\$'),
               buildSinglePriceItem('TCG', cardInfo.prices?.usdFoil, '\$'),
@@ -50,7 +59,8 @@ class CardDetails extends StatelessWidget {
             height: 3,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               buildSinglePriceItem('CDM', cardInfo.prices?.eur, '€'),
               buildSinglePriceItem('CDM', cardInfo.prices?.eurFoil, '€'),
@@ -72,13 +82,17 @@ class CardDetails extends StatelessWidget {
     );
   }
 
-  Expanded buildSinglePriceItem(String name, String? value, String currency) {
-    return Expanded(
-      child: Text(
-        '$name:  $currency${value ?? '--.--'}',
-        style: textStyle,
-      ),
+  Widget buildSinglePriceItem(String name, String? value, String currency) {
+    return Text(
+      '$name:  $currency${value ?? '--.--'}',
+      style: textStyle,
     );
+    // return Expanded(
+    //   child: Text(
+    //     '$name:  $currency${value ?? '--.--'}',
+    //     style: textStyle,
+    //   ),
+    // );
   }
 
   TextButton getLinkButton(String name, String? url) {
