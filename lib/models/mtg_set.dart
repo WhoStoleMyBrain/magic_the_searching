@@ -10,4 +10,12 @@ class MtGSet {
     this.releasedAt,
     required this.iconSvgUri,
   });
+
+  factory MtGSet.empty() {
+    return MtGSet(
+      code: '',
+      name: '',
+      iconSvgUri: '',
+    );
+  }
 }
