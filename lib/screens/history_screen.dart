@@ -45,6 +45,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
     Navigator.of(context).pushReplacementNamed('/');
+    history.openModalSheet = false;
     await cardDataProvider.processQuery();
   }
 
@@ -60,7 +61,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     SearchStartHelper.prefillValue = history.data[index].query;
     history.openModalSheet = true;
     Navigator.of(context).pushReplacementNamed('/');
-    await cardDataProvider.processQuery();
+    // await cardDataProvider.processQuery();
   }
 
   @override
