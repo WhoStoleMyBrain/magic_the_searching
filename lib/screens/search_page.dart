@@ -1,13 +1,11 @@
-import 'dart:convert';
-
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 import 'package:magic_the_searching/helpers/constants.dart';
+import 'package:magic_the_searching/providers/scryfall_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../helpers/card_symbol_helper.dart';
 import '../models/mtg_set.dart';
@@ -17,7 +15,7 @@ class SearchPage extends StatefulWidget {
   const SearchPage({super.key, this.prefilledValues});
 
   @override
-  _SearchPageState createState() => _SearchPageState();
+  State<SearchPage> createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
@@ -34,13 +32,9 @@ class _SearchPageState extends State<SearchPage> {
       LanguageIdentifier(confidenceThreshold: 0.5);
 
   List<String> _languages = [];
-  List<String> _creatureTypes = [];
-  List<MtGSet> _sets = [];
   List<String> _selectedKeywordAbilities = [];
-  List<String> _keywordAbilities = [];
   List<String> _selectedCreatureTypes = [];
   List<String> _selectedCardTypes = [];
-  final _cacheManager = DefaultCacheManager();
 
   String _selectedCmcCondition = '<';
   Map<String, bool> _manaSymbolsSelected = {
@@ -51,112 +45,33 @@ class _SearchPageState extends State<SearchPage> {
     'W': false,
   };
 
-  // The card types
-  final List<String> _cardTypes = [
-    // 'None',
-    'Artifact',
-    'Battle',
-    'Conspiracy',
-    'Creature',
-    'Emblem',
-    'Enchantment',
-    'Hero',
-    'Instant',
-    'Land',
-    'Phenomenon',
-    'Plane',
-    'Planeswalker',
-    'Scheme',
-    'Sorcery',
-    'Tribal',
-    'Vanguard',
-    'Legendary',
-  ];
-
   final _formKey = GlobalKey<FormState>();
-
-  // Future<List<Map<String, dynamic>>> manaSymbols = Future.value([]);
 
   @override
   void initState() {
     super.initState();
-    _fetchCreatureTypes();
-    _fetchSets();
-    _fetchKeywordAbilities();
     setState(() {
       if (widget.prefilledValues != null) {
         _searchTermController.text =
-            widget.prefilledValues!['searchTerm'] ?? '';
-        _creatureTypes = widget.prefilledValues!['creatureTypes'] ?? [];
-        _selectedCardTypes = widget.prefilledValues!['selectedCardTypes'] ?? [];
+            widget.prefilledValues![Constants.contextSearchTerm] ?? '';
+        _selectedCreatureTypes =
+            widget.prefilledValues![Constants.contextCreatureTypes] ?? [];
+        _selectedCardTypes =
+            widget.prefilledValues![Constants.contextCardTypes] ?? [];
         _selectedKeywordAbilities =
-            widget.prefilledValues!['selectedKeywordAbilities'] ?? [];
+            widget.prefilledValues![Constants.contextKeywords] ?? [];
 
-        _setController.text = widget.prefilledValues!['set'] ?? '';
-        _cmcValueController.text = widget.prefilledValues!['cmcValue'] ?? '';
-        _selectedCmcCondition = widget.prefilledValues!['cmcCondition'] ?? '<';
+        _setController.text =
+            widget.prefilledValues![Constants.contextSet]?.name ?? '';
+        _cmcValueController.text =
+            widget.prefilledValues![Constants.contextCmcValue] ?? '';
+        _selectedCmcCondition =
+            widget.prefilledValues![Constants.contextCmcCondition] ?? '<';
         _manaSymbolsSelected =
-            widget.prefilledValues!['colors'] ?? _manaSymbolsSelected;
+            widget.prefilledValues![Constants.contextManaSymbols] ??
+                _manaSymbolsSelected;
       }
     });
-  }
-
-  Future<List<String>> _fetchTypesFromUrl(String url) async {
-    final response = await _cacheManager.getSingleFile(url);
-    final Map<String, dynamic> jsonData =
-        jsonDecode(await response.readAsString());
-    if (jsonData.containsKey('data')) {
-      return List<String>.from(jsonData['data']);
-    }
-    return [];
-  }
-
-  void _fetchCreatureTypes() async {
-    try {
-      _creatureTypes = await _fetchTypesFromUrl(Constants.urlCreatureTypes);
-      setState(() {});
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching creature types: $e');
-      }
-    }
-  }
-
-  void _fetchKeywordAbilities() async {
-    try {
-      _keywordAbilities =
-          await _fetchTypesFromUrl(Constants.urlKeywordAbilities);
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching creature types: $e');
-      }
-    }
-  }
-
-  void _fetchSets() async {
-    const url = 'https://api.scryfall.com/sets';
-    try {
-      final response = await _cacheManager.getSingleFile(url);
-      final Map<String, dynamic> jsonData =
-          jsonDecode(await response.readAsString());
-
-      if (jsonData.containsKey('data')) {
-        _sets = jsonData['data']
-            .map<MtGSet>((json) => MtGSet(
-                  code: json['code'],
-                  name: json['name'],
-                  releasedAt: json['released_at'] != null
-                      ? DateTime.parse(json['released_at'])
-                      : null,
-                  iconSvgUri: json['icon_svg_uri'],
-                ))
-            .toList();
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching sets: $e');
-      }
-    }
   }
 
   void _identifyLanguages(String _) async {
@@ -184,15 +99,22 @@ class _SearchPageState extends State<SearchPage> {
   Row _getManaSymbolsField() {
     return Row(
       children: [
-        const Text('Colors:'),
+        // const Text('Colors:'),
         Wrap(
           spacing: 8.0,
           children: _manaSymbolsSelected.entries.map((entry) {
             return FilterChip(
+              shape: const CircleBorder(
+                  side: BorderSide(
+                      color: Colors.black, width: 2, style: BorderStyle.solid),
+                  eccentricity: 0),
+              showCheckmark: false,
               label: SvgPicture.asset(
                 CardSymbolHelper.symbolToAssetPath(entry.key),
-                width: 24,
-                height: 24,
+                // width: 24,
+                // height: 24,
+                width: 36,
+                height: 36,
               ),
               labelPadding: EdgeInsets.zero,
               selected: entry.value,
@@ -250,13 +172,13 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Autocomplete<MtGSet> _getMtgSetField() {
+  Autocomplete<MtGSet> _getMtgSetField(List<MtGSet> sets) {
     return Autocomplete<MtGSet>(
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (textEditingValue.text == '') {
           return const Iterable<MtGSet>.empty();
         }
-        return _sets.where((MtGSet option) {
+        return sets.where((MtGSet option) {
           return option.name
               .toLowerCase()
               .contains(textEditingValue.text.toLowerCase());
@@ -340,6 +262,8 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    ScryfallProvider scryfallProvider =
+        Provider.of<ScryfallProvider>(context, listen: true);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search'),
@@ -356,21 +280,21 @@ class _SearchPageState extends State<SearchPage> {
                   setState(() {
                     _selectedCreatureTypes = p0;
                   });
-                }, _selectedCreatureTypes, _creatureTypes,
+                }, _selectedCreatureTypes, scryfallProvider.creatureTypes,
                     _creatureTypesTextController, 'Creature Types'),
                 _getMultiDropdownSelectionField((p0, p1) {
                   setState(() {
                     _selectedCardTypes = p0;
                   });
-                }, _selectedCardTypes, _cardTypes, _cardTypesTextController,
-                    'Card Types'),
+                }, _selectedCardTypes, scryfallProvider.cardTypes,
+                    _cardTypesTextController, 'Card Types'),
                 _getMultiDropdownSelectionField((p0, p1) {
                   setState(() {
                     _selectedKeywordAbilities = p0;
                   });
-                }, _selectedKeywordAbilities, _keywordAbilities,
+                }, _selectedKeywordAbilities, scryfallProvider.keywordAbilities,
                     _keywordAbilitiesTextController, 'Keyword Abilities'),
-                _getMtgSetField(),
+                _getMtgSetField(scryfallProvider.sets),
                 _getCmcField(),
                 _getManaSymbolsField(),
               ],
@@ -381,16 +305,23 @@ class _SearchPageState extends State<SearchPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
+            MtGSet? set = scryfallProvider.sets
+                .where((element) => element.name == _setController.text)
+                .firstOrNull;
             Navigator.pop(context, {
-              'searchTerm': _searchTermController.text,
-              'languages': _languages,
-              'creatureTypes': _selectedCreatureTypes,
-              'cardTypes': _selectedCardTypes,
-              'keywordAbilities': _selectedKeywordAbilities,
-              'set': _setController.text,
-              'cmcValue': _cmcValueController.text,
-              'cmcCondition': _selectedCmcCondition,
-              'colors': _manaSymbolsSelected,
+              Constants.contextSearchTerm: _searchTermController.text,
+              Constants.contextLanguages: _languages,
+              Constants.contextCreatureTypes: _selectedCreatureTypes
+                  .map((e) => scryfallProvider.mappedCreatureTypes[e]!)
+                  .toList(),
+              Constants.contextCardTypes: _selectedCardTypes,
+              Constants.contextKeywords: _selectedKeywordAbilities
+                  .map((e) => scryfallProvider.mappedKeywordAbilities[e]!)
+                  .toList(),
+              Constants.contextSet: set ?? MtGSet.empty(),
+              Constants.contextCmcValue: _cmcValueController.text,
+              Constants.contextCmcCondition: _selectedCmcCondition,
+              Constants.contextManaSymbols: _manaSymbolsSelected,
             });
           }
         },
