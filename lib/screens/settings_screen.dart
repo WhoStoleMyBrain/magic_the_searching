@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/helpers/bulk_data_helper.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/widgets/app_drawer.dart';
 import 'package:path_provider/path_provider.dart';
@@ -213,6 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool canUpdateDB = settings.canUpdateDB;
     DateTime dbDate = settings.dbDate;
     bool useImagesFromNet = settings.useImagesFromNet;
+    // Languages selectedLanguage;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -243,6 +245,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
+              DropdownMenu(
+                  initialSelection: settings.language.name,
+                  onSelected: (value) async {
+                    if (value != null) {
+                      settings.saveUserLanguage(Languages.values.byName(value));
+                    }
+                  },
+                  dropdownMenuEntries: Languages.values
+                      .map((e) =>
+                          DropdownMenuEntry(value: e.name, label: e.longName))
+                      .toList()),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -275,6 +289,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
+              // DropdownButton(
+              //   items: Languages.values
+              //       .map((e) => DropdownMenuItem(child: Text(e.code)))
+              //       .toList(),
+              //   onChanged: (value) {},
+              // ),
               if (kDebugMode)
                 ElevatedButton(
                     onPressed: () async {

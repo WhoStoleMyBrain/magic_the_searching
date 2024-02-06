@@ -1,3 +1,20 @@
+enum Languages {
+  en('English'),
+  sp('Spanish'),
+  fr('French'),
+  de('German'),
+  it('Italian'),
+  pt('Portuguese'),
+  ja('Japanese'),
+  ko('Korean'),
+  ru('Russian'),
+  zhs('Simplified Chinese'),
+  zht('Traditional Chinese');
+
+  const Languages(this.longName);
+  final String longName;
+}
+
 class Constants {
   static const urlKeywordAbilities =
       'https://api.scryfall.com/catalog/keyword-abilities';
@@ -14,4 +31,7 @@ class Constants {
   static const contextCmcCondition = 'cmcCondition';
   static const contextColors = 'colors';
   static const contextManaSymbols = 'colors';
+  static const settingUserLanguage = 'userLanguage';
+  static const settingUseImagesFromNet = 'useImagesFromNet';
+  static const settingDbUpdatedAt = 'dbUpdatedAt';
 }

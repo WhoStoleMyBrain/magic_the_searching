@@ -94,7 +94,9 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
       _openModalSheetAfterLoad();
       getUseLocalDB();
       if (_scaffoldKey.currentState!.isDrawerOpen) {
-        print('closing app drawer....');
+        if (kDebugMode) {
+          print('closing app drawer....');
+        }
         _scaffoldKey.currentState?.closeDrawer();
       }
     });
@@ -128,10 +130,14 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     final mediaQuery = MediaQuery.of(context);
     return PopScope(
       onPopInvoked: (didPop) {
-        print('did pop: $didPop');
-        print(_scaffoldKey.currentState!.isDrawerOpen);
+        if (kDebugMode) {
+          print('did pop: $didPop');
+          print(_scaffoldKey.currentState!.isDrawerOpen);
+        }
         if (_scaffoldKey.currentState!.isDrawerOpen) {
-          print('closing app drawer....');
+          if (kDebugMode) {
+            print('closing app drawer....');
+          }
           _scaffoldKey.currentState?.closeDrawer();
         }
       },

@@ -1,9 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../helpers/constants.dart';
 import '../helpers/search_start_helper.dart';
 import '../providers/card_data_provider.dart';
+import '../providers/scryfall_provider.dart';
 import '../providers/settings.dart';
 import '../screens/search_page.dart';
 
@@ -12,9 +13,6 @@ class MyMainAppBar extends StatefulWidget {
 
   @override
   State<MyMainAppBar> createState() => _MyMainAppBarState();
-
-  // @override
-  // Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
 class _MyMainAppBarState extends State<MyMainAppBar> {
@@ -42,90 +40,6 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
     );
   }
 
-  Map<String, dynamic> parseSearchString(String search) {
-    // This is a placeholder. You will need to implement this method based on your search string format.
-    // ...
-    Map<String, dynamic> parsed = {
-      'searchTerm': '',
-      'creatureType': '',
-      'cardType': '',
-      'set': '',
-      'cmcValue': '',
-      'cmcCondition': '<',
-      'colors': <String, bool>{
-        'G': false,
-        'R': false,
-        'B': false,
-        'U': false,
-        'W': false,
-      },
-    };
-    List<String> terms = search.split(' ');
-
-    for (String term in terms) {
-      // If the term is one of the card types, it's the card type
-      // Adjust this to match your actual card type names
-      if (term.contains('t:')) {
-        if ([
-          'Artifact',
-          'Battle',
-          'Conspiracy',
-          'Creature',
-          'Emblem',
-          'Enchantment',
-          'Hero',
-          'Instant',
-          'Land',
-          'Phenomenon',
-          'Plane',
-          'Planeswalker',
-          'Scheme',
-          'Sorcery',
-          'Tribal',
-          'Vanguard',
-          'Legendary'
-        ]
-            .map((e) => e.toLowerCase())
-            .contains(term.split(':')[1].toLowerCase())) {
-          parsed['cardType'] = term.split(':')[1];
-        } else {
-          parsed['creatureType'] = term.split(':')[1];
-        }
-      }
-      // If the term is one of the color symbols, it's a color
-      // Note that we're assuming color symbols are single characters here
-      else if (term.contains('m:')) {
-        parsed['colors'][term.split('m:')[1]] = true;
-      }
-      // If the term is a number, it's the cmcValue
-      else if (term.contains('mv')) {
-        // mv is of the structure mv[cmcCondition][cmcValue]
-        final regExp = RegExp(r'\d+');
-        Match? match = regExp.firstMatch(term);
-        if (match != null) {
-          String number = term.substring(match.start, match.end);
-          parsed['cmcValue'] = number;
-          parsed['cmcCondition'] = term.substring(2, match.start);
-        }
-      }
-      // If the term contains '=', it's the set
-      else if (term.contains('e:')) {
-        parsed['set'] = term.split(':')[1];
-      }
-      // Otherwise, we'll assume it's part of the search term
-      else {
-        parsed['searchTerm'] += ' $term';
-      }
-    }
-
-    // Clean up the search term
-    parsed['searchTerm'] = parsed['searchTerm'].trim();
-    if (kDebugMode) {
-      print('parsed info:$parsed');
-    }
-    return parsed;
-  }
-
   @override
   Widget build(BuildContext context) {
     final cardDataProvider =
@@ -146,11 +60,13 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
         (cardDataProvider.cards.isNotEmpty && title != '')
             ? IconButton(
                 icon: const Icon(Icons.mode),
-                color: Colors.white,
+                color: Colors.black,
                 onPressed: () async {
-                  // SearchStartHelper.prefillValue = title;
+                  ScryfallProvider scryfallProvider =
+                      Provider.of<ScryfallProvider>(context, listen: false);
                   final Map<String, dynamic> prefilledValues =
-                      parseSearchString(title);
+                      SearchStartHelper.mapQueryToPrefilledValues(
+                          title, scryfallProvider);
                   await Navigator.of(context)
                       .push(
                     MaterialPageRoute(
@@ -162,15 +78,15 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
                     if (value != null) {
                       SearchStartHelper.startSearchForCard(
                         context,
-                        value['searchTerm'],
-                        value['languages'],
-                        value['creatureTypes'],
-                        value['keywordAbilities'],
-                        value['cardTypes'],
-                        value['set'],
-                        value['cmcValue'],
-                        value['cmcCondition'],
-                        value['colors'],
+                        value[Constants.contextSearchTerm],
+                        value[Constants.contextLanguages],
+                        value[Constants.contextCreatureTypes],
+                        value[Constants.contextKeywords],
+                        value[Constants.contextCardTypes],
+                        value[Constants.contextSet],
+                        value[Constants.contextCmcValue],
+                        value[Constants.contextCmcCondition],
+                        value[Constants.contextColors],
                       );
                     }
                   });

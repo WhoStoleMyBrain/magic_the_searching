@@ -89,5 +89,6 @@ dependencies {
     // ...
     // Use this dependency to bundle the model with your app
     implementation 'com.google.mlkit:language-id:17.0.3'
+    implementation "androidx.activity:activity:1.6.0-alpha05"
 
 }

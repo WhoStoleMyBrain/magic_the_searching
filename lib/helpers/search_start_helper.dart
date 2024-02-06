@@ -99,26 +99,30 @@ class SearchStartHelper {
   static Map<String, dynamic> mapQueryToPrefilledValues(
       String query, ScryfallProvider scryfallProvider) {
     final splitQuery = query.split(' ');
-    print('splitQuery: ${splitQuery.asMap()}');
+    if (kDebugMode) {
+      print('splitQuery: ${splitQuery.asMap()}');
+    }
     // fetching the correct parts of the split query
-    var sets = _getItemsWithStringStart(splitQuery, 'e:');
-    var manaValues = _getItemsWithStringStart(splitQuery, 'mv');
-    var manaSymbols = _getItemsWithStringStart(splitQuery, 'm:');
-    var keywords = splitQuery.where((element) => element.contains('keyword:'));
-    var types = splitQuery.where((element) => element.contains('t:'));
+    List<String> sets = _getItemsWithStringStart(splitQuery, 'e:');
+    List<String> manaValues = _getItemsWithStringStart(splitQuery, 'mv');
+    List<String> manaSymbols = _getItemsWithStringStart(splitQuery, 'm:');
+    Iterable<String> keywords =
+        splitQuery.where((element) => element.contains('keyword:'));
+    Iterable<String> types =
+        splitQuery.where((element) => element.contains('t:'));
 
     // fetch set
-    var foundSet = scryfallProvider.sets
+    MtGSet? foundSet = scryfallProvider.sets
         .where((element) => sets.contains(element.name))
         .toList()
         .firstOrNull;
 
     // fetch cmc value
-    var foundCmcValues = manaValues.isNotEmpty ? manaValues.first : '';
-    var conditionRegExp = RegExp(r'[<|>|<=|>=|=]');
-    var numberRegExp = RegExp(r'\d');
-    var condition = conditionRegExp.firstMatch(foundCmcValues)?[0];
-    var number = numberRegExp.firstMatch(foundCmcValues)?[0];
+    String foundCmcValues = manaValues.isNotEmpty ? manaValues.first : '';
+    RegExp conditionRegExp = RegExp(r'[<|>|<=|>=|=]');
+    RegExp numberRegExp = RegExp(r'\d');
+    String? cmcCondition = conditionRegExp.firstMatch(foundCmcValues)?[0];
+    String? cmcValue = numberRegExp.firstMatch(foundCmcValues)?[0];
 
     // fetch colors
     List<String> colors = ['W', 'U', 'B', 'R', 'G'];
@@ -127,39 +131,13 @@ class SearchStartHelper {
         );
 
     // fetch rest of the query
-    var restOfQuery = splitQuery
-        .where((element) => !element.contains(RegExp(r'[<>:=]')))
-        .reduce((value, element) => '$value $element');
+    String? restOfQuery = _getRestOfQuery(splitQuery);
 
-    var cardTypes = types
-        .where((element) =>
-            scryfallProvider.cardTypes.contains(element.split('t:')[1]))
-        .map((e) => e.split('t:')[1])
-        .toList();
+    List<String> cardTypes = _getCardTypes(types, scryfallProvider);
     // fetch creature types
-    var creatureTypes = types
-        .where((element) => scryfallProvider.mappedCreatureTypes.values
-            .contains(element.split('t:')[1]))
-        .toList();
-    creatureTypes = creatureTypes
-        .map(
-          (e) => scryfallProvider.mappedCreatureTypes
-              .map((key, value) => MapEntry(value, key))[e.split('t:')[1]]!,
-        )
-        .toList();
+    List<String> creatureTypes = _getCreatureTypes(types, scryfallProvider);
     // fetch keywords
-    List<String>? foundKeywords;
-    try {
-      foundKeywords = keywords
-          .map((e) => scryfallProvider.mappedKeywordAbilities.map(
-              (key, value) => MapEntry(value, key))[e.split('keyword:')[1]]!)
-          .toList();
-    } catch (e) {
-      if (kDebugMode) {
-        print('Unhandled error: $e');
-      }
-      foundKeywords = null;
-    }
+    List<String>? foundKeywords = _getKeywords(keywords, scryfallProvider);
 
     return {
       Constants.contextCreatureTypes: creatureTypes,
@@ -168,9 +146,64 @@ class SearchStartHelper {
       Constants.contextSet: foundSet,
       Constants.contextManaSymbols: mappedManaSymbols,
       Constants.contextSearchTerm: restOfQuery,
-      Constants.contextCmcCondition: condition,
-      Constants.contextCmcValue: number,
+      Constants.contextCmcCondition: cmcCondition,
+      Constants.contextCmcValue: cmcValue,
     };
+  }
+
+  static List<String>? _getKeywords(
+      Iterable<String> keywords, ScryfallProvider scryfallProvider) {
+    try {
+      return keywords
+          .map((e) => scryfallProvider.mappedKeywordAbilities.map(
+              (key, value) => MapEntry(value, key))[e.split('keyword:')[1]]!)
+          .toList();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Unhandled error: $e');
+      }
+      return null;
+    }
+  }
+
+  static List<String> _getEntriesFromReference(
+      Iterable<String> query, Iterable<String> reference, String split) {
+    return query
+        .where((element) => reference.contains(element.split(split)[1]))
+        .toList();
+  }
+
+  static List<String> _getCreatureTypes(
+      Iterable<String> types, ScryfallProvider scryfallProvider) {
+    List<String> creatureTypes = _getEntriesFromReference(
+        types, scryfallProvider.mappedCreatureTypes.values, 't:');
+    creatureTypes = creatureTypes
+        .map(
+          (e) => scryfallProvider.mappedCreatureTypes
+              .map((key, value) => MapEntry(value, key))[e.split('t:')[1]]!,
+        )
+        .toList();
+    return creatureTypes;
+  }
+
+  static List<String> _getCardTypes(
+      Iterable<String> types, ScryfallProvider scryfallProvider) {
+    List<String> cardTypes =
+        _getEntriesFromReference(types, scryfallProvider.cardTypes, 't:')
+            .map((e) => e.split('t:')[1])
+            .toList();
+
+    return cardTypes;
+  }
+
+  static String? _getRestOfQuery(List<String> splitQuery) {
+    try {
+      return splitQuery
+          .where((element) => !element.contains(RegExp(r'[<>:=]')))
+          .reduce((value, element) => '$value $element');
+    } catch (e) {
+      return null;
+    }
   }
 
   static Future<void> startSearchForCard(
@@ -188,7 +221,6 @@ class SearchStartHelper {
     //     'creature types: $creatureTypes; keywordAbilities: $keywordAbilities, cardtypes: $cardTypes');
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     final settings = Provider.of<Settings>(ctx, listen: false);
-    bool requestSuccessful;
 
     String languageQuery = languages.isNotEmpty
         ? languages.map((language) => "lang:$language").join(' ').trim()
@@ -198,9 +230,7 @@ class SearchStartHelper {
     String keywordAbilitiesQuery =
         buildCumulativeQuery(keywordAbilities, 'keyword').trim();
     String setQuery = mtgSet.name.isEmpty ? "e:${mtgSet.name}" : '';
-    String cmcQuery = cmcValue != ''
-        ? "mv$cmcCondition$cmcValue"
-        : ''; //TODO Fix this != 0 part
+    String cmcQuery = cmcValue != '' ? "mv$cmcCondition$cmcValue" : '';
     String manaSymbolQuery = manaSymbols.isNotEmpty
         ? manaSymbols.entries
             .where((entry) => entry.value == true)
@@ -220,28 +250,30 @@ class SearchStartHelper {
     keywordAbilitiesQuery.isNotEmpty
         ? fullQueryList.add(keywordAbilitiesQuery)
         : null;
-    // cardDataProvider.query =
-    //     "$text $languageQuery $creatureTypesQuery $cardTypesQuery $setQuery $cmcQuery $manaSymbolQuery $keywordAbilitiesQuery"
-    //         .trim();
     cardDataProvider.query = fullQueryList.join(' ');
     cardDataProvider.languages = languages;
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
-    print('Using query: ${cardDataProvider.query}');
+    if (kDebugMode) {
+      print('Using query: ${cardDataProvider.query}');
+    }
     if (settings.useLocalDB) {
-      // print('processing locally...');
-      requestSuccessful = await cardDataProvider.processQueryLocally();
+      await cardDataProvider.processQueryLocally().then((value) {
+        if (!value) {
+          showFailedQuery(ctx, text);
+        }
+        return value;
+      });
     } else {
       if (kDebugMode) {
         print('using Scryfall API...');
       }
-      requestSuccessful = await cardDataProvider.processQuery();
-      if (kDebugMode) {
-        print('Request successful? $requestSuccessful');
-      }
-    }
-    if (!requestSuccessful) {
-      showFailedQuery(ctx, text);
+      await cardDataProvider.processQuery().then((value) {
+        if (!value) {
+          showFailedQuery(ctx, text);
+        }
+        return value;
+      });
     }
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../helpers/scryfall_request_handler.dart';
 import '../helpers/db_helper.dart';
@@ -65,12 +64,18 @@ class CardDataProvider with ChangeNotifier {
 
   Future<bool> _requestDataFromScryfall() async {
     scryfallRequestHandler = ScryfallRequestHandler();
+    languages = queryParameters.entries
+        .where((element) => element.key == 'lang')
+        .map((e) => e.value)
+        .toList();
     scryfallRequestHandler.searchText = query;
     scryfallRequestHandler.languages = languages;
     scryfallRequestHandler.setHttpsQuery(queryParameters, isStandardQuery);
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
-    print('queryResult: $queryResult');
+    if (kDebugMode) {
+      print('queryResult: $queryResult');
+    }
     if (queryResult.isEmpty) {
       cards = [];
       Map<String, dynamic> historyData = {

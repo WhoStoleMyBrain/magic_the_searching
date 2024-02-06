@@ -1,4 +1,5 @@
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -36,6 +37,14 @@ class _SearchPageState extends State<SearchPage> {
   List<String> _selectedCreatureTypes = [];
   List<String> _selectedCardTypes = [];
 
+  final FocusNode focusNodeQuery = FocusNode();
+  final FocusNode focusNodeCreatureTypes = FocusNode();
+  final FocusNode focusNodeCardTypes = FocusNode();
+  final FocusNode focusNodeKeywordAbilities = FocusNode();
+  final FocusNode focusNodeCmcValue = FocusNode();
+  // final FocusNode focusNodeQuery = FocusNode();
+  // final FocusNode focusNodeQuery = FocusNode();
+
   String _selectedCmcCondition = '<';
   Map<String, bool> _manaSymbolsSelected = {
     'G': false,
@@ -50,6 +59,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
+
     setState(() {
       if (widget.prefilledValues != null) {
         _searchTermController.text =
@@ -60,7 +70,6 @@ class _SearchPageState extends State<SearchPage> {
             widget.prefilledValues![Constants.contextCardTypes] ?? [];
         _selectedKeywordAbilities =
             widget.prefilledValues![Constants.contextKeywords] ?? [];
-
         _setController.text =
             widget.prefilledValues![Constants.contextSet]?.name ?? '';
         _cmcValueController.text =
@@ -72,6 +81,12 @@ class _SearchPageState extends State<SearchPage> {
                 _manaSymbolsSelected;
       }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    focusNodeQuery.dispose();
   }
 
   void _identifyLanguages(String _) async {
@@ -99,7 +114,6 @@ class _SearchPageState extends State<SearchPage> {
   Row _getManaSymbolsField() {
     return Row(
       children: [
-        // const Text('Colors:'),
         Wrap(
           spacing: 8.0,
           children: _manaSymbolsSelected.entries.map((entry) {
@@ -111,8 +125,6 @@ class _SearchPageState extends State<SearchPage> {
               showCheckmark: false,
               label: SvgPicture.asset(
                 CardSymbolHelper.symbolToAssetPath(entry.key),
-                // width: 24,
-                // height: 24,
                 width: 36,
                 height: 36,
               ),
@@ -156,6 +168,7 @@ class _SearchPageState extends State<SearchPage> {
         Expanded(
           child: TextFormField(
             controller: _cmcValueController,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: const InputDecoration(labelText: 'CMC Value'),
             keyboardType: TextInputType.number,
             validator: (value) {
@@ -193,6 +206,7 @@ class _SearchPageState extends State<SearchPage> {
           VoidCallback onFieldSubmitted) {
         fieldTextEditingController.text = _setController.text;
         return TextFormField(
+          textInputAction: TextInputAction.next,
           controller: fieldTextEditingController,
           decoration: const InputDecoration(labelText: 'Set'),
           focusNode: fieldFocusNode,
@@ -207,6 +221,26 @@ class _SearchPageState extends State<SearchPage> {
 
   TextFormField _getSearchTermField() {
     return TextFormField(
+      focusNode: focusNodeQuery,
+      // onFieldSubmitted: (value) {
+      // FocusScope.of(context).requestFocus(focusNode);
+      // FocusScope.of(context).nextFocus();
+      // focusNode.nextFocus();
+      // },
+      // onEditingComplete: () {
+      //   var cnt = 0;
+      //   do {
+      //     cnt++;
+      //     FocusScope.of(context).nextFocus();
+      //     print('Tried next $cnt times');
+      //   } while (FocusScope.of(context).focusedChild?.context?.widget == null &&
+      //       cnt < 100);
+      //   // focusNode.nextFocus();
+      // },
+      onFieldSubmitted: (value) {
+        focusNodeCreatureTypes.requestFocus();
+      },
+      textInputAction: TextInputAction.next,
       controller: _searchTermController,
       decoration: InputDecoration(
         labelText: 'Name of the card',
@@ -231,7 +265,9 @@ class _SearchPageState extends State<SearchPage> {
       List<String> selectedObjectItems,
       List<String> options,
       TextEditingController textEditingController,
-      String label) {
+      String label,
+      FocusNode focusNode,
+      VoidCallback onFieldSubmitted) {
     return DropdownSearch<String>.multiSelection(
       items: options,
       dropdownDecoratorProps: DropDownDecoratorProps(
@@ -239,21 +275,40 @@ class _SearchPageState extends State<SearchPage> {
       popupProps: PopupPropsMultiSelection.menu(
         showSearchBox: true,
         searchDelay: Duration.zero,
-        onItemAdded: (selectedItems, addedItem) {
-          onSelectionChanged!(selectedItems, addedItem);
+        onItemAdded: onSelectionChanged,
+        onDismissed: () {
+          onFieldSubmitted();
         },
+        // onItemAdded: (selectedItems, addedItem) {
+        //   onSelectionChanged!(selectedItems, addedItem);
+        // },
         onItemRemoved: onSelectionChanged,
+
         searchFieldProps: TextFieldProps(
-            onTap: () {},
-            controller: textEditingController,
-            decoration: InputDecoration(
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  textEditingController.clear();
-                },
-              ),
-            )),
+          autofocus: true,
+          focusNode: focusNode,
+          textInputAction: TextInputAction.next,
+          onTap: () {
+            if (kDebugMode) {
+              print('Tapped');
+            }
+          },
+          onAppPrivateCommand: (p0, p1) {
+            if (kDebugMode) {
+              print('p0: $p0');
+              print('p1: $p1');
+            }
+          },
+          controller: textEditingController,
+          // decoration: InputDecoration(
+          //   suffixIcon: IconButton(
+          //     icon: const Icon(Icons.clear),
+          //     onPressed: () {
+          //       textEditingController.clear();
+          //     },
+          //   ),
+          // )
+        ),
         showSelectedItems: true,
       ),
       selectedItems: selectedObjectItems,
@@ -276,28 +331,47 @@ class _SearchPageState extends State<SearchPage> {
             child: Column(
               children: [
                 _getSearchTermField(),
+                _getMtgSetField(scryfallProvider.sets),
                 // Creature Types
-                _getMultiDropdownSelectionField((p0, p1) {
-                  setState(() {
-                    _selectedCreatureTypes = p0;
-                  });
-                }, _selectedCreatureTypes, scryfallProvider.creatureTypes,
-                    _creatureTypesTextController, 'Creature Types'),
+                _getMultiDropdownSelectionField(
+                    (p0, p1) {
+                      setState(() {
+                        _selectedCreatureTypes = p0;
+                      });
+                    },
+                    _selectedCreatureTypes,
+                    scryfallProvider.creatureTypes,
+                    _creatureTypesTextController,
+                    'Creature Types',
+                    focusNodeCreatureTypes,
+                    () {
+                      focusNodeCardTypes.requestFocus();
+                    }),
                 // Card Types
                 _getMultiDropdownSelectionField((p0, p1) {
                   setState(() {
                     _selectedCardTypes = p0;
                   });
-                }, _selectedCardTypes, scryfallProvider.cardTypes,
-                    _cardTypesTextController, 'Card Types'),
+                },
+                    _selectedCardTypes,
+                    scryfallProvider.cardTypes,
+                    _cardTypesTextController,
+                    'Card Types',
+                    focusNodeCardTypes,
+                    () {}),
                 // Keyword Abilities
                 _getMultiDropdownSelectionField((p0, p1) {
                   setState(() {
                     _selectedKeywordAbilities = p0;
                   });
-                }, _selectedKeywordAbilities, scryfallProvider.keywordAbilities,
-                    _keywordAbilitiesTextController, 'Keyword Abilities'),
-                _getMtgSetField(scryfallProvider.sets),
+                },
+                    _selectedKeywordAbilities,
+                    scryfallProvider.keywordAbilities,
+                    _keywordAbilitiesTextController,
+                    'Keyword Abilities',
+                    focusNodeKeywordAbilities,
+                    () {}),
+                // _getMtgSetField(scryfallProvider.sets),
                 _getCmcField(),
                 _getManaSymbolsField(),
               ],

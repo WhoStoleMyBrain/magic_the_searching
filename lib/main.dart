@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/providers/card_symbol_provider.dart';
 import 'package:magic_the_searching/providers/settings.dart';
@@ -54,7 +55,10 @@ class MyApp extends StatelessWidget {
         // ),
         ChangeNotifierProvider(
           create: (_) {
-            return Settings(false, false, DateTime.now(), false);
+            Settings settings =
+                Settings(false, false, DateTime.now(), false, Languages.en);
+            settings.getUserLanguage();
+            return settings;
           },
         ),
         ChangeNotifierProvider(
