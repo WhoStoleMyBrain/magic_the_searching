@@ -34,4 +34,6 @@ class Constants {
   static const settingUserLanguage = 'userLanguage';
   static const settingUseImagesFromNet = 'useImagesFromNet';
   static const settingDbUpdatedAt = 'dbUpdatedAt';
+  static const placeholderSplitText = 'PLACEHOLDER_SPLIT_TEXT';
+  static const loyaltyAssetPath = 'assets/images/Loyalty.svg';
 }
