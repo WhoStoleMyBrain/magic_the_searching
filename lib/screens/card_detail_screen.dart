@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
 import 'package:provider/provider.dart';
@@ -37,13 +39,13 @@ class CardDetailScreen extends StatelessWidget {
   Future<void> _startSearchForCards(BuildContext ctx, String text,
       Map<String, String> queryParameters) async {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
-    // final settings = Provider.of<Settings>(ctx, listen: false);
     cardDataProvider.query = text;
     cardDataProvider.isStandardQuery = false;
     cardDataProvider.queryParameters = queryParameters;
-    // cardDataProvider.languages = [settings.language.name];
 
-    print('starting search for cards in detail screen! $queryParameters');
+    if (kDebugMode) {
+      print('starting search for cards in detail screen! $queryParameters');
+    }
     await cardDataProvider.processQuery().then((bool value) {
       if (!value) {
         _showFailedQuery(ctx, text);
@@ -62,6 +64,8 @@ class CardDetailScreen extends StatelessWidget {
       fontSize: 20,
     );
     final Settings settings = Provider.of<Settings>(context, listen: false);
+    print(settings.language.longName);
+    print('all names: ${Languages.values.map((e) => e.longName)}');
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,

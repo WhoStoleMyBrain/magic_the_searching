@@ -1,16 +1,17 @@
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-
-import '../helpers/card_symbol_helper.dart';
-import '../providers/card_symbol_provider.dart';
-import '../scryfall_api_json_serialization/card_info.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+
+import '../helpers/card_text_display_helper.dart';
+import '../helpers/card_symbol_helper.dart';
+import '../helpers/constants.dart';
+import '../providers/card_symbol_provider.dart';
 import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/image_uris.dart';
+import '../scryfall_api_json_serialization/card_info.dart';
 
 class CardImageDisplay extends StatefulWidget {
   const CardImageDisplay({
@@ -60,13 +61,22 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
         20;
   }
 
+  double _getContainerWidth() {
+    return (widget.mediaQuery.size.width -
+                2 * widget.mediaQuery.padding.horizontal) /
+            2 -
+        24;
+  }
+
   List<Widget> cardNameAndManaSymbol() {
     List<String> cardSymbols =
         CardSymbolHelper.getSymbolsOfText(widget.cardInfo.manaCost ?? '');
     return [
       Center(
         child: Text(
-          widget.cardInfo.name ?? 'No name found for this card.',
+          widget.cardInfo.printedName ??
+              widget.cardInfo.name ??
+              'No name found for this card.',
           style: const TextStyle(
             fontSize: 14,
           ),
@@ -77,6 +87,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       ),
       cardSymbols.isNotEmpty
           ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ...cardSymbols.map((e) => SvgPicture.asset(
                       e,
@@ -94,7 +105,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
 
   List<Widget> cardTypeLine() {
     return [
-      Text(widget.cardInfo.typeLine ?? '',
+      Text(widget.cardInfo.printedTypeLine ?? widget.cardInfo.typeLine ?? '',
           style: const TextStyle(fontSize: 12)),
     ];
   }
@@ -104,101 +115,44 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
       softWrap: true,
       overflow: TextOverflow.visible,
       text: TextSpan(
-        children: [...textSpanWidgets(text)],
+        children: [
+          ...CardTextDisplayHelper.textSpanWidgetsFromText(
+              text, symbolImages, 12)
+        ],
       ),
     );
   }
 
-  List<dynamic> textSpanWidgets(String text) {
-    // text = text.replaceFirst(r'PLACEHOLDER_SPLIT_TEXT', '\n');
-    List<String> splittedText = text.split(RegExp(r'[{}]'));
-    splittedText.removeWhere((element) {
-      return element == '' || element == ' ';
-    });
-    var finalSpans = [];
-    for (var tmp in splittedText) {
-      tmp.contains('PLACEHOLDER_SPLIT_TEXT')
-          ? finalSpans.addAll([
-              TextSpan(
-                  text: tmp.split('PLACEHOLDER_SPLIT_TEXT').first,
-                  style: const TextStyle(fontSize: 12, color: Colors.black)),
-              const WidgetSpan(
-                  child: Divider(
-                endIndent: 20,
-                indent: 20,
-                color: Colors.black,
-                thickness: 1,
-              )),
-              TextSpan(
-                  text: tmp.split('PLACEHOLDER_SPLIT_TEXT').last,
-                  style: const TextStyle(fontSize: 12, color: Colors.black)),
-            ])
-          : finalSpans.add(
-              symbolImages.keys
-                      .contains(CardSymbolHelper.symbolToAssetPath(tmp))
-                  ? WidgetSpan(
-                      alignment: ui.PlaceholderAlignment.middle,
-                      child: SvgPicture.asset(
-                        CardSymbolHelper.symbolToAssetPath(tmp),
-                        height: 12,
-                        width: 12,
-                      ),
-                    )
-                  : TextSpan(
-                      text: tmp,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.black)),
-            );
-    }
-    return finalSpans;
-  }
-
-  List<Widget> oracleText() {
-    var richText = buildRichTextSpan(widget.cardInfo.oracleText ?? '');
-    return [
-      Expanded(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              ...cardTypeLine(),
-              const Divider(
-                thickness: 0.5,
-                color: Colors.black,
-              ),
-              Container(
-                alignment: Alignment.topLeft,
-                child: richText,
-              )
-            ],
-          ),
+  Widget oracleText() {
+    var richText = buildRichTextSpan(
+        widget.cardInfo.printedText ?? widget.cardInfo.oracleText ?? '');
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: richText,
         ),
       ),
-    ];
+    );
   }
 
   List<Widget> powerAndToughness() {
     bool placeholderInLoyalty =
-        widget.cardInfo.loyalty?.contains('PLACEHOLDER_SPLIT_TEXT') ?? false;
+        widget.cardInfo.loyalty?.contains(Constants.placeholderSplitText) ??
+            false;
     bool placeholderInPower =
-        widget.cardInfo.power?.contains('PLACEHOLDER_SPLIT_TEXT') ?? false;
+        widget.cardInfo.power?.contains(Constants.placeholderSplitText) ??
+            false;
     bool placeholderInToughness =
-        widget.cardInfo.toughness?.contains('PLACEHOLDER_SPLIT_TEXT') ?? false;
+        widget.cardInfo.toughness?.contains(Constants.placeholderSplitText) ??
+            false;
     return [
       Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           (widget.cardInfo.loyalty != null || placeholderInLoyalty)
-              ? Stack(alignment: AlignmentDirectional.center, children: [
-                  SvgPicture.asset(
-                    'assets/images/Loyalty.svg',
-                    width: 16,
-                    height: 16,
-                  ),
-                  Text(
-                    widget.cardInfo.loyalty ?? '0',
-                    style: const TextStyle(fontSize: 10, color: Colors.white),
-                  ),
-                ])
+              ? CardTextDisplayHelper.getLoyaltyDisplay(
+                  widget.cardInfo.loyalty, 16)
               : (widget.cardInfo.power == null &&
                           widget.cardInfo.toughness == null ||
                       (placeholderInPower || placeholderInToughness))
@@ -231,6 +185,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   Widget cardText() {
     return Container(
       height: _getContainerHeight(),
+      width: _getContainerWidth(),
       padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisSize: MainAxisSize.max,
@@ -240,7 +195,12 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
             thickness: 0.5,
             color: Colors.black,
           ),
-          ...oracleText(),
+          ...cardTypeLine(),
+          const Divider(
+            thickness: 0.5,
+            color: Colors.black,
+          ),
+          oracleText(),
           ...powerAndToughness(),
           ...setName(),
         ],
@@ -254,6 +214,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     final CardSymbolProvider cardSymbolProvider =
         Provider.of<CardSymbolProvider>(context, listen: true);
     symbolImages = cardSymbolProvider.symbolImages;
+    print('widget info: ${widget.cardInfo.printedName}');
+    print('widget info: ${widget.cardInfo.printedText}');
+    print('widget info: ${widget.cardInfo.printedTypeLine}');
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),
       builder: (context, snapshot) {

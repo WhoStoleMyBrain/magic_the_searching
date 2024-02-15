@@ -4,9 +4,11 @@ import 'dart:ui' as ui;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/card_symbol_helper.dart';
+import 'package:magic_the_searching/helpers/card_text_display_helper.dart';
 import 'package:magic_the_searching/providers/card_symbol_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../helpers/constants.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../providers/settings.dart';
@@ -67,7 +69,8 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
               child: AutoSizeText(
                 // '',
                 overflow: TextOverflow.ellipsis,
-                widget.cardInfo.name ??
+                widget.cardInfo.printedName ??
+                    widget.cardInfo.name ??
                     'No name found for this card.', // https://pub.dev/packages/auto_size_text for auto title resize!
                 style: const TextStyle(
                   fontSize: 24,
@@ -100,13 +103,14 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
 
   List<Widget> cardTypeLine() {
     return [
-      Text(widget.cardInfo.typeLine ?? '',
+      Text(widget.cardInfo.printedTypeLine ?? widget.cardInfo.typeLine ?? '',
           style: const TextStyle(fontSize: 16)),
     ];
   }
 
   Widget oracleText() {
-    var richText = buildRichTextSpan(widget.cardInfo.oracleText ?? '');
+    var richText = buildRichTextSpan(
+        widget.cardInfo.printedText ?? widget.cardInfo.oracleText ?? '');
     return Expanded(
       child: SingleChildScrollView(
         child: Container(
@@ -135,7 +139,9 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   Widget loyaltyColumn() {
     return Column(
       children: [
-        ...widget.cardInfo.loyalty?.split('PLACEHOLDER_SPLIT_TEXT').map((e) {
+        ...widget.cardInfo.loyalty
+                ?.split(Constants.placeholderSplitText)
+                .map((e) {
               return e == 'null'
                   ? const SizedBox.shrink()
                   : Stack(alignment: AlignmentDirectional.center, children: [
@@ -162,12 +168,12 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     return Column(
       children: [
         ...widget.cardInfo.power
-                ?.split('PLACEHOLDER_SPLIT_TEXT')
+                ?.split(Constants.placeholderSplitText)
                 .asMap()
                 .entries
                 .map((e) {
               String toughness = widget.cardInfo.toughness
-                      ?.split('PLACEHOLDER_SPLIT_TEXT')[e.key] ??
+                      ?.split(Constants.placeholderSplitText)[e.key] ??
                   "-";
               return (e.value == 'null' || toughness == 'null')
                   ? const SizedBox.shrink()
@@ -226,10 +232,10 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     });
     var finalSpans = [];
     for (var tmp in splittedText) {
-      tmp.contains('PLACEHOLDER_SPLIT_TEXT')
+      tmp.contains(Constants.placeholderSplitText)
           ? finalSpans.addAll([
               TextSpan(
-                  text: tmp.split('PLACEHOLDER_SPLIT_TEXT').first,
+                  text: tmp.split(Constants.placeholderSplitText).first,
                   style: const TextStyle(fontSize: 16, color: Colors.black)),
               const WidgetSpan(
                   child: Divider(
@@ -239,7 +245,7 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
                 thickness: 1.5,
               )),
               TextSpan(
-                  text: tmp.split('PLACEHOLDER_SPLIT_TEXT').last,
+                  text: tmp.split(Constants.placeholderSplitText).last,
                   style: const TextStyle(fontSize: 16, color: Colors.black)),
             ])
           : finalSpans.add(
@@ -259,6 +265,7 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
                           const TextStyle(fontSize: 16, color: Colors.black)),
             );
     }
+    print('final spans in card detail: $finalSpans');
     return finalSpans;
   }
 
@@ -267,7 +274,10 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
       softWrap: true,
       overflow: TextOverflow.visible,
       text: TextSpan(
-        children: [...textSpanWidgets(text)],
+        children: [
+          ...CardTextDisplayHelper.textSpanWidgetsFromText(
+              text, symbolImages, 16)
+        ],
       ),
     );
   }
@@ -276,21 +286,23 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     return widget.mediaQuery.size.width *
         (0.7 -
             0.1 *
-                (widget.cardInfo.power?.split('PLACEHOLDER_SPLIT_TEXT').first ==
+                (widget.cardInfo.power
+                            ?.split(Constants.placeholderSplitText)
+                            .first ==
                         null
                     ? widget.cardInfo.power
-                            ?.split('PLACEHOLDER_SPLIT_TEXT')
+                            ?.split(Constants.placeholderSplitText)
                             .first
                             .length ??
                         0
                     : 0) -
             0.1 *
                 (widget.cardInfo.toughness
-                            ?.split('PLACEHOLDER_SPLIT_TEXT')
+                            ?.split(Constants.placeholderSplitText)
                             .first ==
                         null
                     ? widget.cardInfo.toughness
-                            ?.split('PLACEHOLDER_SPLIT_TEXT')
+                            ?.split(Constants.placeholderSplitText)
                             .first
                             .length ??
                         0

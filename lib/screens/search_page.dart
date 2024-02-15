@@ -111,34 +111,33 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  Row _getManaSymbolsField() {
-    return Row(
-      children: [
-        Wrap(
-          spacing: 8.0,
-          children: _manaSymbolsSelected.entries.map((entry) {
-            return FilterChip(
-              shape: const CircleBorder(
-                  side: BorderSide(
-                      color: Colors.black, width: 2, style: BorderStyle.solid),
-                  eccentricity: 0),
-              showCheckmark: false,
-              label: SvgPicture.asset(
-                CardSymbolHelper.symbolToAssetPath(entry.key),
-                width: 36,
-                height: 36,
-              ),
-              labelPadding: EdgeInsets.zero,
-              selected: entry.value,
-              onSelected: (bool selected) {
-                setState(() {
-                  _manaSymbolsSelected[entry.key] = selected;
-                });
-              },
-            );
-          }).toList(),
-        ),
-      ],
+  Widget _getManaSymbolsField() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width - 32,
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        children: _manaSymbolsSelected.entries.map((entry) {
+          return FilterChip(
+            shape: const CircleBorder(
+                side: BorderSide(
+                    color: Colors.black, width: 2, style: BorderStyle.solid),
+                eccentricity: 0),
+            showCheckmark: false,
+            label: SvgPicture.asset(
+              CardSymbolHelper.symbolToAssetPath(entry.key),
+              width: 42,
+              height: 42,
+            ),
+            labelPadding: EdgeInsets.zero,
+            selected: entry.value,
+            onSelected: (bool selected) {
+              setState(() {
+                _manaSymbolsSelected[entry.key] = selected;
+              });
+            },
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -327,6 +326,9 @@ class _SearchPageState extends State<SearchPage> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
+            onChanged: () {
+              print('form changed!!');
+            },
             key: _formKey,
             child: Column(
               children: [
@@ -371,8 +373,10 @@ class _SearchPageState extends State<SearchPage> {
                     'Keyword Abilities',
                     focusNodeKeywordAbilities,
                     () {}),
-                // _getMtgSetField(scryfallProvider.sets),
                 _getCmcField(),
+                const SizedBox(
+                  height: 8,
+                ),
                 _getManaSymbolsField(),
               ],
             ),

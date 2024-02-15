@@ -31,16 +31,6 @@ class CardDetails extends StatelessWidget {
                 'Foil',
                 style: textStyle,
               ),
-              // Expanded(
-              //     child: Text(
-              //   'Normal',
-              //   style: textStyle,
-              // )),
-              // Expanded(
-              //     child: Text(
-              //   'Foil',
-              //   style: textStyle,
-              // )),
             ],
           ),
           const Divider(
@@ -49,18 +39,16 @@ class CardDetails extends StatelessWidget {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            // mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               buildSinglePriceItem('TCG', cardInfo.prices?.usd, '\$'),
               buildSinglePriceItem('TCG', cardInfo.prices?.usdFoil, '\$'),
             ],
           ),
           const SizedBox(
-            height: 3,
+            height: 4,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               buildSinglePriceItem('CDM', cardInfo.prices?.eur, '€'),
               buildSinglePriceItem('CDM', cardInfo.prices?.eurFoil, '€'),
@@ -84,15 +72,9 @@ class CardDetails extends StatelessWidget {
 
   Widget buildSinglePriceItem(String name, String? value, String currency) {
     return Text(
-      '$name:  $currency${value ?? '--.--'}',
+      '$name:\t$currency${value ?? '--.--'}',
       style: textStyle,
     );
-    // return Expanded(
-    //   child: Text(
-    //     '$name:  $currency${value ?? '--.--'}',
-    //     style: textStyle,
-    //   ),
-    // );
   }
 
   TextButton getLinkButton(String name, String? url) {
