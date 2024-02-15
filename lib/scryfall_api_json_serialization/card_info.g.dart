@@ -1,7 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: unnecessary_cast
-
 part of 'card_info.dart';
 
 // **************************************************************************
@@ -11,10 +9,13 @@ part of 'card_info.dart';
 CardInfo _$CardInfoFromJson(Map<String, dynamic> json) => CardInfo(
       id: json['id'] as String,
       name: json['name'] as String?,
+      printedName: json['printed_name'] as String?,
       manaCost: json['mana_cost'] as String?,
       typeLine: json['type_line'] as String?,
+      printedTypeLine: json['printed_type_line'] as String?,
       oracleId: json['oracle_id'] as String?,
       oracleText: oracleTextReadValue(json, 'oracleText') as String?,
+      printedText: printedTextReadValue(json, 'printedText') as String?,
       power: powerToughnessLoyaltyReadValue(json, 'power') as String?,
       toughness: powerToughnessLoyaltyReadValue(json, 'toughness') as String?,
       loyalty: powerToughnessLoyaltyReadValue(json, 'loyalty') as String?,
@@ -40,10 +41,13 @@ CardInfo _$CardInfoFromJson(Map<String, dynamic> json) => CardInfo(
 Map<String, dynamic> _$CardInfoToJson(CardInfo instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
+      'printed_name': instance.printedName,
       'mana_cost': instance.manaCost,
       'type_line': instance.typeLine,
+      'printed_type_line': instance.printedTypeLine,
       'oracle_id': instance.oracleId,
       'oracleText': instance.oracleText,
+      'printedText': instance.printedText,
       'power': instance.power,
       'toughness': instance.toughness,
       'loyalty': instance.loyalty,

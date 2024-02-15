@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 import './prices.dart';
 import './purchase_uris.dart';
 
@@ -84,15 +85,19 @@ String? oracleTextReadValue(Map<dynamic, dynamic>? json, String parameterName) {
           : json!['oracle_text']
       : json?['card_faces']
           .map((e) => e['oracle_text'])
-          .join('PLACEHOLDER_SPLIT_TEXT');
-  // : json?['card_faces'].map((e) => e['oracle_text']).join('\n');
-  // : json?['card_faces'].join('\n');
-  // return json;
+          .join(Constants.placeholderSplitText);
 }
 
-// String? oracleTextFromJson(Map<String, dynamic>? json) {
-//   return (json?['card_faces'] == null) ? json!['oracle_text'] : json?['card_faces'].join('\n');
-// }
+String? printedTextReadValue(
+    Map<dynamic, dynamic>? json, String parameterName) {
+  return (json?['card_faces'] == null)
+      ? (json?['printed_text'] == null)
+          ? null
+          : json!['printed_text']
+      : json?['printed_faces']
+          .map((e) => e['printed_text'])
+          .join(Constants.placeholderSplitText);
+}
 
 String? powerToughnessLoyaltyReadValue(
     Map<dynamic, dynamic>? json, String parameterName) {
@@ -105,28 +110,8 @@ String? powerToughnessLoyaltyReadValue(
           ? null
           : json?['card_faces']
               .map((e) => e[parameterName])
-              .join('PLACEHOLDER_SPLIT_TEXT');
+              .join(Constants.placeholderSplitText);
 }
-
-// String? toughnessReadValue(Map<dynamic, dynamic>? json, String parameterName) {
-//   return (json?['card_faces'] == null)
-//       ? (json?['oracle_text'] == null)
-//           ? null
-//           : json!['oracle_text']
-//       : json?['card_faces']
-//           .map((e) => e['oracle_text'])
-//           .join('PLACEHOLDER_SPLIT_TEXT');
-// }
-
-// String? loyaltyReadValue(Map<dynamic, dynamic>? json, String parameterName) {
-//   return (json?['card_faces'] == null)
-//       ? (json?['oracle_text'] == null)
-//           ? null
-//           : json!['oracle_text']
-//       : json?['card_faces']
-//           .map((e) => e['oracle_text'])
-//           .join('PLACEHOLDER_SPLIT_TEXT');
-// }
 
 @JsonSerializable(
     explicitToJson:
@@ -135,14 +120,18 @@ String? powerToughnessLoyaltyReadValue(
         FieldRename // renames the fields from the Json to lowerCamelCase variables
             .snake)
 class CardInfo {
-  //flutter pub run build_runner watch
+  //flutter pub run build_runner watch // deprecated!
+  // dart run build_runner build
   CardInfo({
     required this.id,
     required this.name,
+    required this.printedName,
     required this.manaCost,
     required this.typeLine,
+    required this.printedTypeLine,
     required this.oracleId,
     required this.oracleText,
+    required this.printedText,
     required this.power,
     required this.toughness,
     required this.loyalty,
@@ -151,22 +140,23 @@ class CardInfo {
     required this.scryfallUri,
     required this.imageUris,
     required this.cardFaces,
-    // required this.hasTwoSides,
     required this.prices,
-    // required this.dateTime,
     required this.purchaseUris,
     required this.hasTwoSides,
     required this.dateTime,
   });
   String id;
   String? name;
+  String? printedName;
   String? manaCost;
   String? typeLine;
+  String? printedTypeLine;
   @JsonKey(name: 'oracle_id')
   String? oracleId;
-  // @JsonKey(name: 'oracle_text')
   @JsonKey(name: 'oracleText', readValue: oracleTextReadValue)
   String? oracleText;
+  @JsonKey(name: 'printedText', readValue: printedTextReadValue)
+  String? printedText;
   @JsonKey(
     readValue: powerToughnessLoyaltyReadValue,
   )
@@ -218,24 +208,16 @@ class CardInfo {
     return CardInfo(
       id: dbData['card_info']['id'] as String,
       name: dbData['card_detail']['name'] as String?,
+      printedName: dbData['card_detail']['printedName'] as String?,
       oracleId: dbData['card_info']['oracleId'] as String?,
       oracleText: dbData['card_detail']['oracleText'] as String?,
+      printedText: dbData['card_detail']['printedText'] as String?,
       setName: dbData['card_detail']['setName'] as String?,
       scryfallUri: dbData['card_info']['scryfallUri'] as String?,
       imageUris: ImageUris.fromDB(dbData['image_uris']),
-      // imageUris: dbData['image_uris'] == null
-      //     ? null
-      //     : ImageUris.fromJson(dbData['image_uris'] as Map<String, dynamic>),
       cardFaces: cardFacesFromDB(dbData['card_faces']),
       prices: Prices.fromDB(dbData['prices']),
-      // prices: dbData['prices'] == null
-      //     ? null
-      //     : Prices.fromJson(dbData['prices'] as Map<String, dynamic>),
       purchaseUris: PurchaseUris.fromDB(dbData['purchase_uris']),
-      // purchaseUris: dbData['purchase_uris'] == null
-      //     ? null
-      //     : PurchaseUris.fromJson(
-      //         dbData['purchase_uris'] as Map<String, dynamic>),
       hasTwoSides: dbData['card_detail']['hasTwoSides'] == 0 ? false : true,
       dateTime: DateTime.parse(dbData['card_info']['dateTime'] as String),
       flavorText: dbData['card_detail']['flavorText'] as String?,
@@ -244,6 +226,7 @@ class CardInfo {
       toughness: dbData['card_detail']['toughness'] as String?,
       loyalty: dbData['card_detail']['loyalty'] as String?,
       typeLine: dbData['card_detail']['typeLine'] as String?,
+      printedTypeLine: dbData['card_detail']['printedTypeLine'] as String?,
     );
   }
 
@@ -258,9 +241,12 @@ class CardInfo {
       'card_detail': {
         'id': id,
         'name': name,
+        'printedName': printedName,
         'manaCost': manaCost,
         'typeLine': typeLine,
+        'printedTypeLine': printedTypeLine,
         'oracleText': oracleText,
+        'printedText': printedText,
         'power': power,
         'toughness': toughness,
         'loyalty': loyalty,
