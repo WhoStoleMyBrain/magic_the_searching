@@ -42,11 +42,6 @@ class Settings with ChangeNotifier {
     return _useImagesFromNet;
   }
 
-  // set language(Languages newLanguage) {
-  //   _language = newLanguage;
-  //   notifyListeners();
-  // }
-
   Languages get language {
     return _language;
   }
@@ -55,7 +50,7 @@ class Settings with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     DateTime oldDBDate = DateTime.parse(
         prefs.getString(Constants.settingDbUpdatedAt) ??
-            DateTime.parse("1969-07-20 20:18:04Z").toIso8601String());
+            Constants.defaultTimestamp);
     BulkData? bulkData = await BulkDataHelper.getBulkData();
     if ((bulkData?.updatedAt
                 .subtract(const Duration(days: 1))
