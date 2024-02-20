@@ -51,6 +51,7 @@ dependencies:
   auto_size_text: ^3.0.0
   image_cropper: ^5.0.1
   dropdown_search: ^5.0.6
+  mailto: ^2.0.0
 
 
 dev_dependencies:
@@ -66,7 +67,25 @@ dev_dependencies:
   # usage_stats: ^1.1.1
   build_runner: ^2.4.4
   json_serializable: ^6.7.0
+  flutter_launcher_icons: "^0.13.1"
 
+flutter_launcher_icons:
+  android: true
+  # ios: true
+  image_path: "assets/icon/MtS_Logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  # web:
+  #   generate: true
+  #   image_path: "path/to/image.png"
+  #   background_color: "#hexcode"
+  #   theme_color: "#hexcode"
+  # windows:
+  #   generate: true
+  #   image_path: "path/to/image.png"
+  #   icon_size: 48 # min:48, max:256, default: 48
+  # macos:
+  #   generate: true
+  #   image_path: "path/to/image.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
