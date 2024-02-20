@@ -77,9 +77,10 @@ class MyApp extends StatelessWidget {
         )
       ],
       child: Builder(builder: (context) {
-        var settings = Provider.of<Settings>(context, listen: false);
+        Settings settings = Provider.of<Settings>(context, listen: false);
         settings.checkCanUpdateDB();
         settings.checkUseImagesFromNet();
+
         return MaterialApp(
           title: 'Flutter Demo',
           theme: ThemeData(
