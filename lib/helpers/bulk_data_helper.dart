@@ -13,6 +13,7 @@ class BulkDataHelper {
   static const String bulkDataPath = 'https://api.scryfall.com/bulk-data';
 
   static Future<BulkData?> getBulkData() async {
+    // print('starting bulk data');
     BulkData? bulkData;
     final url = Uri.parse(BulkDataHelper.bulkDataPath);
     final Map<String, dynamic> responseData;
@@ -23,11 +24,7 @@ class BulkDataHelper {
       results = responseData["data"].map((e) => BulkData.fromJson(e)).toList();
       bulkData =
           results.firstWhere((element) => element.type == 'oracle_cards');
-      if (kDebugMode) {
-        print(bulkData);
-      }
-      // bulkData =
-      //     results.firstWhere((element) => element.type == 'all_cards');
+
       if (response.statusCode != 200) {
         if (kDebugMode) {
           print('did not receive data from bulk data!');
