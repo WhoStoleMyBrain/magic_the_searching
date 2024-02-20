@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/providers/history.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 import 'package:path/path.dart' as path;
@@ -13,38 +14,67 @@ class DBHelper {
 
   static Future<void> deleteTablesIfExists() async {
     final db = await DBHelper.cardDatabase();
-    db.execute('DROP TABLE IF EXISTS card_info');
-    db.execute('DROP TABLE IF EXISTS card_detail');
-    db.execute('DROP TABLE IF EXISTS image_uris');
-    db.execute('DROP TABLE IF EXISTS card_faces');
-    db.execute('DROP TABLE IF EXISTS prices');
-    db.execute('DROP TABLE IF EXISTS purchase_uris');
+    await db.execute('DROP TABLE IF EXISTS card_info');
+    await db.execute('DROP TABLE IF EXISTS card_detail');
+    await db.execute('DROP TABLE IF EXISTS image_uris');
+    await db.execute('DROP TABLE IF EXISTS card_faces');
+    await db.execute('DROP TABLE IF EXISTS prices');
+    await db.execute('DROP TABLE IF EXISTS purchase_uris');
+    // Make sure that the tables are there, since we manually deleted them.
+    // Therefore onCreate on the database would not be called again, which
+    // in turn results in an empty database
+    await recreateTablesIfTheyDoNotExist();
+  }
+
+  static Future<void> recreateTablesIfTheyDoNotExist() async {
+    final db = await DBHelper.cardDatabase();
+    await db.execute(Constants.createCardInfoTable);
+    await db.execute(Constants.createCardDetailTable);
+    await db.execute(Constants.createImageUrisTable);
+    await db.execute(Constants.createCardFacesTable);
+    await db.execute(Constants.createPricesTable);
+    await db.execute(Constants.createPurchaseUrisTable);
   }
 
   static Future<int> checkDatabaseSize(String dbName) async {
+    try {
+      final dbPath = await sql.getDatabasesPath();
+      String fullDbPath = path.join(dbPath, dbName);
+      final file = File(fullDbPath);
+      final size = await file.length();
+      return size;
+    } on PathNotFoundException {
+      return await cardDatabase().then((value) async {
+        return await value.close().then((value) async {
+          final dbPath = await sql.getDatabasesPath();
+          String fullDbPath = path.join(dbPath, dbName);
+
+          final file = File(fullDbPath).openRead();
+          final size = await file.length;
+          return size;
+        });
+      });
+    }
+  }
+
+  static Future<void> deleteDatabaseFile(String dbName) async {
     final dbPath = await sql.getDatabasesPath();
     String fullDbPath = path.join(dbPath, dbName);
     final file = File(fullDbPath);
-    final size = await file.length();
-    return size;
+    await file.delete();
   }
 
   static Future<sql.Database> cardDatabase() async {
     final dbPath = await sql.getDatabasesPath();
-    return sql.openDatabase(path.join(dbPath, 'cardDatabase.db'),
-        onCreate: (db, version) async {
-      await db.execute(
-          'CREATE TABLE card_info(id TEXT UNIQUE PRIMARY KEY, oracleId TEXT, scryfallUri TEXT, dateTime DATETIME);');
-      await db.execute(
-          'CREATE TABLE card_detail(id TEXT UNIQUE PRIMARY KEY, name TEXT, printedName TEXT, manaCost TEXT, typeLine TEXT, printedTypeLine TEXT, oracleText TEXT, printedText TEXT, power TEXT, toughness TEXT, loyalty TEXT, setName TEXT, flavorText TEXT, hasTwoSides INTEGER, FOREIGN KEY(id) REFERENCES card_info(id));');
-      await db.execute(
-          'CREATE TABLE image_uris(id TEXT UNIQUE PRIMARY KEY, normal TEXT, small TEXT, FOREIGN KEY(id) REFERENCES card_info(id));');
-      await db.execute(
-          'CREATE TABLE card_faces(id TEXT UNIQUE PRIMARY KEY, normalFront TEXT, smallFront TEXT, normalBack TEXT, smallBack TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
-      await db.execute(
-          'CREATE TABLE prices(id TEXT UNIQUE PRIMARY KEY, usd TEXT, usdFoil TEXT, eur TEXT, eurFoil TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
-      await db.execute(
-          'CREATE TABLE purchase_uris(id TEXT UNIQUE PRIMARY KEY, tcgplayer TEXT, cardmarket TEXT, FOREIGN KEY(id) REFERENCES card_info(id))');
+    return sql
+        .openDatabase(path.join(dbPath, Constants.cardDatabaseTableFileName),
+            onCreate: (db, version) async {
+      await db.execute(Constants.createCardInfoTable);
+      await db.execute(Constants.createCardDetailTable);
+      await db.execute(Constants.createImageUrisTable);
+      await db.execute(Constants.createCardFacesTable);
+      await db.execute(Constants.createPricesTable);
+      await db.execute(Constants.createPurchaseUrisTable);
     }, version: 1);
   }
 
