@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/providers/scryfall_provider.dart';
+import 'package:mailto/mailto.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../helpers/constants.dart';
 import '../helpers/search_start_helper.dart';
@@ -126,8 +129,13 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cardDataProvider = Provider.of<CardDataProvider>(context);
-    final mediaQuery = MediaQuery.of(context);
+    CardDataProvider cardDataProvider = Provider.of<CardDataProvider>(context);
+    MediaQueryData mediaQuery = MediaQuery.of(context);
+    Future.delayed(
+      Duration.zero,
+      () => showDialogIfFirstLoaded(context),
+    );
+
     return PopScope(
       onPopInvoked: (didPop) {
         if (kDebugMode) {
@@ -162,14 +170,12 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
 
   GridView myGridView(
       MediaQueryData mediaQuery, CardDataProvider cardDataProvider) {
-    const cardAspectRatio = 1 / 1.4;
-    const cardPriceDisplayHeight = 183; //183
-
+    double cardAspectRatio = 1 / 1.4;
+    int cardPriceDisplayHeight = 183; //183
     // final totalHeight = MediaQuery.of(context).size.width / cardAspectRatio;
-    final totalHeight = MediaQuery.of(context).size.width / cardAspectRatio +
+    double totalHeight = MediaQuery.of(context).size.width / cardAspectRatio +
         cardPriceDisplayHeight;
-
-    final childAspectRatio = MediaQuery.of(context).size.width / totalHeight;
+    double childAspectRatio = MediaQuery.of(context).size.width / totalHeight;
     return GridView.builder(
       controller: _controller,
       // key: UniqueKey(),
@@ -188,5 +194,62 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         );
       },
     );
+  }
+
+  showDialogIfFirstLoaded(BuildContext context) async {
+    await SharedPreferences.getInstance().then((SharedPreferences prefs) {
+      bool isFirstLoaded =
+          prefs.getBool(Constants.settingIsFirstLoaded) ?? true;
+
+      if (isFirstLoaded || kDebugMode) {
+        // if (isFirstLoaded) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            final mailtoLink = Mailto(
+                to: [
+                  'magicthesearching@gmail.com',
+                ],
+                subject: 'Feedback or Trouble with Magic the Searching',
+                body:
+                    'Enter your suggestions or a description of your errors below. Please try to be as precise as possible and feel free to append screenshots, images or links to further clarify your request! Thank you!');
+            return AlertDialog(
+              title: const Text('Your feedback matters!'),
+              // content: [],
+              content: Center(
+                child: RichText(
+                    text: TextSpan(children: [
+                  TextSpan(
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 20),
+                      text:
+                          'This app is still under development and part of my humble desire to bring high quality apps free of charge and free of those horrible ads to users!\nIf you have any suggestions for improvements or trouble while using the app, please contact me either via the google play store or via mail at '),
+                  TextSpan(
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary,
+                          fontSize: 20),
+                      text: 'magicthesearching@gmail.com',
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launchUrl(Uri.parse(mailtoLink.toString()));
+                        }),
+                ])),
+              ),
+              // const Text(
+              //     'This app is still under development and part of my humble desire to bring high quality apps free of charge and free of those horrible ads to users!\nIf you have any suggestions for improvements or trouble while using the app, please contact me either via the google play store or via mail at magicthesearching@gmail.com'),
+              actions: [
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      prefs.setBool(Constants.settingIsFirstLoaded, false);
+                    },
+                    child: const Text('Understood'))
+              ],
+            );
+          },
+        );
+      }
+    });
   }
 }
