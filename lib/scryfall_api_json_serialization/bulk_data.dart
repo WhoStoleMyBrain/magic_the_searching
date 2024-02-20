@@ -26,7 +26,8 @@ class BulkData {
     required this.description,
     required this.downloadUri,
     required this.updatedAt,
-    required this.compressedSize,
+    required this.size,
+    // required this.compressedSize,
     required this.contentType,
     required this.contentEncoding,
 
@@ -41,7 +42,8 @@ class BulkData {
   //     fromJson: dateTimeFromJson,
   //     toJson: dateTimeToJson)
   DateTime updatedAt;
-  int compressedSize;
+  int size;
+  // int compressedSize;
   String contentType;
   String contentEncoding;
 

@@ -94,7 +94,7 @@ String? printedTextReadValue(
       ? (json?['printed_text'] == null)
           ? null
           : json!['printed_text']
-      : json?['printed_faces']
+      : json?['card_faces']
           .map((e) => e['printed_text'])
           .join(Constants.placeholderSplitText);
 }
