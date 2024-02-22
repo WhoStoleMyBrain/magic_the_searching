@@ -47,7 +47,7 @@ class ScryfallRequestHandler {
   }
 
   Future<void> sendQueryRequest() async {
-    print('sending query request: $query');
+    // print('sending query request: $query');
     final url = Uri.parse(query);
     try {
       final response = await http.get(url);

@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/enums/query_location.dart';
+import 'package:magic_the_searching/helpers/connectivity_helper.dart';
+import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:magic_the_searching/models/mtg_set.dart';
 import 'package:magic_the_searching/providers/scryfall_provider.dart';
@@ -217,11 +220,9 @@ class SearchStartHelper {
       String cmcValue,
       String cmcCondition,
       Map<String, bool> manaSymbols) async {
-    // print(
-    //     'creature types: $creatureTypes; keywordAbilities: $keywordAbilities, cardtypes: $cardTypes');
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     final settings = Provider.of<Settings>(ctx, listen: false);
-
+    // building all the necessary parameters for queries
     String languageQuery = languages.isNotEmpty
         ? languages.map((language) => "lang:$language").join(' ').trim()
         : '';
@@ -237,6 +238,7 @@ class SearchStartHelper {
             .map((entry) => "m:${entry.key}")
             .join(' ')
         : '';
+    // building full query list
     var fullQueryList = [];
     text.isNotEmpty ? fullQueryList.add(text) : null;
     languageQuery.isNotEmpty ? fullQueryList.add(languageQuery) : null;
@@ -250,6 +252,7 @@ class SearchStartHelper {
     keywordAbilitiesQuery.isNotEmpty
         ? fullQueryList.add(keywordAbilitiesQuery)
         : null;
+    // set query parameters in card data provider
     cardDataProvider.query = fullQueryList.join(' ');
     cardDataProvider.languages = languages;
     cardDataProvider.isStandardQuery = true;
@@ -257,22 +260,42 @@ class SearchStartHelper {
     if (kDebugMode) {
       print('Using query: ${cardDataProvider.query}');
     }
-    if (settings.useLocalDB) {
-      await cardDataProvider.processQueryLocally().then((value) {
-        if (!value) {
-          showFailedQuery(ctx, text);
+    // handle query with built query parameters
+    _handleQueryingOfData(ctx, cardDataProvider, settings, text);
+  }
+
+  static bool _postQueryFeedback(BuildContext ctx, String text, bool value) {
+    if (!value) {
+      showFailedQuery(ctx, text);
+    }
+    return value;
+  }
+
+  static void _handleQueryingOfData(BuildContext ctx,
+      CardDataProvider cardDataProvider, Settings settings, String text) async {
+    final bool hasInternetConnection =
+        await ConnectivityHelper.checkConnectivity();
+    if (!hasInternetConnection || settings.useLocalDB) {
+      // final int dbSize =
+      await DBHelper.checkDatabaseSize(Constants.cardDatabaseTableFileName)
+          .then((int dbSize) async {
+        if (dbSize / 1024 ~/ 1024 > 3) {
+          await cardDataProvider.processQueryLocally().then((value) {
+            _postQueryFeedback(ctx, text, value);
+            cardDataProvider.queryLocation = QueryLocation.local;
+          });
+        } else {
+          _postQueryFeedback(ctx, text, false);
+          cardDataProvider.queryLocation = QueryLocation.none;
         }
-        return value;
       });
     } else {
       if (kDebugMode) {
         print('using Scryfall API...');
       }
       await cardDataProvider.processQuery().then((value) {
-        if (!value) {
-          showFailedQuery(ctx, text);
-        }
-        return value;
+        _postQueryFeedback(ctx, text, value);
+        cardDataProvider.queryLocation = QueryLocation.scryfall;
       });
     }
   }

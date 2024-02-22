@@ -31,8 +31,9 @@ class CardImageDisplay extends StatefulWidget {
 class _CardImageDisplayState extends State<CardImageDisplay> {
   int _side = 0;
   late Image? _networkImageStream;
-  late bool _hasInternetConnection = true;
+  bool _hasInternetConnection = true;
   late Stream<FileResponse> fileStream;
+  late Settings settings;
   Map<String, SvgPicture> symbolImages = {};
 
   Stream<FileResponse>? getLocalImage(Settings settings) {
@@ -50,6 +51,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
   }
 
   double _getContainerHeight() {
+    //TODO Rework this! I would LOVE to have a more dynamic approach
     return (widget.mediaQuery.size.height -
                 2 * widget.mediaQuery.padding.vertical -
                 2 * widget.mediaQuery.viewInsets.top) /
@@ -68,15 +70,22 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
         24;
   }
 
+  String getCardNameText() {
+    if (settings.language != Languages.en &&
+        widget.cardInfo.printedName != null) {
+      return widget.cardInfo.printedName ?? 'No name found for this card.';
+    } else {
+      return widget.cardInfo.name ?? 'No name found for this card.';
+    }
+  }
+
   List<Widget> cardNameAndManaSymbol() {
     List<String> cardSymbols =
         CardSymbolHelper.getSymbolsOfText(widget.cardInfo.manaCost ?? '');
     return [
       Center(
         child: Text(
-          widget.cardInfo.printedName ??
-              widget.cardInfo.name ??
-              'No name found for this card.',
+          getCardNameText(),
           style: const TextStyle(
             fontSize: 14,
           ),
@@ -105,9 +114,17 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
 
   List<Widget> cardTypeLine() {
     return [
-      Text(widget.cardInfo.printedTypeLine ?? widget.cardInfo.typeLine ?? '',
-          style: const TextStyle(fontSize: 12)),
+      Text(getCardTypeText(), style: const TextStyle(fontSize: 12)),
     ];
+  }
+
+  String getCardTypeText() {
+    if (settings.language != Languages.en &&
+        widget.cardInfo.printedTypeLine != null) {
+      return widget.cardInfo.printedTypeLine ?? '';
+    } else {
+      return widget.cardInfo.typeLine ?? '';
+    }
   }
 
   Widget buildRichTextSpan(String text) {
@@ -123,9 +140,17 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     );
   }
 
+  String getTextToDisplay() {
+    if (settings.language != Languages.en &&
+        widget.cardInfo.printedText != null) {
+      return widget.cardInfo.printedText ?? '';
+    } else {
+      return widget.cardInfo.oracleText ?? '';
+    }
+  }
+
   Widget oracleText() {
-    var richText = buildRichTextSpan(
-        widget.cardInfo.printedText ?? widget.cardInfo.oracleText ?? '');
+    var richText = buildRichTextSpan(getTextToDisplay());
     return Expanded(
       child: SingleChildScrollView(
         child: Container(
@@ -186,7 +211,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     return Container(
       height: _getContainerHeight(),
       width: _getContainerWidth(),
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -210,13 +235,10 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = Provider.of<Settings>(context, listen: true);
+    settings = Provider.of<Settings>(context, listen: true);
     final CardSymbolProvider cardSymbolProvider =
         Provider.of<CardSymbolProvider>(context, listen: true);
     symbolImages = cardSymbolProvider.symbolImages;
-    print('widget info: ${widget.cardInfo.printedName}');
-    print('widget info: ${widget.cardInfo.printedText}');
-    print('widget info: ${widget.cardInfo.printedTypeLine}');
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),
       builder: (context, snapshot) {

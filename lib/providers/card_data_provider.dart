@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:magic_the_searching/enums/query_location.dart';
 
 import '../helpers/scryfall_request_handler.dart';
 import '../helpers/db_helper.dart';
@@ -8,12 +9,21 @@ class CardDataProvider with ChangeNotifier {
   List<CardInfo> _cards = [];
   List<String> languages = [];
   String query = '';
-  String column = 'searchText';
   bool isLoading = false;
   bool isStandardQuery = true;
   bool hasMore = false;
+  QueryLocation _queryLocation = QueryLocation.none;
   Map<String, String> queryParameters = {};
   late ScryfallRequestHandler scryfallRequestHandler;
+
+  set queryLocation(QueryLocation newQueryLocation) {
+    _queryLocation = newQueryLocation;
+    notifyListeners();
+  }
+
+  QueryLocation get queryLocation {
+    return _queryLocation;
+  }
 
   set cards(List<CardInfo> queryData) {
     _cards = queryData;

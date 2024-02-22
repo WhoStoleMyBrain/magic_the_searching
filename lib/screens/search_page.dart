@@ -327,7 +327,9 @@ class _SearchPageState extends State<SearchPage> {
           padding: const EdgeInsets.all(16.0),
           child: Form(
             onChanged: () {
-              print('form changed!!');
+              if (kDebugMode) {
+                print('form changed!!');
+              }
             },
             key: _formKey,
             child: Column(

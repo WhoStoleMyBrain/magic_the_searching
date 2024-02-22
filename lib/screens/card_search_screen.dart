@@ -201,7 +201,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
       bool isFirstLoaded =
           prefs.getBool(Constants.settingIsFirstLoaded) ?? true;
 
-      if (isFirstLoaded || kDebugMode) {
+      if (isFirstLoaded) {
         // if (isFirstLoaded) {
         showDialog(
           context: context,
@@ -215,7 +215,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
                     'Enter your suggestions or a description of your errors below. Please try to be as precise as possible and feel free to append screenshots, images or links to further clarify your request! Thank you!');
             return AlertDialog(
               title: const Text('Your feedback matters!'),
-              // content: [],
               content: Center(
                 child: RichText(
                     text: TextSpan(children: [
@@ -236,8 +235,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
                         }),
                 ])),
               ),
-              // const Text(
-              //     'This app is still under development and part of my humble desire to bring high quality apps free of charge and free of those horrible ads to users!\nIf you have any suggestions for improvements or trouble while using the app, please contact me either via the google play store or via mail at magicthesearching@gmail.com'),
               actions: [
                 ElevatedButton(
                     onPressed: () {

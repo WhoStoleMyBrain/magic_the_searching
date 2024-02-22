@@ -13,7 +13,6 @@ class BulkDataHelper {
   static const String bulkDataPath = 'https://api.scryfall.com/bulk-data';
 
   static Future<BulkData?> getBulkData() async {
-    // print('starting bulk data');
     BulkData? bulkData;
     final url = Uri.parse(BulkDataHelper.bulkDataPath);
     final Map<String, dynamic> responseData;

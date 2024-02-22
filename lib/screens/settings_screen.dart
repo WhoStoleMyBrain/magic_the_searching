@@ -148,6 +148,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _entriesSaved = 0;
       _totalEntries = jsonList.length;
     });
+
     for (int i = 0; i < jsonList.length; i += 1000) {
       try {
         List<dynamic> jsonSubList;
@@ -245,6 +246,270 @@ class _SettingsScreenState extends State<SettingsScreen> {
     settings.useImagesFromNet = newValue;
   }
 
+  Future<int> checkLocalDBSize() async {
+    return DBHelper.checkDatabaseSize(Constants.cardDatabaseTableFileName)
+        .onError((error, stackTrace) async {
+      if (error is FileSystemException) {
+        return 0;
+      } else if (error is PathNotFoundException) {
+        return 0;
+      }
+      return 0;
+    }).then((value) async {
+      return value;
+    });
+  }
+
+  ListTile getListTileLanguages(Settings settings) {
+    return ListTile(
+      // dense: true,
+      // isThreeLine: true,
+      leading: const Icon(Icons.language),
+      title: const Text('Language'),
+      trailing: DropdownMenu(
+          enableSearch: false,
+          // width: MediaQuery.of(context).size.width * 0.4,
+          textStyle: const TextStyle(fontSize: 12),
+          initialSelection: settings.language.name,
+          onSelected: (value) async {
+            if (value != null) {
+              settings.saveUserLanguage(Languages.values.byName(value));
+            }
+          },
+          dropdownMenuEntries: Languages.values
+              .map((e) => DropdownMenuEntry(value: e.name, label: e.longName))
+              .toList()),
+    );
+  }
+
+  ListTile getListTileDownloadBulkData(DateTime dbDate, bool canUpdateDB,
+      BuildContext context, Settings settings) {
+    return ListTile(
+      leading: const Icon(Icons.download),
+      title: const Text('Download database for offline use'),
+      subtitle: getBulkDataInfo(dbDate),
+      trailing: getCardInfoDownloadButton(canUpdateDB, context, settings),
+      // ],
+    );
+  }
+
+  ListTile getListTileFreeUpStorage() {
+    return ListTile(
+        leading: const Icon(Icons.delete),
+        title: const Text('Card info stored on device'),
+        subtitle: FutureBuilder(
+          future: checkLocalDBSize(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.hasData) {
+              return Text(
+                  'takes up approx. MB: ${snapshot.data! / 1024 ~/ 1024}');
+            }
+            return const Text('takes up approx. MB:');
+          },
+        ),
+        trailing: ElevatedButton(
+            onPressed: () async {
+              await DBHelper.deleteTablesIfExists();
+              await setDbUpdatedAtTimestamp();
+              setState(() {});
+            },
+            child: const Text('Delete')));
+  }
+
+  ListTile getListTileShowImages(bool useImagesFromNet) {
+    return ListTile(
+      // mainAxisAlignment: MainAxisAlignment.center,
+      // children: [
+      leading: const Icon(Icons.settings),
+      title: const Text('Show Images'),
+      subtitle: const Text('This uses up more internet volume'),
+      trailing: Switch(
+        value: useImagesFromNet,
+        onChanged: (newValue) {
+          changeUseImagesFromNet(newValue);
+        },
+      ),
+      // ],
+    );
+  }
+
+  ListTile getListTileUseLocalDb(bool useLocalDB, BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.dataset),
+      title: const Text('Use local DB'),
+      trailing: Switch(
+        value: useLocalDB,
+        onChanged: (newValue) {
+          changeUseLocalDB(newValue, context);
+        },
+      ),
+    );
+  }
+
+  Future<void> setDbUpdatedAtTimestamp() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        Constants.settingDbUpdatedAt, Constants.defaultTimestamp);
+  }
+
+  Text getBulkDataInfo(DateTime dbDate) {
+    return Text(
+      'last updated: ${dbDate.year}-${dbDate.month.toString().length < 2 ? '0${dbDate.month}' : dbDate.month}-${dbDate.day.toString().length < 2 ? '0${dbDate.day}' : dbDate.day}',
+      style: const TextStyle(fontSize: 12),
+    );
+  }
+
+  ElevatedButton getCardInfoDownloadButton(
+      bool canUpdateDB, BuildContext context, Settings settings) {
+    return ElevatedButton(
+      onPressed: canUpdateDB
+          ? () async {
+              await BulkDataHelper.getBulkData()
+                  .then((value) => showDialog<bool>(
+                      context: context,
+                      builder: (bCtx) {
+                        return AlertDialog(
+                          title: const Text('Info!'),
+                          content: SingleChildScrollView(
+                              child: Text(
+                                  '''Downloading and processing the data may take up to a few minutes, depending on your internet speed and the model of your phone.\nIt is highly recommended to use a Wi-Fi connection to download data!\nThe downloaded file is approximately ${value != null ? value.size / 1024 ~/ 1024 : 150} MB large.''')),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context, true);
+                              },
+                              child: const Text('Start Download'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Abort'),
+                            )
+                          ],
+                        );
+                      }))
+                  .then((value) {
+                if (value != null) {
+                  if (value) {
+                    handleBulkData().whenComplete(
+                      () => setState(
+                        () {
+                          settings.checkCanUpdateDB();
+                        },
+                      ),
+                    );
+                  }
+                }
+              });
+            }
+          : null,
+      child: canUpdateDB ? const Text('Download') : const Text('Up tp date'),
+    );
+  }
+
+  ElevatedButton getAbortDownloadButton() {
+    return ElevatedButton(
+        onPressed: () {
+          if (_client != null) {
+            _client!.close();
+          }
+          deleteLocalFile();
+          setBulkDataState(); // sets all values to false
+          _totalBits = 0;
+          _receivedBits = 0;
+          _entriesSaved = 0;
+          _totalEntries = 0;
+          Navigator.pushNamed(context, SettingsScreen.routeName);
+        },
+        child: const Text('Abort!'));
+  }
+
+  List<Widget> getDebuggingWidgets() {
+    return [
+      const Divider(
+        thickness: 3,
+      ),
+      const Text('Debugging'),
+      ElevatedButton(
+          onPressed: () async {
+            // TODO: if database file does not exist, need to press this button TWICE, before getting a result...
+            var dbSize = await DBHelper.checkDatabaseSize(
+                Constants.cardDatabaseTableFileName);
+            if (kDebugMode) {
+              print(
+                  'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+            }
+          },
+          child: const Text('Check card db file...')),
+      ElevatedButton(
+          onPressed: () async {
+            var dbSize = await DBHelper.checkDatabaseSize('history.db');
+            if (kDebugMode) {
+              print(
+                  'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
+            }
+          },
+          child: const Text('Check history db file...')),
+      ElevatedButton(
+        onPressed: () async {
+          await DBHelper.deleteTablesIfExists();
+        },
+        child: const Text('Delete local DB!'),
+      )
+    ];
+  }
+
+  Widget getBulkDataDownloadOverlay() {
+    return (_isRequestingBulkData || _isDownloading || _isProcessingToLocalDB)
+        ? Container(
+            color: const Color.fromRGBO(197, 197, 197, 0.35),
+            height: MediaQuery.of(context).size.height * 1,
+            child: Center(
+              child: _isRequestingBulkData
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const Text('Fetching Bulk Data Url...'),
+                        getAbortDownloadButton(),
+                      ],
+                    )
+                  : _isDownloading
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              value: (_receivedBits / _totalBits) < 1
+                                  ? _receivedBits / _totalBits
+                                  : 1,
+                            ),
+                            Text(
+                                'Downloading data... ${_receivedBits ~/ (1024 * 1024)}/${_totalBits ~/ (1024 * 1024)} MB'),
+                            getAbortDownloadButton(),
+                          ],
+                        )
+                      : _isProcessingToLocalDB
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  value: _totalEntries != 0
+                                      ? (_entriesSaved / _totalEntries)
+                                      : 0,
+                                ),
+                                Text(
+                                    'Processing data to local DB... $_entriesSaved / $_totalEntries done'),
+                                getAbortDownloadButton(),
+                              ],
+                            )
+                          : const Center(),
+            ),
+          )
+        : const Center();
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<Settings>(context);
@@ -270,194 +535,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(
                 height: 20,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Use local DB'),
-                  Switch(
-                    value: useLocalDB,
-                    onChanged: (newValue) {
-                      changeUseLocalDB(newValue, context);
-                    },
-                  ),
-                ],
-              ),
-              DropdownMenu(
-                  initialSelection: settings.language.name,
-                  onSelected: (value) async {
-                    if (value != null) {
-                      settings.saveUserLanguage(Languages.values.byName(value));
-                    }
-                  },
-                  dropdownMenuEntries: Languages.values
-                      .map((e) =>
-                          DropdownMenuEntry(value: e.name, label: e.longName))
-                      .toList()),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Show Images (requires network connection)'),
-                  Switch(
-                    value: useImagesFromNet,
-                    onChanged: (newValue) {
-                      changeUseImagesFromNet(newValue);
-                    },
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: canUpdateDB
-                        ? () async {
-                            await BulkDataHelper.getBulkData()
-                                .then((value) => showDialog<bool>(
-                                    context: context,
-                                    builder: (bCtx) {
-                                      return AlertDialog(
-                                        title: const Text('Info!'),
-                                        content: SingleChildScrollView(
-                                            child: Text(
-                                                'Downloading and processing the data may take up to a few minutes, depending on your internet speed and the model of your phone.\nIt is highly recommended to use a Wi-Fi connection to download data!\nThe downloaded file is approximately ${value?.size ?? 150} MB large.')),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              print('trying to pop with true');
-                                              Navigator.pop(context, true);
-                                            },
-                                            child: const Text('Okay'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              () {
-                                                print(
-                                                    'trying to pop with false');
-                                                Navigator.pop(context);
-                                              };
-                                            },
-                                            child: const Text('Abort'),
-                                          )
-                                        ],
-                                      );
-                                    }))
-                                .then((value) {
-                              if (value != null) {
-                                if (value) {
-                                  handleBulkData().whenComplete(
-                                    () => setState(
-                                      () {
-                                        settings.checkCanUpdateDB();
-                                      },
-                                    ),
-                                  );
-                                }
-                              }
-                            });
-                          }
-                        : null,
-                    child: canUpdateDB
-                        ? const Text('Download card info')
-                        : const Text('Local card info is up to date'),
-                  ),
-                  Text(
-                    'last updated: ${dbDate.year}-${dbDate.month.toString().length < 2 ? '0${dbDate.month}' : dbDate.month}-${dbDate.day.toString().length < 2 ? '0${dbDate.day}' : dbDate.day}',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-              if (kDebugMode)
-                ElevatedButton(
-                    onPressed: () async {
-                      // TODO: if database file does not exist, need to press this button TWICE, before getting a result...
-                      var dbSize = await DBHelper.checkDatabaseSize(
-                          Constants.cardDatabaseTableFileName);
-                      if (kDebugMode) {
-                        print(
-                            'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
-                      }
-                    },
-                    child: const Text('Check card db file...')),
-              if (kDebugMode)
-                ElevatedButton(
-                    onPressed: () async {
-                      var dbSize =
-                          await DBHelper.checkDatabaseSize('history.db');
-                      if (kDebugMode) {
-                        print(
-                            'dbSize: $dbSize B; ${dbSize ~/ 1024} KB; ${dbSize ~/ (1024 * 1024)} MB');
-                      }
-                    },
-                    child: const Text('Check history db file...')),
-              if (kDebugMode)
-                ElevatedButton(
-                  onPressed: () async {
-                    await DBHelper.deleteTablesIfExists();
-                  },
-                  child: const Text('Delete local DB!'),
-                ),
+              getListTileUseLocalDb(useLocalDB, context),
+              getListTileShowImages(useImagesFromNet),
+              getListTileDownloadBulkData(
+                  dbDate, canUpdateDB, context, settings),
+              getListTileFreeUpStorage(),
+              getListTileLanguages(settings),
+              if (kDebugMode) ...getDebuggingWidgets()
             ],
           ),
-          (_isRequestingBulkData || _isDownloading || _isProcessingToLocalDB)
-              ? Container(
-                  color: const Color.fromRGBO(197, 197, 197, 0.35),
-                  height: MediaQuery.of(context).size.height * 1,
-                  child: Center(
-                    child: _isRequestingBulkData
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const CircularProgressIndicator(),
-                              const Text('Fetching Bulk Data Url...'),
-                              ElevatedButton(
-                                  onPressed: () {
-                                    // _response.stream.
-                                    if (_client != null) {
-                                      _client!.close();
-                                    }
-                                    setBulkDataState(); // sets all values to false
-                                  },
-                                  child: const Text('Abort!')),
-                            ],
-                          )
-                        : _isDownloading
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CircularProgressIndicator(
-                                    value: (_receivedBits / _totalBits) < 1
-                                        ? _receivedBits / _totalBits
-                                        : 1,
-                                  ),
-                                  Text(
-                                      'Downloading data... ${_receivedBits ~/ (1024 * 1024)}/${_totalBits ~/ (1024 * 1024)} MB'),
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        // _response.stream.
-                                        if (_client != null) {
-                                          _client!.close();
-                                        }
-                                        setBulkDataState(); // sets all values to false
-                                      },
-                                      child: const Text('Abort!')),
-                                ],
-                              )
-                            : _isProcessingToLocalDB
-                                ? Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CircularProgressIndicator(
-                                        value: _totalEntries != 0
-                                            ? (_entriesSaved / _totalEntries)
-                                            : 0,
-                                      ),
-                                      Text(
-                                          'Processing data to local DB... $_entriesSaved / $_totalEntries done'),
-                                    ],
-                                  )
-                                : const Center(),
-                  ),
-                )
-              : const Center(),
+          getBulkDataDownloadOverlay(),
         ],
       ),
     );

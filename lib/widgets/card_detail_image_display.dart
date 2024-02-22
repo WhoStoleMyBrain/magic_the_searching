@@ -265,7 +265,6 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
                           const TextStyle(fontSize: 16, color: Colors.black)),
             );
     }
-    print('final spans in card detail: $finalSpans');
     return finalSpans;
   }
 
