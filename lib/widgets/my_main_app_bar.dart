@@ -77,14 +77,22 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
   }
 
   Widget getIconDisplayQueryMethod(CardDataProvider cardDataProvider) {
-    return switch (cardDataProvider.queryLocation) {
-      QueryLocation.local =>
-        const Text('LCL', style: TextStyle(color: Colors.black)),
-      QueryLocation.scryfall =>
-        const Text('SCR', style: TextStyle(color: Colors.deepPurple)),
-      QueryLocation.none =>
-        const Text('NON', style: TextStyle(color: Colors.green)),
-    };
+    return Tooltip(
+      triggerMode: TooltipTriggerMode.tap,
+      showDuration: const Duration(seconds: 5),
+      message:
+          'NON: no source available\nLCL: used local DB\nSCR: used Scryfall',
+      child: Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: switch (cardDataProvider.queryLocation) {
+            QueryLocation.local =>
+              const Text('LCL', style: TextStyle(color: Colors.green)),
+            QueryLocation.scryfall =>
+              const Text('SCR', style: TextStyle(color: Colors.deepPurple)),
+            QueryLocation.none =>
+              const Text('NON', style: TextStyle(color: Colors.black)),
+          }),
+    );
   }
 
   IconButton iconButtonEmpty() {
