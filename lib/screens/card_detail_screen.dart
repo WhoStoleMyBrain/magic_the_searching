@@ -5,6 +5,7 @@ import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 
+import '../helpers/navigation_helper.dart';
 import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import '../widgets/card_detail_image_display.dart';
@@ -63,34 +64,45 @@ class CardDetailScreen extends StatelessWidget {
       fontSize: 20,
     );
     final Settings settings = Provider.of<Settings>(context, listen: false);
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        actions: [
-          getRefinedSearchButton(
-            context,
-            cardInfo,
-            ScryfallQueryMaps.inUserLanguageMap(settings.language),
-            'In ${settings.language.longName}',
-          ),
-          getRefinedSearchButton(
-              context, cardInfo, ScryfallQueryMaps.printsMap, 'All Prints'),
-          getRefinedSearchButton(
-              context, cardInfo, ScryfallQueryMaps.versionMap, 'All Arts'),
-        ],
-      ),
-      body: SizedBox(
-        height: mediaQuery.size.height,
-        child: Card(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CardDetailImageDisplay(
-                    cardInfo: cardInfo, mediaQuery: mediaQuery),
-                CardDetails(textStyle: textStyle, cardInfo: cardInfo),
-              ],
+    return PopScope(
+      canPop: Navigator.canPop(context),
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        if (!Navigator.canPop(context)) {
+          NavigationHelper.showExitAppDialog(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          actions: [
+            getRefinedSearchButton(
+              context,
+              cardInfo,
+              ScryfallQueryMaps.inUserLanguageMap(settings.language),
+              'In ${settings.language.longName}',
+            ),
+            getRefinedSearchButton(
+                context, cardInfo, ScryfallQueryMaps.printsMap, 'All Prints'),
+            getRefinedSearchButton(
+                context, cardInfo, ScryfallQueryMaps.versionMap, 'All Arts'),
+          ],
+        ),
+        body: SizedBox(
+          height: mediaQuery.size.height,
+          child: Card(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CardDetailImageDisplay(
+                      cardInfo: cardInfo, mediaQuery: mediaQuery),
+                  CardDetails(textStyle: textStyle, cardInfo: cardInfo),
+                ],
+              ),
             ),
           ),
         ),

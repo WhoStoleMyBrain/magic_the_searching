@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:magic_the_searching/helpers/bulk_data_helper.dart';
 import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
+import 'package:magic_the_searching/helpers/navigation_helper.dart';
 import 'package:magic_the_searching/widgets/app_drawer.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -519,33 +520,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool canUpdateDB = settings.canUpdateDB;
     DateTime dbDate = settings.dbDate;
     bool useImagesFromNet = settings.useImagesFromNet;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        automaticallyImplyLeading:
-            (_isProcessingToLocalDB || _isDownloading || _isRequestingBulkData)
-                ? false
-                : true,
-      ),
-      drawer: const AppDrawer(),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              const SizedBox(
-                height: 20,
-              ),
-              getListTileUseLocalDb(useLocalDB, context),
-              getListTileShowImages(useImagesFromNet),
-              getListTileDownloadBulkData(
-                  dbDate, canUpdateDB, context, settings),
-              getListTileFreeUpStorage(),
-              getListTileLanguages(settings),
-              if (kDebugMode) ...getDebuggingWidgets()
-            ],
-          ),
-          getBulkDataDownloadOverlay(),
-        ],
+    return PopScope(
+      canPop: Navigator.canPop(context),
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        if (!Navigator.canPop(context)) {
+          NavigationHelper.showExitAppDialog(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Settings'),
+          automaticallyImplyLeading: (_isProcessingToLocalDB ||
+                  _isDownloading ||
+                  _isRequestingBulkData)
+              ? false
+              : true,
+        ),
+        drawer: const AppDrawer(),
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                const SizedBox(
+                  height: 20,
+                ),
+                getListTileUseLocalDb(useLocalDB, context),
+                getListTileShowImages(useImagesFromNet),
+                getListTileDownloadBulkData(
+                    dbDate, canUpdateDB, context, settings),
+                getListTileFreeUpStorage(),
+                getListTileLanguages(settings),
+                if (kDebugMode) ...getDebuggingWidgets()
+              ],
+            ),
+            getBulkDataDownloadOverlay(),
+          ],
+        ),
       ),
     );
   }

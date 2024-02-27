@@ -9,6 +9,7 @@ import 'package:magic_the_searching/providers/scryfall_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../helpers/card_symbol_helper.dart';
+import '../helpers/navigation_helper.dart';
 import '../models/mtg_set.dart';
 
 class SearchPage extends StatefulWidget {
@@ -318,97 +319,108 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     ScryfallProvider scryfallProvider =
         Provider.of<ScryfallProvider>(context, listen: true);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Search'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            onChanged: () {
-              if (kDebugMode) {
-                print('form changed!!');
-              }
-            },
-            key: _formKey,
-            child: Column(
-              children: [
-                _getSearchTermField(),
-                _getMtgSetField(scryfallProvider.sets),
-                // Creature Types
-                _getMultiDropdownSelectionField(
-                    (p0, p1) {
-                      setState(() {
-                        _selectedCreatureTypes = p0;
-                      });
-                    },
-                    _selectedCreatureTypes,
-                    scryfallProvider.creatureTypes,
-                    _creatureTypesTextController,
-                    'Creature Types',
-                    focusNodeCreatureTypes,
-                    () {
-                      focusNodeCardTypes.requestFocus();
-                    }),
-                // Card Types
-                _getMultiDropdownSelectionField((p0, p1) {
-                  setState(() {
-                    _selectedCardTypes = p0;
-                  });
-                },
-                    _selectedCardTypes,
-                    scryfallProvider.cardTypes,
-                    _cardTypesTextController,
-                    'Card Types',
-                    focusNodeCardTypes,
-                    () {}),
-                // Keyword Abilities
-                _getMultiDropdownSelectionField((p0, p1) {
-                  setState(() {
-                    _selectedKeywordAbilities = p0;
-                  });
-                },
-                    _selectedKeywordAbilities,
-                    scryfallProvider.keywordAbilities,
-                    _keywordAbilitiesTextController,
-                    'Keyword Abilities',
-                    focusNodeKeywordAbilities,
-                    () {}),
-                _getCmcField(),
-                const SizedBox(
-                  height: 8,
-                ),
-                _getManaSymbolsField(),
-              ],
+    return PopScope(
+      canPop: Navigator.canPop(context),
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        if (!Navigator.canPop(context)) {
+          NavigationHelper.showExitAppDialog(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Search'),
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              onChanged: () {
+                if (kDebugMode) {
+                  print('form changed!!');
+                }
+              },
+              key: _formKey,
+              child: Column(
+                children: [
+                  _getSearchTermField(),
+                  _getMtgSetField(scryfallProvider.sets),
+                  // Creature Types
+                  _getMultiDropdownSelectionField(
+                      (p0, p1) {
+                        setState(() {
+                          _selectedCreatureTypes = p0;
+                        });
+                      },
+                      _selectedCreatureTypes,
+                      scryfallProvider.creatureTypes,
+                      _creatureTypesTextController,
+                      'Creature Types',
+                      focusNodeCreatureTypes,
+                      () {
+                        focusNodeCardTypes.requestFocus();
+                      }),
+                  // Card Types
+                  _getMultiDropdownSelectionField((p0, p1) {
+                    setState(() {
+                      _selectedCardTypes = p0;
+                    });
+                  },
+                      _selectedCardTypes,
+                      scryfallProvider.cardTypes,
+                      _cardTypesTextController,
+                      'Card Types',
+                      focusNodeCardTypes,
+                      () {}),
+                  // Keyword Abilities
+                  _getMultiDropdownSelectionField((p0, p1) {
+                    setState(() {
+                      _selectedKeywordAbilities = p0;
+                    });
+                  },
+                      _selectedKeywordAbilities,
+                      scryfallProvider.keywordAbilities,
+                      _keywordAbilitiesTextController,
+                      'Keyword Abilities',
+                      focusNodeKeywordAbilities,
+                      () {}),
+                  _getCmcField(),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  _getManaSymbolsField(),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          if (_formKey.currentState!.validate()) {
-            MtGSet? set = scryfallProvider.sets
-                .where((element) => element.name == _setController.text)
-                .firstOrNull;
-            Navigator.pop(context, {
-              Constants.contextSearchTerm: _searchTermController.text,
-              Constants.contextLanguages: _languages,
-              Constants.contextCreatureTypes: _selectedCreatureTypes
-                  .map((e) => scryfallProvider.mappedCreatureTypes[e]!)
-                  .toList(),
-              Constants.contextCardTypes: _selectedCardTypes,
-              Constants.contextKeywords: _selectedKeywordAbilities
-                  .map((e) => scryfallProvider.mappedKeywordAbilities[e]!)
-                  .toList(),
-              Constants.contextSet: set ?? MtGSet.empty(),
-              Constants.contextCmcValue: _cmcValueController.text,
-              Constants.contextCmcCondition: _selectedCmcCondition,
-              Constants.contextManaSymbols: _manaSymbolsSelected,
-            });
-          }
-        },
-        child: const Icon(Icons.search),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            if (_formKey.currentState!.validate()) {
+              MtGSet? set = scryfallProvider.sets
+                  .where((element) => element.name == _setController.text)
+                  .firstOrNull;
+              Navigator.pop(context, {
+                Constants.contextSearchTerm: _searchTermController.text,
+                Constants.contextLanguages: _languages,
+                Constants.contextCreatureTypes: _selectedCreatureTypes
+                    .map((e) => scryfallProvider.mappedCreatureTypes[e]!)
+                    .toList(),
+                Constants.contextCardTypes: _selectedCardTypes,
+                Constants.contextKeywords: _selectedKeywordAbilities
+                    .map((e) => scryfallProvider.mappedKeywordAbilities[e]!)
+                    .toList(),
+                Constants.contextSet: set ?? MtGSet.empty(),
+                Constants.contextCmcValue: _cmcValueController.text,
+                Constants.contextCmcCondition: _selectedCmcCondition,
+                Constants.contextManaSymbols: _manaSymbolsSelected,
+              });
+            }
+          },
+          child: const Icon(Icons.search),
+        ),
       ),
     );
   }

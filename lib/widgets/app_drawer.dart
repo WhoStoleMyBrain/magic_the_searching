@@ -22,6 +22,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.search),
             title: const Text('Search'),
             onTap: () {
+              Navigator.pop(context);
               Navigator.of(context).pushNamed(CardSearchScreen.routeName);
               // Navigator.of(context).pushReplacementNamed('/');
             },
@@ -31,6 +32,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.history),
             title: const Text('History'),
             onTap: () {
+              Navigator.pop(context);
               Navigator.of(context).pushNamed(HistoryScreen.routeName);
               // .pushReplacementNamed(HistoryScreen.routeName);
             },
@@ -40,6 +42,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings_outlined),
             title: const Text('Settings'),
             onTap: () {
+              Navigator.pop(context);
               Navigator.of(context).pushNamed(SettingsScreen.routeName);
               // .pushReplacementNamed(SettingsScreen.routeName);
             },
@@ -49,6 +52,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.help_outline),
             title: const Text('Help'),
             onTap: () {
+              Navigator.pop(context);
               Navigator.of(context).pushNamed(HelpScreen.routeName);
               // Navigator.of(context).pushReplacementNamed(HelpScreen.routeName);
             },

@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart' as url;
+import '../helpers/navigation_helper.dart';
 import '../widgets/all_help_messages.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/help_message.dart';
@@ -55,34 +56,45 @@ class _HelpScreenState extends State<HelpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Help'),
-      ),
-      drawer: const AppDrawer(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12.0),
-        child: ExpansionPanelList(
-          elevation: 0,
-          dividerColor: Colors.black54,
-          materialGapSize: 8,
-          expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 8),
-          expansionCallback: (i, isOpen) => setState(() {
-            _isOpen[i] = isOpen;
-          }),
-          children: [
-            helpMessageToText(AllHelpMessages.linksToWeb, 0),
-            helpMessageToText(AllHelpMessages.dataOrigin, 1),
-            helpMessageToText(AllHelpMessages.downloadDB, 2),
-            helpMessageToText(AllHelpMessages.localDB, 3),
-            helpMessageToText(AllHelpMessages.showImages, 4),
-            helpMessageToText(AllHelpMessages.search, 5),
-            helpMessageToText(AllHelpMessages.cardDetailScreen, 6),
-            getAdvancesSearchHelpMessage(context, 7),
-            helpMessageToText(AllHelpMessages.cardNotFound, 8),
-            helpMessageToText(AllHelpMessages.prices, 9),
-            helpMessageToText(AllHelpMessages.historyScreen, 10),
-          ],
+    return PopScope(
+      canPop: Navigator.canPop(context),
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        if (!Navigator.canPop(context)) {
+          NavigationHelper.showExitAppDialog(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Help'),
+        ),
+        drawer: const AppDrawer(),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(12.0),
+          child: ExpansionPanelList(
+            elevation: 0,
+            dividerColor: Colors.black54,
+            materialGapSize: 8,
+            expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 8),
+            expansionCallback: (i, isOpen) => setState(() {
+              _isOpen[i] = isOpen;
+            }),
+            children: [
+              helpMessageToText(AllHelpMessages.linksToWeb, 0),
+              helpMessageToText(AllHelpMessages.dataOrigin, 1),
+              helpMessageToText(AllHelpMessages.downloadDB, 2),
+              helpMessageToText(AllHelpMessages.localDB, 3),
+              helpMessageToText(AllHelpMessages.showImages, 4),
+              helpMessageToText(AllHelpMessages.search, 5),
+              helpMessageToText(AllHelpMessages.cardDetailScreen, 6),
+              getAdvancesSearchHelpMessage(context, 7),
+              helpMessageToText(AllHelpMessages.cardNotFound, 8),
+              helpMessageToText(AllHelpMessages.prices, 9),
+              helpMessageToText(AllHelpMessages.historyScreen, 10),
+            ],
+          ),
         ),
       ),
     );

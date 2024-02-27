@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/navigation_helper.dart';
 import 'package:magic_the_searching/providers/scryfall_provider.dart';
 import 'package:mailto/mailto.dart';
 
@@ -36,6 +37,34 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   ScrollController _controller = ScrollController();
   bool endOfScrollReached = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openModalSheetAfterLoad();
+      getUseLocalDB();
+      if (kDebugMode) {
+        print(
+            'drawer open on widget load? ${_scaffoldKey.currentState!.isDrawerOpen}');
+      }
+      if (_scaffoldKey.currentState!.isDrawerOpen) {
+        if (kDebugMode) {
+          print('closing app drawer....');
+        }
+        _scaffoldKey.currentState?.closeDrawer();
+      }
+    });
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.removeListener(_scrollListener);
+    _controller.dispose();
+  }
 
   Future<void> getUseLocalDB() async {
     final settings = Provider.of<Settings>(context, listen: false);
@@ -90,30 +119,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _openModalSheetAfterLoad();
-      getUseLocalDB();
-      if (_scaffoldKey.currentState!.isDrawerOpen) {
-        if (kDebugMode) {
-          print('closing app drawer....');
-        }
-        _scaffoldKey.currentState?.closeDrawer();
-      }
-    });
-    _controller = ScrollController();
-    _controller.addListener(_scrollListener);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.removeListener(_scrollListener);
-    _controller.dispose();
-  }
-
   _scrollListener() {
     if (_controller.offset >= _controller.position.maxScrollExtent &&
         !_controller.position.outOfRange) {
@@ -125,47 +130,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: false);
     await cardDataProvider.requestDataAtEndOfScroll();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    CardDataProvider cardDataProvider = Provider.of<CardDataProvider>(context);
-    MediaQueryData mediaQuery = MediaQuery.of(context);
-    Future.delayed(
-      Duration.zero,
-      () => showDialogIfFirstLoaded(context),
-    );
-
-    return PopScope(
-      onPopInvoked: (didPop) {
-        if (kDebugMode) {
-          print('did pop: $didPop');
-          print(_scaffoldKey.currentState!.isDrawerOpen);
-        }
-        if (_scaffoldKey.currentState!.isDrawerOpen) {
-          if (kDebugMode) {
-            print('closing app drawer....');
-          }
-          _scaffoldKey.currentState?.closeDrawer();
-        }
-      },
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: const PreferredSize(
-            preferredSize: Size(double.infinity, kToolbarHeight),
-            child: MyMainAppBar()),
-        drawer: const AppDrawer(),
-        body: cardDataProvider.isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : cardDataProvider.cards.isEmpty
-                ? const Center(
-                    child: Text('No cards found. Try searching for some!'))
-                : myGridView(mediaQuery, cardDataProvider),
-        floatingActionButton: const MyMainFloatingActionButtons(),
-      ),
-    );
   }
 
   GridView myGridView(
@@ -200,9 +164,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     await SharedPreferences.getInstance().then((SharedPreferences prefs) {
       bool isFirstLoaded =
           prefs.getBool(Constants.settingIsFirstLoaded) ?? true;
-
       if (isFirstLoaded) {
-        // if (isFirstLoaded) {
         showDialog(
           context: context,
           builder: (context) {
@@ -248,5 +210,43 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         );
       }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    CardDataProvider cardDataProvider = Provider.of<CardDataProvider>(context);
+    MediaQueryData mediaQuery = MediaQuery.of(context);
+    Future.delayed(
+      Duration.zero,
+      () => showDialogIfFirstLoaded(context),
+    );
+
+    return PopScope(
+      canPop: Navigator.canPop(context),
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        if (!Navigator.canPop(context)) {
+          NavigationHelper.showExitAppDialog(context);
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: const PreferredSize(
+            preferredSize: Size(double.infinity, kToolbarHeight),
+            child: MyMainAppBar()),
+        drawer: const AppDrawer(),
+        body: cardDataProvider.isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : cardDataProvider.cards.isEmpty
+                ? const Center(
+                    child: Text('No cards found. Try searching for some!'))
+                : myGridView(mediaQuery, cardDataProvider),
+        floatingActionButton: const MyMainFloatingActionButtons(),
+      ),
+    );
   }
 }
