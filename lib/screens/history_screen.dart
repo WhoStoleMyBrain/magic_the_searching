@@ -43,7 +43,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.languages = languages;
     // cardDataProvider.dbHelperFunction = DBHelper.getHistoryData;
-    cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
+    cardDataProvider.scryfallQueryMaps = ScryfallQueryMaps.searchMap;
     Navigator.of(context).pushReplacementNamed('/');
     history.openModalSheet = false;
     await cardDataProvider.processQuery();
@@ -57,7 +57,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     cardDataProvider.query = searchText;
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.languages = languages;
-    cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
+    cardDataProvider.scryfallQueryMaps = ScryfallQueryMaps.searchMap;
     SearchStartHelper.prefillValue = history.data[index].query;
     history.openModalSheet = true;
     Navigator.of(context).pushReplacementNamed('/');

@@ -230,7 +230,7 @@ class SearchStartHelper {
     String cardTypesQuery = buildCumulativeQuery(cardTypes, 't').trim();
     String keywordAbilitiesQuery =
         buildCumulativeQuery(keywordAbilities, 'keyword').trim();
-    String setQuery = mtgSet.name.isEmpty ? "e:${mtgSet.name}" : '';
+    String setQuery = mtgSet.name != '' ? "e:${mtgSet.name}" : '';
     String cmcQuery = cmcValue != '' ? "mv$cmcCondition$cmcValue" : '';
     String manaSymbolQuery = manaSymbols.isNotEmpty
         ? manaSymbols.entries
@@ -239,24 +239,27 @@ class SearchStartHelper {
             .join(' ')
         : '';
     // building full query list
-    var fullQueryList = [];
-    text.isNotEmpty ? fullQueryList.add(text) : null;
-    languageQuery.isNotEmpty ? fullQueryList.add(languageQuery) : null;
-    creatureTypesQuery.isNotEmpty
-        ? fullQueryList.add(creatureTypesQuery)
-        : null;
-    cardTypesQuery.isNotEmpty ? fullQueryList.add(cardTypesQuery) : null;
-    setQuery.isNotEmpty ? fullQueryList.add(setQuery) : null;
-    cmcQuery.isNotEmpty ? fullQueryList.add(cmcQuery) : null;
-    manaSymbolQuery.isNotEmpty ? fullQueryList.add(manaSymbolQuery) : null;
-    keywordAbilitiesQuery.isNotEmpty
-        ? fullQueryList.add(keywordAbilitiesQuery)
-        : null;
+    Map<String, dynamic> fullQueryList = {};
+    fullQueryList.addEntries([
+      MapEntry('text', text.isNotEmpty ? text : null),
+      MapEntry('language', languageQuery.isNotEmpty ? languageQuery : null),
+      MapEntry('creatureTypes',
+          creatureTypesQuery.isNotEmpty ? creatureTypesQuery : null),
+      MapEntry('cardTypes', cardTypesQuery.isNotEmpty ? cardTypesQuery : null),
+      MapEntry('set', setQuery.isNotEmpty ? setQuery : null),
+      MapEntry('cmc', cmcQuery.isNotEmpty ? cmcQuery : null),
+      MapEntry(
+          'manaSymbols', manaSymbolQuery.isNotEmpty ? manaSymbolQuery : null),
+      MapEntry('keywordAbilities',
+          keywordAbilitiesQuery.isNotEmpty ? keywordAbilitiesQuery : null),
+    ]);
     // set query parameters in card data provider
-    cardDataProvider.query = fullQueryList.join(' ');
+    cardDataProvider.allQueryParameters = fullQueryList;
+    cardDataProvider.query =
+        fullQueryList.values.where((element) => element != null).join(' ');
     cardDataProvider.languages = languages;
     cardDataProvider.isStandardQuery = true;
-    cardDataProvider.queryParameters = ScryfallQueryMaps.searchMap;
+    cardDataProvider.scryfallQueryMaps = ScryfallQueryMaps.searchMap;
     if (kDebugMode) {
       print('Using query: ${cardDataProvider.query}');
     }
@@ -276,7 +279,6 @@ class SearchStartHelper {
     final bool hasInternetConnection =
         await ConnectivityHelper.checkConnectivity();
     if (!hasInternetConnection || settings.useLocalDB) {
-      // final int dbSize =
       await DBHelper.checkDatabaseSize(Constants.cardDatabaseTableFileName)
           .then((int dbSize) async {
         if (dbSize / 1024 ~/ 1024 > 3) {

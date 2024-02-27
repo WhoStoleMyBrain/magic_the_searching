@@ -168,19 +168,75 @@ class DBHelper {
     };
   }
 
-  static Future<List<Map<String, dynamic>>> getCardsByName(String name) async {
+  static String queryParameterToSqliteQuery(MapEntry<String, dynamic> element,
+      Map<String, String> queryParameterToDatabaseColumn) {
+    switch (element.key) {
+      case 'text':
+        return '${queryParameterToDatabaseColumn[element.key]} LIKE \'%${element.value}%\'';
+      case 'creatureTypes':
+        try {
+          return '${queryParameterToDatabaseColumn[element.key]} LIKE \'%${element.value.toString().split("t:")[1]}%\'';
+        } on Exception catch (_) {
+          return '${queryParameterToDatabaseColumn[element.key]} LIKE \'%${element.value}%\'';
+        }
+      case 'cardTypes':
+        try {
+          return '${queryParameterToDatabaseColumn[element.key]} LIKE \'%${element.value.toString().split("t:")[1]}%\'';
+        } on Exception catch (_) {
+          return '${queryParameterToDatabaseColumn[element.key]} LIKE \'%${element.value}%\'';
+        }
+      // case 'set':
+      //   return ''; //TODO Not implemented because it's fucking hard
+      // case 'cmc':
+      //   return ''; //TODO Not implemented because it's fucking hard
+      // case 'manaSymbols':
+      //   return ''; //TODO Not implemented because it's fucking hard
+      case 'keywordAbilities':
+        var tmp =
+            '${element.value.split(" ").fold('', (previousValue, el) => "$previousValue ${queryParameterToDatabaseColumn[element.key]} LIKE '%${el.split('keyword:')[1]}%' AND")}';
+        return tmp.substring(0, tmp.length - 4);
+      default:
+        return element.value;
+    }
+  }
+
+  static String buildRawQuery(Map<String, dynamic> allQueryParameters) {
+    Map<String, String> queryParameterToDatabaseColumn = {
+      'text': 'name',
+      'creatureTypes': 'typeLine',
+      'cardTypes': 'typeLine',
+      'set': 'setName',
+      'cmc': 'manaCost',
+      'manaSymbols': 'manaCost',
+      'keywordAbilities': 'oracleText',
+    };
+    var tmp = allQueryParameters.entries
+        .where((element) =>
+            (element.value != null) &&
+            (!['set', 'cmc', 'manaSymbols'].contains(element.key)))
+        .fold(
+            '',
+            (previousValue, element) =>
+                '$previousValue ${queryParameterToSqliteQuery(element, queryParameterToDatabaseColumn)} AND');
+    tmp =
+        'WHERE${tmp.substring(0, tmp.length - 4)}'; // one AND will be added too much
+    return tmp;
+  }
+
+  static Future<List<Map<String, dynamic>>> getCardsByName(
+      Map<String, dynamic> allQueryParameters) async {
+    //TODO Implement limit and offset to limit query and also request new data at end of scroll
     final db = await DBHelper.cardDatabase();
-    List<Map<String, dynamic>> cardDetail = await db
-        .rawQuery('SELECT * FROM card_detail WHERE name LIKE \'%$name%\'');
+    var tmp = buildRawQuery(allQueryParameters);
+    List<Map<String, dynamic>> cardDetail =
+        await db.rawQuery('SELECT * FROM card_detail $tmp LIMIT 10 OFFSET 0');
     if (cardDetail.isEmpty) {
       return [];
     }
 
     final List<Map<String, dynamic>> retList = [];
     for (int i = 0; i < cardDetail.length; i++) {
-      // print(_cardInfo[i]);
       final String id = cardDetail[i]["id"];
-      // retList.add(await DBHelper.getCardById(id));
       final cardInfo =
           await db.query('card_info', where: 'id = ?', whereArgs: [id]);
       final imageUris =
@@ -191,12 +247,12 @@ class DBHelper {
       final purchaseUris =
           await db.query('purchase_uris', where: 'id = ?', whereArgs: [id]);
       retList.add({
-        'card_info': cardInfo,
+        'card_info': cardInfo.isNotEmpty ? cardInfo.first : null,
         'card_detail': cardDetail[i],
-        'image_uris': imageUris.first,
-        'card_faces': cardFaces.first,
-        'prices': prices.first,
-        'purchase_uris': purchaseUris.first,
+        'image_uris': imageUris.isNotEmpty ? imageUris.first : null,
+        'card_faces': cardFaces.isNotEmpty ? cardFaces.first : null,
+        'prices': prices.isNotEmpty ? prices.first : null,
+        'purchase_uris': purchaseUris.isNotEmpty ? purchaseUris.first : null,
       });
     }
     return retList;

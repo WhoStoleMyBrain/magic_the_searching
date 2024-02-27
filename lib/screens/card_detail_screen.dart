@@ -40,7 +40,7 @@ class CardDetailScreen extends StatelessWidget {
     final cardDataProvider = Provider.of<CardDataProvider>(ctx, listen: false);
     cardDataProvider.query = text;
     cardDataProvider.isStandardQuery = false;
-    cardDataProvider.queryParameters = queryParameters;
+    cardDataProvider.scryfallQueryMaps = queryParameters;
 
     if (kDebugMode) {
       print('starting search for cards in detail screen! $queryParameters');

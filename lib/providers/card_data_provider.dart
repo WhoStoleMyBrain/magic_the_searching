@@ -13,7 +13,8 @@ class CardDataProvider with ChangeNotifier {
   bool isStandardQuery = true;
   bool hasMore = false;
   QueryLocation _queryLocation = QueryLocation.none;
-  Map<String, String> queryParameters = {};
+  Map<String, String> scryfallQueryMaps = {};
+  Map<String, dynamic> allQueryParameters = {};
   late ScryfallRequestHandler scryfallRequestHandler;
 
   set queryLocation(QueryLocation newQueryLocation) {
@@ -48,7 +49,13 @@ class CardDataProvider with ChangeNotifier {
   Future<bool> processQueryLocally() async {
     isLoading = true;
     notifyListeners();
-    List<Map<String, dynamic>> dbResult = await DBHelper.getCardsByName(query);
+    // print('local search query: $query');
+    // print('local search query params: $allQueryParameters');
+    //soo the idea is to filter using all query params, most notably
+    //creature type, set, card type, cmc, manasymbols, keywordabilities and name (=text)
+    // first get those values from allQueryParams? or better to just use them in the search?
+    List<Map<String, dynamic>> dbResult =
+        await DBHelper.getCardsByName(allQueryParameters);
     if (dbResult.isEmpty) {
       cards = [];
       Map<String, dynamic> historyData = {
@@ -68,19 +75,20 @@ class CardDataProvider with ChangeNotifier {
       };
       DBHelper.insertIntoHistory(historyData);
     }
+    // print('found results: $dbResult');
     cards = dbResult.map((e) => CardInfo.fromDB(e)).toList();
     return true;
   }
 
   Future<bool> _requestDataFromScryfall() async {
     scryfallRequestHandler = ScryfallRequestHandler();
-    languages = queryParameters.entries
+    languages = scryfallQueryMaps.entries
         .where((element) => element.key == 'lang')
         .map((e) => e.value)
         .toList();
     scryfallRequestHandler.searchText = query;
     scryfallRequestHandler.languages = languages;
-    scryfallRequestHandler.setHttpsQuery(queryParameters, isStandardQuery);
+    scryfallRequestHandler.setHttpsQuery(scryfallQueryMaps, isStandardQuery);
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
     if (kDebugMode) {
