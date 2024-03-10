@@ -44,7 +44,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.magic_the_searching"
-        minSdkVersion 22
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -88,7 +88,12 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     // ...
     // Use this dependency to bundle the model with your app
-    implementation 'com.google.mlkit:language-id:17.0.3'
+    // implementation 'com.google.mlkit:language-id:17.0.3'
+    implementation 'com.google.mlkit:text-recognition-chinese:16.0.0-beta6'
+    implementation 'com.google.mlkit:text-recognition-devanagari:16.0.0-beta6'
+    implementation 'com.google.mlkit:text-recognition-japanese:16.0.0-beta6'
+    implementation 'com.google.mlkit:text-recognition-korean:16.0.0-beta6'
+    // implementation 'com.google.mlkit:text-recognition-latin:16.0.0-beta6'
     implementation "androidx.activity:activity:1.6.0-alpha05"
 
 }

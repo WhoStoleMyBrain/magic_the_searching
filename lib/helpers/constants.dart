@@ -38,6 +38,10 @@ class Constants {
   static const settingIsFirstLoaded = 'isFirstLoaded';
   static const placeholderSplitText = 'PLACEHOLDER_SPLIT_TEXT';
   static const loyaltyAssetPath = 'assets/images/Loyalty.svg';
+  static const imageTextMapCardName = 'cardName';
+  static const imageTextMapCardType = 'cardType';
+  static const imageTextMapCreatureType = 'creatureType';
+
   static String defaultTimestamp =
       DateTime.parse("1969-07-20 20:18:04Z").toIso8601String();
 

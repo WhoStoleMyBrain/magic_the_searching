@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart' as url;
 import '../helpers/navigation_helper.dart';
 import '../widgets/all_help_messages.dart';
 import '../widgets/app_drawer.dart';
-import '../widgets/help_message.dart';
+import '../models/help_message.dart';
 
 class HelpScreen extends StatefulWidget {
   static const routeName = '/help-screen';

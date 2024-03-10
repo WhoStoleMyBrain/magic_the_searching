@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/navigation_helper.dart';
+import 'package:magic_the_searching/providers/image_taken_provider.dart';
 import 'package:magic_the_searching/providers/scryfall_provider.dart';
 import 'package:mailto/mailto.dart';
 
@@ -44,16 +45,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _openModalSheetAfterLoad();
       getUseLocalDB();
-      if (kDebugMode) {
-        print(
-            'drawer open on widget load? ${_scaffoldKey.currentState!.isDrawerOpen}');
-      }
-      if (_scaffoldKey.currentState!.isDrawerOpen) {
-        if (kDebugMode) {
-          print('closing app drawer....');
-        }
-        _scaffoldKey.currentState?.closeDrawer();
-      }
     });
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
@@ -79,15 +70,51 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         Provider.of<CardDataProvider>(context, listen: false);
     ScryfallProvider scryfallProvider =
         Provider.of<ScryfallProvider>(context, listen: false);
+    ImageTakenProvider imageTakenProvider =
+        Provider.of<ImageTakenProvider>(context, listen: false);
 
     if (historyProvider.openModalSheet) {
       // SearchStartHelper.startEnterSearchTerm(context);
-      final query = cardDataProvider.query;
-      var prefilledValues =
+      String query = cardDataProvider.query;
+      Map<String, dynamic> prefilledValues =
           SearchStartHelper.mapQueryToPrefilledValues(query, scryfallProvider);
       if (kDebugMode) {
         print('query in history clicked: $query');
       }
+      await Navigator.of(context)
+          .push(
+        MaterialPageRoute(
+          builder: (context) => SearchPage(
+            prefilledValues: prefilledValues,
+          ),
+        ),
+      )
+          .then((value) {
+        if (kDebugMode) {
+          print('returned Value value history clicked: $value');
+        }
+
+        if (value != null) {
+          SearchStartHelper.startSearchForCard(
+            context,
+            value[Constants.contextSearchTerm],
+            value[Constants.contextLanguages],
+            value[Constants.contextCreatureTypes],
+            value[Constants.contextKeywords],
+            value[Constants.contextCardTypes],
+            value[Constants.contextSet],
+            value[Constants.contextCmcValue],
+            value[Constants.contextCmcCondition],
+            value[Constants.contextManaSymbols],
+          );
+        }
+      });
+    } else if (imageTakenProvider.openModalSheet) {
+      Map<String, dynamic> prefilledValues = {
+        Constants.contextSearchTerm: imageTakenProvider.cardName,
+        Constants.contextCreatureTypes: imageTakenProvider.creatureType,
+        Constants.contextCardTypes: imageTakenProvider.cardType,
+      };
       await Navigator.of(context)
           .push(
         MaterialPageRoute(

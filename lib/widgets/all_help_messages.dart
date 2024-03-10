@@ -1,4 +1,4 @@
-import 'help_message.dart';
+import '../models/help_message.dart';
 
 class AllHelpMessages {
   static int numberOfMessages = 11;

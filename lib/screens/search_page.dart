@@ -1,5 +1,4 @@
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -38,13 +37,11 @@ class _SearchPageState extends State<SearchPage> {
   List<String> _selectedCreatureTypes = [];
   List<String> _selectedCardTypes = [];
 
-  final FocusNode focusNodeQuery = FocusNode();
-  final FocusNode focusNodeCreatureTypes = FocusNode();
-  final FocusNode focusNodeCardTypes = FocusNode();
-  final FocusNode focusNodeKeywordAbilities = FocusNode();
-  final FocusNode focusNodeCmcValue = FocusNode();
-  // final FocusNode focusNodeQuery = FocusNode();
-  // final FocusNode focusNodeQuery = FocusNode();
+  final _setKey = GlobalKey<DropdownSearchState>();
+  final _creatureTypeKey = GlobalKey<DropdownSearchState>();
+  final _cardTypeKey = GlobalKey<DropdownSearchState>();
+  final _keywordAbilitiesKey = GlobalKey<DropdownSearchState>();
+  late FocusScopeNode _focusScopeNode;
 
   String _selectedCmcCondition = '<';
   Map<String, bool> _manaSymbolsSelected = {
@@ -60,6 +57,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
+    _focusScopeNode = FocusScopeNode(canRequestFocus: true);
 
     setState(() {
       if (widget.prefilledValues != null) {
@@ -87,7 +85,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void dispose() {
     super.dispose();
-    focusNodeQuery.dispose();
+    _focusScopeNode.dispose();
   }
 
   void _identifyLanguages(String _) async {
@@ -187,6 +185,7 @@ class _SearchPageState extends State<SearchPage> {
 
   Autocomplete<MtGSet> _getMtgSetField(List<MtGSet> sets) {
     return Autocomplete<MtGSet>(
+      key: _setKey,
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (textEditingValue.text == '') {
           return const Iterable<MtGSet>.empty();
@@ -204,14 +203,13 @@ class _SearchPageState extends State<SearchPage> {
           TextEditingController fieldTextEditingController,
           FocusNode fieldFocusNode,
           VoidCallback onFieldSubmitted) {
-        fieldTextEditingController.text = _setController.text;
         return TextFormField(
           textInputAction: TextInputAction.next,
           controller: fieldTextEditingController,
           decoration: const InputDecoration(labelText: 'Set'),
           focusNode: fieldFocusNode,
           onFieldSubmitted: (String value) {
-            onFieldSubmitted();
+            _creatureTypeKey.currentState?.openDropDownSearch();
           },
         );
       },
@@ -221,24 +219,11 @@ class _SearchPageState extends State<SearchPage> {
 
   TextFormField _getSearchTermField() {
     return TextFormField(
-      focusNode: focusNodeQuery,
-      // onFieldSubmitted: (value) {
-      // FocusScope.of(context).requestFocus(focusNode);
-      // FocusScope.of(context).nextFocus();
-      // focusNode.nextFocus();
-      // },
-      // onEditingComplete: () {
-      //   var cnt = 0;
-      //   do {
-      //     cnt++;
-      //     FocusScope.of(context).nextFocus();
-      //     print('Tried next $cnt times');
-      //   } while (FocusScope.of(context).focusedChild?.context?.widget == null &&
-      //       cnt < 100);
-      //   // focusNode.nextFocus();
-      // },
+      autofocus: true,
       onFieldSubmitted: (value) {
-        focusNodeCreatureTypes.requestFocus();
+        if (_setKey.currentState != null) {
+          _setKey.currentState!.openDropDownSearch();
+        }
       },
       textInputAction: TextInputAction.next,
       controller: _searchTermController,
@@ -266,49 +251,24 @@ class _SearchPageState extends State<SearchPage> {
       List<String> options,
       TextEditingController textEditingController,
       String label,
-      FocusNode focusNode,
-      VoidCallback onFieldSubmitted) {
+      GlobalKey key) {
     return DropdownSearch<String>.multiSelection(
+      key: key,
       items: options,
+      onSaved: (newValue) {
+        print('Multi selection on saved: $newValue');
+      },
       dropdownDecoratorProps: DropDownDecoratorProps(
           dropdownSearchDecoration: InputDecoration(labelText: label)),
       popupProps: PopupPropsMultiSelection.menu(
         showSearchBox: true,
         searchDelay: Duration.zero,
         onItemAdded: onSelectionChanged,
-        onDismissed: () {
-          onFieldSubmitted();
-        },
-        // onItemAdded: (selectedItems, addedItem) {
-        //   onSelectionChanged!(selectedItems, addedItem);
-        // },
         onItemRemoved: onSelectionChanged,
-
         searchFieldProps: TextFieldProps(
-          autofocus: true,
-          focusNode: focusNode,
-          textInputAction: TextInputAction.next,
-          onTap: () {
-            if (kDebugMode) {
-              print('Tapped');
-            }
-          },
-          onAppPrivateCommand: (p0, p1) {
-            if (kDebugMode) {
-              print('p0: $p0');
-              print('p1: $p1');
-            }
-          },
-          controller: textEditingController,
-          // decoration: InputDecoration(
-          //   suffixIcon: IconButton(
-          //     icon: const Icon(Icons.clear),
-          //     onPressed: () {
-          //       textEditingController.clear();
-          //     },
-          //   ),
-          // )
-        ),
+            autofocus: true,
+            textInputAction: TextInputAction.next,
+            controller: textEditingController),
         showSelectedItems: true,
       ),
       selectedItems: selectedObjectItems,
@@ -319,6 +279,11 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     ScryfallProvider scryfallProvider =
         Provider.of<ScryfallProvider>(context, listen: true);
+    var tmp = FocusScope.of(context).focusedChild;
+    if (tmp != null) {
+      // tmp.
+    }
+    print('tmp: $tmp');
     return PopScope(
       canPop: Navigator.canPop(context),
       onPopInvoked: (didPop) {
@@ -337,61 +302,51 @@ class _SearchPageState extends State<SearchPage> {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Form(
-              onChanged: () {
-                if (kDebugMode) {
-                  print('form changed!!');
-                }
-              },
               key: _formKey,
-              child: Column(
-                children: [
-                  _getSearchTermField(),
-                  _getMtgSetField(scryfallProvider.sets),
-                  // Creature Types
-                  _getMultiDropdownSelectionField(
-                      (p0, p1) {
-                        setState(() {
-                          _selectedCreatureTypes = p0;
-                        });
-                      },
-                      _selectedCreatureTypes,
-                      scryfallProvider.creatureTypes,
-                      _creatureTypesTextController,
-                      'Creature Types',
-                      focusNodeCreatureTypes,
-                      () {
-                        focusNodeCardTypes.requestFocus();
-                      }),
-                  // Card Types
-                  _getMultiDropdownSelectionField((p0, p1) {
-                    setState(() {
-                      _selectedCardTypes = p0;
-                    });
-                  },
-                      _selectedCardTypes,
-                      scryfallProvider.cardTypes,
-                      _cardTypesTextController,
-                      'Card Types',
-                      focusNodeCardTypes,
-                      () {}),
-                  // Keyword Abilities
-                  _getMultiDropdownSelectionField((p0, p1) {
-                    setState(() {
-                      _selectedKeywordAbilities = p0;
-                    });
-                  },
-                      _selectedKeywordAbilities,
-                      scryfallProvider.keywordAbilities,
-                      _keywordAbilitiesTextController,
-                      'Keyword Abilities',
-                      focusNodeKeywordAbilities,
-                      () {}),
-                  _getCmcField(),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  _getManaSymbolsField(),
-                ],
+              child: FocusScope(
+                node: _focusScopeNode,
+                canRequestFocus: true,
+                skipTraversal: false,
+                child: Column(
+                  children: [
+                    _getSearchTermField(),
+                    _getMtgSetField(scryfallProvider.sets),
+                    // Creature Types
+                    _getMultiDropdownSelectionField((p0, p1) {
+                      setState(() {
+                        _selectedCreatureTypes = p0;
+                      });
+                    },
+                        _selectedCreatureTypes,
+                        scryfallProvider.creatureTypes,
+                        _creatureTypesTextController,
+                        'Creature Types',
+                        _creatureTypeKey),
+                    // Card Types
+                    _getMultiDropdownSelectionField((p0, p1) {
+                      setState(() {
+                        _selectedCardTypes = p0;
+                      });
+                    }, _selectedCardTypes, scryfallProvider.cardTypes,
+                        _cardTypesTextController, 'Card Types', _cardTypeKey),
+                    // Keyword Abilities
+                    _getMultiDropdownSelectionField((p0, p1) {
+                      setState(() {
+                        _selectedKeywordAbilities = p0;
+                      });
+                    },
+                        _selectedKeywordAbilities,
+                        scryfallProvider.keywordAbilities,
+                        _keywordAbilitiesTextController,
+                        'Keyword Abilities',
+                        _keywordAbilitiesKey),
+                    _getCmcField(),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    _getManaSymbolsField(),
+                  ],
+                ),
               ),
             ),
           ),
