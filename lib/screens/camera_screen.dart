@@ -1,7 +1,3 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:async';
 import 'dart:io';
 
@@ -9,22 +5,18 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:magic_the_searching/helpers/google_mlkit_helper.dart';
-import 'package:magic_the_searching/providers/scryfall_provider.dart';
-import 'package:magic_the_searching/widgets/fire_query_image_taken_alert_dialog.dart';
 import 'package:provider/provider.dart';
+import '../helpers/google_mlkit_helper.dart';
+import '../providers/scryfall_provider.dart';
+import '../widgets/fire_query_image_taken_alert_dialog.dart';
 
-import '../helpers/constants.dart';
-
-/// Camera example home widget.
-class CameraExampleHome extends StatefulWidget {
-  /// Default Constructor
+class CameraScreen extends StatefulWidget {
   static const routeName = '/camera-example';
-  const CameraExampleHome(this._cameras, {super.key});
+  const CameraScreen(this._cameras, {super.key});
   final List<CameraDescription> _cameras;
   @override
-  State<CameraExampleHome> createState() {
-    return _CameraExampleHomeState();
+  State<CameraScreen> createState() {
+    return _CameraScreenState();
   }
 }
 
@@ -49,7 +41,7 @@ void _logError(String code, String? message) {
   print('Error: $code${message == null ? '' : '\nError Message: $message'}');
 }
 
-class _CameraExampleHomeState extends State<CameraExampleHome>
+class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
   CameraController? controller;
   XFile? imageFile;
@@ -647,7 +639,9 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       }
     }).then((value) async {
       if (value != null) {
-        print('returned map: $value');
+        if (kDebugMode) {
+          print('returned map: $value');
+        }
         showDialog<void>(
           context: context,
           builder: (bCtx) {
@@ -811,7 +805,9 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   void _showCameraException(CameraException e) {
-    _logError(e.code, e.description);
+    if (kDebugMode) {
+      _logError(e.code, e.description);
+    }
     showInSnackBar('Error: ${e.code}\n${e.description}');
   }
 }

@@ -17,7 +17,7 @@ import './screens/card_detail_screen.dart';
 import './screens/card_search_screen.dart';
 import './screens/history_screen.dart';
 import 'providers/scryfall_provider.dart';
-import 'screens/camera_test_screen.dart';
+import 'screens/camera_screen.dart';
 
 late List<CameraDescription> _cameras;
 void main() async {
@@ -104,7 +104,7 @@ class MyApp extends StatelessWidget {
             SettingsScreen.routeName: (ctx) => const SettingsScreen(),
             HelpScreen.routeName: (ctx) => const HelpScreen(),
             // CameraApp.routeName: (ctx) => CameraApp(_cameras),
-            CameraExampleHome.routeName: (ctx) => CameraExampleHome(_cameras),
+            CameraScreen.routeName: (ctx) => CameraScreen(_cameras),
           },
           home: const CardSearchScreen(),
         );

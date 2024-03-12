@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:magic_the_searching/providers/scryfall_provider.dart';
-import 'package:magic_the_searching/screens/camera_test_screen.dart';
+import 'package:magic_the_searching/screens/camera_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../helpers/constants.dart';
-import '../helpers/process_image_taking.dart';
 import '../helpers/search_start_helper.dart';
 import '../screens/search_page.dart';
 
@@ -68,19 +67,8 @@ class _MyMainFloatingActionButtonsState
           Padding(
             padding: const EdgeInsets.all(5.0),
             child: FloatingActionButton(
-              heroTag: 'camera',
               onPressed: () {
-                ProcessImageTaking.takePictureAndFireQuery(context,
-                    scryfallProvider: scryfallProvider);
-              },
-              child: const Icon(Icons.camera_enhance),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed(CameraExampleHome.routeName);
+                Navigator.of(context).pushNamed(CameraScreen.routeName);
               },
               child: const Icon(Icons.camera),
             ),

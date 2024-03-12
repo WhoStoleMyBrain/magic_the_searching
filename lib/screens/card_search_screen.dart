@@ -1,9 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/helpers/navigation_helper.dart';
-import 'package:magic_the_searching/providers/image_taken_provider.dart';
-import 'package:magic_the_searching/providers/scryfall_provider.dart';
 import 'package:mailto/mailto.dart';
 
 import 'package:provider/provider.dart';
@@ -12,6 +9,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../helpers/constants.dart';
 import '../helpers/search_start_helper.dart';
+import '../helpers/navigation_helper.dart';
+import '../providers/image_taken_provider.dart';
+import '../providers/scryfall_provider.dart';
 import '../providers/history.dart';
 import '../providers/card_data_provider.dart';
 import '../providers/settings.dart';

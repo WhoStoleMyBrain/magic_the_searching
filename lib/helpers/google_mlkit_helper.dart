@@ -80,8 +80,10 @@ class GoogleMlkitHelper {
       creatureType =
           _getCreatureTypeFromBlocks(recognisedText.blocks, scryfallProvider);
     } else {
-      print(
-          'not getting card type and creature type, since there is no scryfall provider');
+      if (kDebugMode) {
+        print(
+            'not getting card type and creature type, since there is no scryfall provider');
+      }
     }
     returnMap[Constants.imageTextMapCardName] = cardName;
     returnMap[Constants.imageTextMapCardType] = cardType;

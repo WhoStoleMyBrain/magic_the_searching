@@ -1,10 +1,11 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class CameraApp extends StatefulWidget {
   static const routeName = '/camera-app';
-  List<CameraDescription> _cameras;
-  CameraApp(
+  final List<CameraDescription> _cameras;
+  const CameraApp(
     this._cameras, {
     super.key,
   });
@@ -20,7 +21,9 @@ class _CameraAppState extends State<CameraApp> {
     super.initState();
 
     // _cameras = await availableCameras();
-    print('available cameras: ${widget._cameras}');
+    if (kDebugMode) {
+      print('available cameras: ${widget._cameras}');
+    }
     controller = CameraController(widget._cameras[0], ResolutionPreset.max);
     controller.initialize().then((_) {
       if (!mounted) {

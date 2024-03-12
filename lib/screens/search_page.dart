@@ -1,4 +1,5 @@
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -32,7 +33,7 @@ class _SearchPageState extends State<SearchPage> {
   LanguageIdentifier languageIdentifier =
       LanguageIdentifier(confidenceThreshold: 0.5);
 
-  List<String> _languages = [];
+  final List<String> _languages = [];
   List<String> _selectedKeywordAbilities = [];
   List<String> _selectedCreatureTypes = [];
   List<String> _selectedCardTypes = [];
@@ -86,28 +87,6 @@ class _SearchPageState extends State<SearchPage> {
   void dispose() {
     super.dispose();
     _focusScopeNode.dispose();
-  }
-
-  void _identifyLanguages(String _) async {
-    if (_searchTermController.text.isEmpty) {
-      return;
-    }
-    _languages = [];
-    final String searchTerm = _searchTermController.text;
-
-    try {
-      final String response =
-          await languageIdentifier.identifyLanguage(searchTerm);
-      _languages.add(response);
-    } on PlatformException catch (pe) {
-      if (pe.code == languageIdentifier.undeterminedLanguageCode) {
-        _languages.add('');
-      }
-      _languages.add('');
-    }
-    if (!_languages.contains('en')) {
-      _languages.add('en');
-    }
   }
 
   Widget _getManaSymbolsField() {
@@ -256,7 +235,9 @@ class _SearchPageState extends State<SearchPage> {
       key: key,
       items: options,
       onSaved: (newValue) {
-        print('Multi selection on saved: $newValue');
+        if (kDebugMode) {
+          print('Multi selection on saved: $newValue');
+        }
       },
       dropdownDecoratorProps: DropDownDecoratorProps(
           dropdownSearchDecoration: InputDecoration(labelText: label)),
@@ -279,11 +260,6 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     ScryfallProvider scryfallProvider =
         Provider.of<ScryfallProvider>(context, listen: true);
-    var tmp = FocusScope.of(context).focusedChild;
-    if (tmp != null) {
-      // tmp.
-    }
-    print('tmp: $tmp');
     return PopScope(
       canPop: Navigator.canPop(context),
       onPopInvoked: (didPop) {

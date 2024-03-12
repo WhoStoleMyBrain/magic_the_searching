@@ -186,11 +186,11 @@ class DBHelper {
           return '${queryParameterToDatabaseColumn[element.key]} LIKE \'%${element.value}%\'';
         }
       // case 'set':
-      //   return ''; //TODO Not implemented because it's fucking hard
+      //   return ''; //TODO Not implemented
       // case 'cmc':
-      //   return ''; //TODO Not implemented because it's fucking hard
+      //   return ''; //TODO Not implemented
       // case 'manaSymbols':
-      //   return ''; //TODO Not implemented because it's fucking hard
+      //   return ''; //TODO Not implemented
       case 'keywordAbilities':
         var tmp =
             '${element.value.split(" ").fold('', (previousValue, el) => "$previousValue ${queryParameterToDatabaseColumn[element.key]} LIKE '%${el.split('keyword:')[1]}%' AND")}';
