@@ -2,7 +2,7 @@
     package="com.example.magic_the_searching">
     <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="magic_the_searching"
+        android:label="Magic The Searching"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"
