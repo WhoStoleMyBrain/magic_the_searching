@@ -1,17 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/enums/query_location.dart';
-import 'package:magic_the_searching/helpers/connectivity_helper.dart';
-import 'package:magic_the_searching/helpers/db_helper.dart';
-import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
-import 'package:magic_the_searching/models/mtg_set.dart';
-import 'package:magic_the_searching/providers/scryfall_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../enums/query_location.dart';
+import '../helpers/connectivity_helper.dart';
+import '../helpers/db_helper.dart';
+import '../helpers/scryfall_query_maps.dart';
+import '../models/mtg_set.dart';
+import '../providers/scryfall_provider.dart';
 import '../providers/card_data_provider.dart';
-import '../providers/history.dart';
 import '../providers/settings.dart';
-import '../widgets/enter_search_term.dart';
+
 import 'constants.dart';
 
 class SearchStartHelper {
@@ -22,40 +21,6 @@ class SearchStartHelper {
   }
   SearchStartHelper._internal();
   static String prefillValue = '';
-
-  static void startEnterSearchTerm(
-    BuildContext ctx,
-  ) {
-    showModalBottomSheet(
-      context: ctx,
-      builder: (bCtx) {
-        return GestureDetector(
-          onTap: () {},
-          child: EnterSearchTerm(
-            prefillValue: prefillValue,
-            startSearchForCard: (text, languages) {
-              return SearchStartHelper.startSearchForCard(
-                ctx,
-                text,
-                languages,
-                [],
-                [],
-                [],
-                MtGSet.empty(),
-                '',
-                '',
-                {},
-              );
-            },
-          ),
-        );
-      },
-    ).whenComplete(() {
-      SearchStartHelper.prefillValue = '';
-      final history = Provider.of<History>(ctx, listen: false);
-      history.openModalSheet = false;
-    });
-  }
 
   static Future<void> showFailedQuery(BuildContext ctx, String query) async {
     return showDialog<void>(
@@ -106,7 +71,7 @@ class SearchStartHelper {
       print('splitQuery: ${splitQuery.asMap()}');
     }
     // fetching the correct parts of the split query
-    List<String> sets = _getItemsWithStringStart(splitQuery, 'e:');
+    List<String> sets = _getItemsWithStringStart(splitQuery, 'set:');
     List<String> manaValues = _getItemsWithStringStart(splitQuery, 'mv');
     List<String> manaSymbols = _getItemsWithStringStart(splitQuery, 'm:');
     Iterable<String> keywords =
@@ -116,7 +81,7 @@ class SearchStartHelper {
 
     // fetch set
     MtGSet? foundSet = scryfallProvider.sets
-        .where((element) => sets.contains(element.name))
+        .where((element) => sets.contains(element.code))
         .toList()
         .firstOrNull;
 
@@ -230,7 +195,7 @@ class SearchStartHelper {
     String cardTypesQuery = buildCumulativeQuery(cardTypes, 't').trim();
     String keywordAbilitiesQuery =
         buildCumulativeQuery(keywordAbilities, 'keyword').trim();
-    String setQuery = mtgSet.name != '' ? "e:${mtgSet.name}" : '';
+    String setQuery = mtgSet.code != '' ? "set:${mtgSet.code}" : '';
     String cmcQuery = cmcValue != '' ? "mv$cmcCondition$cmcValue" : '';
     String manaSymbolQuery = manaSymbols.isNotEmpty
         ? manaSymbols.entries
@@ -264,7 +229,7 @@ class SearchStartHelper {
       print('Using query: ${cardDataProvider.query}');
     }
     // handle query with built query parameters
-    _handleQueryingOfData(ctx, cardDataProvider, settings, text);
+    _handleQueryingOfData(ctx, cardDataProvider, settings);
   }
 
   static bool _postQueryFeedback(BuildContext ctx, String text, bool value) {
@@ -275,7 +240,7 @@ class SearchStartHelper {
   }
 
   static void _handleQueryingOfData(BuildContext ctx,
-      CardDataProvider cardDataProvider, Settings settings, String text) async {
+      CardDataProvider cardDataProvider, Settings settings) async {
     final bool hasInternetConnection =
         await ConnectivityHelper.checkConnectivity();
     if (!hasInternetConnection || settings.useLocalDB) {
@@ -283,11 +248,11 @@ class SearchStartHelper {
           .then((int dbSize) async {
         if (dbSize / 1024 ~/ 1024 > 3) {
           await cardDataProvider.processQueryLocally().then((value) {
-            _postQueryFeedback(ctx, text, value);
+            _postQueryFeedback(ctx, cardDataProvider.query, value);
             cardDataProvider.queryLocation = QueryLocation.local;
           });
         } else {
-          _postQueryFeedback(ctx, text, false);
+          _postQueryFeedback(ctx, cardDataProvider.query, false);
           cardDataProvider.queryLocation = QueryLocation.none;
         }
       });
@@ -296,7 +261,7 @@ class SearchStartHelper {
         print('using Scryfall API...');
       }
       await cardDataProvider.processQuery().then((value) {
-        _postQueryFeedback(ctx, text, value);
+        _postQueryFeedback(ctx, cardDataProvider.query, value);
         cardDataProvider.queryLocation = QueryLocation.scryfall;
       });
     }

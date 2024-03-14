@@ -94,7 +94,7 @@ class MyApp extends StatelessWidget {
         settings.checkUseImagesFromNet();
 
         return MaterialApp(
-          title: 'Flutter Demo',
+          title: 'Magic The Searching',
           theme: ThemeData(
             primarySwatch: Colors.blueGrey,
           ),

@@ -49,11 +49,7 @@ class CardDataProvider with ChangeNotifier {
   Future<bool> processQueryLocally() async {
     isLoading = true;
     notifyListeners();
-    // print('local search query: $query');
-    // print('local search query params: $allQueryParameters');
-    //soo the idea is to filter using all query params, most notably
-    //creature type, set, card type, cmc, manasymbols, keywordabilities and name (=text)
-    // first get those values from allQueryParams? or better to just use them in the search?
+
     List<Map<String, dynamic>> dbResult =
         await DBHelper.getCardsByName(allQueryParameters);
     if (dbResult.isEmpty) {
@@ -75,7 +71,6 @@ class CardDataProvider with ChangeNotifier {
       };
       DBHelper.insertIntoHistory(historyData);
     }
-    // print('found results: $dbResult');
     cards = dbResult.map((e) => CardInfo.fromDB(e)).toList();
     return true;
   }

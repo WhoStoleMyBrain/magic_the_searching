@@ -43,7 +43,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _openModalSheetAfterLoad();
+      _navigateToSearchScreenAfterLoad();
       getUseLocalDB();
     });
     _controller = ScrollController();
@@ -64,7 +64,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     settings.useLocalDB = useLocalDB;
   }
 
-  void _openModalSheetAfterLoad() async {
+  void _navigateToSearchScreenAfterLoad() async {
     History historyProvider = Provider.of<History>(context, listen: false);
     CardDataProvider cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: false);
@@ -74,13 +74,12 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         Provider.of<ImageTakenProvider>(context, listen: false);
 
     if (historyProvider.openModalSheet) {
-      // SearchStartHelper.startEnterSearchTerm(context);
       String query = cardDataProvider.query;
       Map<String, dynamic> prefilledValues =
           SearchStartHelper.mapQueryToPrefilledValues(query, scryfallProvider);
-      if (kDebugMode) {
-        print('query in history clicked: $query');
-      }
+      // if (kDebugMode) {
+      //   print('query in history clicked: $query');
+      // }
       await Navigator.of(context)
           .push(
         MaterialPageRoute(

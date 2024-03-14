@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 import 'package:magic_the_searching/helpers/constants.dart';
+import 'package:magic_the_searching/providers/history.dart';
+import 'package:magic_the_searching/providers/image_taken_provider.dart';
 import 'package:magic_the_searching/providers/scryfall_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -71,7 +73,7 @@ class _SearchPageState extends State<SearchPage> {
         _selectedKeywordAbilities =
             widget.prefilledValues![Constants.contextKeywords] ?? [];
         _setController.text =
-            widget.prefilledValues![Constants.contextSet]?.name ?? '';
+            widget.prefilledValues![Constants.contextSet]?.code ?? '';
         _cmcValueController.text =
             widget.prefilledValues![Constants.contextCmcValue] ?? '';
         _selectedCmcCondition =
@@ -165,6 +167,8 @@ class _SearchPageState extends State<SearchPage> {
   Autocomplete<MtGSet> _getMtgSetField(List<MtGSet> sets) {
     return Autocomplete<MtGSet>(
       key: _setKey,
+      initialValue: TextEditingValue(
+          text: widget.prefilledValues?[Constants.contextSet]?.name ?? ''),
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (textEditingValue.text == '') {
           return const Iterable<MtGSet>.empty();
@@ -176,7 +180,12 @@ class _SearchPageState extends State<SearchPage> {
         });
       },
       onSelected: (MtGSet selection) {
-        _setController.text = selection.code;
+        if (kDebugMode) {
+          print('Setting setcontroller text to: ${selection.code}');
+        }
+        setState(() {
+          _setController.text = selection.code;
+        });
       },
       fieldViewBuilder: (BuildContext context,
           TextEditingController fieldTextEditingController,
@@ -264,6 +273,9 @@ class _SearchPageState extends State<SearchPage> {
       canPop: Navigator.canPop(context),
       onPopInvoked: (didPop) {
         if (didPop) {
+          Provider.of<History>(context, listen: false).openModalSheet = false;
+          Provider.of<ImageTakenProvider>(context, listen: false)
+              .openModalSheet = false;
           return;
         }
         if (!Navigator.canPop(context)) {
@@ -331,7 +343,7 @@ class _SearchPageState extends State<SearchPage> {
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               MtGSet? set = scryfallProvider.sets
-                  .where((element) => element.name == _setController.text)
+                  .where((element) => element.code == _setController.text)
                   .firstOrNull;
               Navigator.pop(context, {
                 Constants.contextSearchTerm: _searchTermController.text,
