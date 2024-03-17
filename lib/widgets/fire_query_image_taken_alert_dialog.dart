@@ -48,7 +48,8 @@ class FireQueryImageTakenAlertDialog extends StatelessWidget {
             imageTakenProvider.cardType = cardType;
             imageTakenProvider.creatureType = creatureType;
             historyProvider.openModalSheet = false;
-            Navigator.of(context).pushNamed(CardSearchScreen.routeName);
+            Navigator.of(context).pop();
+            Navigator.of(context).popAndPushNamed(CardSearchScreen.routeName);
             SearchStartHelper.startSearchForCard(
               context,
               cardName,
@@ -62,7 +63,6 @@ class FireQueryImageTakenAlertDialog extends StatelessWidget {
               '',
               {},
             );
-            // Navigator.pop(context);
           },
         ),
         TextButton(
@@ -76,8 +76,8 @@ class FireQueryImageTakenAlertDialog extends StatelessWidget {
             imageTakenProvider.cardName = cardName;
             imageTakenProvider.cardType = cardType;
             imageTakenProvider.creatureType = creatureType;
-            Navigator.of(context).pushNamed(CardSearchScreen.routeName);
-            // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            Navigator.of(context).pop();
+            Navigator.of(context).popAndPushNamed(CardSearchScreen.routeName);
           },
         ),
         TextButton(

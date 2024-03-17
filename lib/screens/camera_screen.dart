@@ -11,7 +11,7 @@ import '../providers/scryfall_provider.dart';
 import '../widgets/fire_query_image_taken_alert_dialog.dart';
 
 class CameraScreen extends StatefulWidget {
-  static const routeName = '/camera-example';
+  static const routeName = '/camera-screen';
   const CameraScreen(this._cameras, {super.key});
   final List<CameraDescription> _cameras;
   @override
@@ -106,11 +106,9 @@ class _CameraScreenState extends State<CameraScreen>
     _flashModeControlRowAnimationController.dispose();
     _exposureModeControlRowAnimationController.dispose();
     _focusModeControlRowAnimationController.dispose();
-    // _cam
     super.dispose();
   }
 
-  // #docregion AppLifecycle
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final CameraController? cameraController = controller;
@@ -126,7 +124,6 @@ class _CameraScreenState extends State<CameraScreen>
       _initializeCameraController(cameraController.description);
     }
   }
-  // #enddocregion AppLifecycle
 
   @override
   Widget build(BuildContext context) {

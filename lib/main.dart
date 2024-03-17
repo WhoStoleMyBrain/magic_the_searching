@@ -103,7 +103,6 @@ class MyApp extends StatelessWidget {
             HistoryScreen.routeName: (ctx) => const HistoryScreen(),
             SettingsScreen.routeName: (ctx) => const SettingsScreen(),
             HelpScreen.routeName: (ctx) => const HelpScreen(),
-            // CameraApp.routeName: (ctx) => CameraApp(_cameras),
             CameraScreen.routeName: (ctx) => CameraScreen(_cameras),
           },
           home: const CardSearchScreen(),
