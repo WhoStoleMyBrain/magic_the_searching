@@ -530,34 +530,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
           NavigationHelper.showExitAppDialog(context);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Settings'),
-          automaticallyImplyLeading: (_isProcessingToLocalDB ||
-                  _isDownloading ||
-                  _isRequestingBulkData)
-              ? false
-              : true,
+      child: Container(
+        alignment: Alignment.topLeft,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          gradient: LinearGradient(
+            begin: Alignment.bottomLeft,
+            end: Alignment.bottomRight,
+            stops: [0.1, 0.9],
+            colors: [
+              Color.fromRGBO(199, 195, 205, 1.0),
+              Color.fromRGBO(218, 229, 223, 1.0),
+            ],
+          ),
         ),
-        drawer: const AppDrawer(),
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                const SizedBox(
-                  height: 20,
-                ),
-                getListTileUseLocalDb(useLocalDB, context),
-                getListTileShowImages(useImagesFromNet),
-                getListTileDownloadBulkData(
-                    dbDate, canUpdateDB, context, settings),
-                getListTileFreeUpStorage(),
-                getListTileLanguages(settings),
-                if (kDebugMode) ...getDebuggingWidgets()
-              ],
-            ),
-            getBulkDataDownloadOverlay(),
-          ],
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            title: const Text('Settings'),
+            automaticallyImplyLeading: (_isProcessingToLocalDB ||
+                    _isDownloading ||
+                    _isRequestingBulkData)
+                ? false
+                : true,
+          ),
+          drawer: const AppDrawer(),
+          body: Stack(
+            children: [
+              Column(
+                children: [
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  getListTileUseLocalDb(useLocalDB, context),
+                  getListTileShowImages(useImagesFromNet),
+                  getListTileDownloadBulkData(
+                      dbDate, canUpdateDB, context, settings),
+                  getListTileFreeUpStorage(),
+                  getListTileLanguages(settings),
+                  if (kDebugMode) ...getDebuggingWidgets()
+                ],
+              ),
+              getBulkDataDownloadOverlay(),
+            ],
+          ),
         ),
       ),
     );

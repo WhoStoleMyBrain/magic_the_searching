@@ -47,6 +47,7 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
         Provider.of<CardDataProvider>(context, listen: true);
     setTitle();
     return AppBar(
+      backgroundColor: Colors.transparent,
       title: (cardDataProvider.cards.isNotEmpty && title != '')
           ? Text(
               'Searched for: $title',
@@ -96,10 +97,10 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
   }
 
   IconButton iconButtonEmpty() {
-    return const IconButton(
+    return IconButton(
       icon: Icon(Icons.mode),
-      color: Colors.grey,
-      disabledColor: Colors.grey,
+      // color: Colors.grey,
+      disabledColor: Colors.grey.shade600,
       onPressed: null,
     );
   }

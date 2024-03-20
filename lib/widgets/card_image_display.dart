@@ -264,7 +264,9 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: (_hasInternetConnection && settings.useImagesFromNet)
-                        ? _networkImageStream
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(24.0),
+                            child: _networkImageStream)
                         : cardText(),
                   )
                 : SizedBox(

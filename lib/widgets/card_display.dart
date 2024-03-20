@@ -21,23 +21,49 @@ class CardDisplay extends StatelessWidget {
         cardTapped(context, cardInfo.id);
       },
       child: Card(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            AspectRatio(
-              aspectRatio: 1 / 1.4,
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: CardImageDisplay(
-                    cardInfo: cardInfo, mediaQuery: mediaQuery),
-              ),
+        shadowColor: Colors.transparent,
+        color: Colors.transparent,
+        child: Container(
+          alignment: Alignment.topLeft,
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            gradient: LinearGradient(
+              begin: Alignment.bottomLeft,
+              end: Alignment.bottomRight,
+              stops: [0.1, 0.9],
+              colors: [
+                Color.fromRGBO(199, 195, 205, 1.0),
+                Color.fromRGBO(218, 229, 223, 1.0),
+              ],
             ),
-            CardPriceDisplay(cardInfo: cardInfo),
-          ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              AspectRatio(
+                aspectRatio: 1 / 1.4,
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: CardImageDisplay(
+                      cardInfo: cardInfo, mediaQuery: mediaQuery),
+                ),
+              ),
+              CardPriceDisplay(cardInfo: cardInfo),
+              // Card(
+              //     borderOnForeground: true,
+              //     elevation: 0,
+              //     shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.only(
+              //             bottomLeft: Radius.circular(8.0),
+              //             bottomRight: Radius.circular(8.0))),
+              //     child: CardPriceDisplay(cardInfo: cardInfo)),
+            ],
+          ),
         ),
       ),
+      // ),
     );
   }
 }

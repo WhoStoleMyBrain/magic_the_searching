@@ -161,14 +161,16 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   GridView myGridView(
       MediaQueryData mediaQuery, CardDataProvider cardDataProvider) {
     double cardAspectRatio = 1 / 1.4;
-    int cardPriceDisplayHeight = 183; //183
-    // final totalHeight = MediaQuery.of(context).size.width / cardAspectRatio;
+    int priceDisplaySize = 12 + 12 + 3 + 16;
+    int gridPadding = 20;
+    int gridWidthPadding = 20 + 8; // TODO: last 20 is temporary
+    int cardPriceDisplayHeight = priceDisplaySize + gridPadding;
     double totalHeight = MediaQuery.of(context).size.width / cardAspectRatio +
         cardPriceDisplayHeight;
-    double childAspectRatio = MediaQuery.of(context).size.width / totalHeight;
+    double childAspectRatio =
+        (MediaQuery.of(context).size.width - gridWidthPadding) / totalHeight;
     return GridView.builder(
       controller: _controller,
-      // key: UniqueKey(),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -257,21 +259,51 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
           NavigationHelper.showExitAppDialog(context);
         }
       },
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: const PreferredSize(
-            preferredSize: Size(double.infinity, kToolbarHeight),
-            child: MyMainAppBar()),
-        drawer: const AppDrawer(),
-        body: cardDataProvider.isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : cardDataProvider.cards.isEmpty
-                ? const Center(
-                    child: Text('No cards found. Try searching for some!'))
-                : myGridView(mediaQuery, cardDataProvider),
-        floatingActionButton: const MyMainFloatingActionButtons(),
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: [0.1, 0.3, 0.65, 0.9],
+            colors: [
+              Color.fromRGBO(243, 187, 180, 1.0),
+              Color.fromRGBO(172, 121, 143, 1.0),
+              Color.fromRGBO(71, 86, 138, 1.0),
+              Color.fromRGBO(20, 64, 101, 1.0)
+            ],
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          key: _scaffoldKey,
+          appBar: const PreferredSize(
+              preferredSize: Size(double.infinity, kToolbarHeight),
+              child: MyMainAppBar()),
+          drawer: const AppDrawer(),
+          body: cardDataProvider.isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : cardDataProvider.cards.isEmpty
+                  ? const Center(
+                      child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'No cards found.',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Try searching for some!',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ))
+                  : myGridView(mediaQuery, cardDataProvider),
+          floatingActionButton: const MyMainFloatingActionButtons(),
+        ),
       ),
     );
   }

@@ -130,44 +130,61 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Camera example'),
+    return Container(
+      alignment: Alignment.topLeft,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        gradient: LinearGradient(
+          begin: Alignment.bottomLeft,
+          end: Alignment.bottomRight,
+          stops: [0.1, 0.9],
+          colors: [
+            Color.fromRGBO(199, 195, 205, 1.0),
+            Color.fromRGBO(218, 229, 223, 1.0),
+          ],
+        ),
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border.all(
-                  color:
-                      controller != null && controller!.value.isRecordingVideo
-                          ? Colors.redAccent
-                          : Colors.grey,
-                  width: 3.0,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('Camera example'),
+          backgroundColor: Colors.transparent,
+        ),
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  border: Border.all(
+                    color:
+                        controller != null && controller!.value.isRecordingVideo
+                            ? Colors.redAccent
+                            : Colors.grey,
+                    width: 3.0,
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(1.0),
-                child: Center(
-                  child: _cameraPreviewWidget(),
+                child: Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: Center(
+                    child: _cameraPreviewWidget(),
+                  ),
                 ),
               ),
             ),
-          ),
-          _captureControlRowWidget(),
-          _modeControlRowWidget(),
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Row(
-              children: <Widget>[
-                _cameraTogglesRowWidget(),
-                _thumbnailWidget(),
-              ],
+            _captureControlRowWidget(),
+            _modeControlRowWidget(),
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Row(
+                children: <Widget>[
+                  _cameraTogglesRowWidget(),
+                  _thumbnailWidget(),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

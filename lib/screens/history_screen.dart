@@ -80,54 +80,71 @@ class _HistoryScreenState extends State<HistoryScreen> {
           NavigationHelper.showExitAppDialog(context);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Your past searches'),
+      child: Container(
+        alignment: Alignment.topLeft,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          gradient: LinearGradient(
+            begin: Alignment.bottomLeft,
+            end: Alignment.bottomRight,
+            stops: [0.1, 0.9],
+            colors: [
+              Color.fromRGBO(199, 195, 205, 1.0),
+              Color.fromRGBO(218, 229, 223, 1.0),
+            ],
+          ),
         ),
-        drawer: const AppDrawer(),
-        body: !isInit
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : history.data.isEmpty
-                ? const Center(
-                    child: Text(
-                        'No data found in history. \nSearches are saved here for 7 days.'))
-                : ListView.builder(
-                    itemCount: history.data.length,
-                    itemBuilder: (ctx, i) {
-                      return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 4.0,
-                          horizontal: 24.0,
-                        ),
-                        title: history.data[i].query == ''
-                            ? const Text('*No Query*')
-                            : Text(
-                                'Search term: ${history.data[i].query[0] == '!' ? history.data[i].query.substring(1) : history.data[i].query}'),
-                        subtitle: Text(
-                            'Matches for this search: ${history.data[i].matches}'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.mode),
-                              color: Colors.black,
-                              onPressed: () async {
-                                _selectHistoryItemAndOpenInput(
-                                    history, cardDataProvider, i);
-                              },
-                            ),
-                            Text(
-                                '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
-                          ],
-                        ),
-                        onTap: () {
-                          _selectHistoryItem(history, cardDataProvider, i);
-                        },
-                      );
-                    },
-                  ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            title: const Text('Your past searches'),
+          ),
+          drawer: const AppDrawer(),
+          body: !isInit
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : history.data.isEmpty
+                  ? const Center(
+                      child: Text(
+                          'No data found in history. \nSearches are saved here for 7 days.'))
+                  : ListView.builder(
+                      itemCount: history.data.length,
+                      itemBuilder: (ctx, i) {
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 4.0,
+                            horizontal: 24.0,
+                          ),
+                          title: history.data[i].query == ''
+                              ? const Text('*No Query*')
+                              : Text(
+                                  'Search term: ${history.data[i].query[0] == '!' ? history.data[i].query.substring(1) : history.data[i].query}'),
+                          subtitle: Text(
+                              'Matches for this search: ${history.data[i].matches}'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.mode),
+                                color: Colors.black,
+                                onPressed: () async {
+                                  _selectHistoryItemAndOpenInput(
+                                      history, cardDataProvider, i);
+                                },
+                              ),
+                              Text(
+                                  '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
+                            ],
+                          ),
+                          onTap: () {
+                            _selectHistoryItem(history, cardDataProvider, i);
+                          },
+                        );
+                      },
+                    ),
+        ),
       ),
     );
   }

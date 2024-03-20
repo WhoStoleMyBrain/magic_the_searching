@@ -97,6 +97,7 @@ class MyApp extends StatelessWidget {
           title: 'Magic The Searching',
           theme: ThemeData(
             primarySwatch: Colors.blueGrey,
+            // scaffoldBackgroundColor: Colors.transparent,
           ),
           routes: {
             CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),

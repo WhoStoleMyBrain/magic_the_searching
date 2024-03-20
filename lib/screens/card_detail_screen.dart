@@ -74,34 +74,53 @@ class CardDetailScreen extends StatelessWidget {
           NavigationHelper.showExitAppDialog(context);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          actions: [
-            getRefinedSearchButton(
-              context,
-              cardInfo,
-              ScryfallQueryMaps.inUserLanguageMap(settings.language),
-              'In ${settings.language.longName}',
-            ),
-            getRefinedSearchButton(
-                context, cardInfo, ScryfallQueryMaps.printsMap, 'All Prints'),
-            getRefinedSearchButton(
-                context, cardInfo, ScryfallQueryMaps.versionMap, 'All Arts'),
-          ],
+      child: Container(
+        alignment: Alignment.topLeft,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          gradient: LinearGradient(
+            begin: Alignment.bottomLeft,
+            end: Alignment.bottomRight,
+            stops: [0.1, 0.9],
+            colors: [
+              Color.fromRGBO(199, 195, 205, 1.0),
+              Color.fromRGBO(218, 229, 223, 1.0),
+            ],
+          ),
         ),
-        body: SizedBox(
-          height: mediaQuery.size.height,
-          child: Card(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CardDetailImageDisplay(
-                      cardInfo: cardInfo, mediaQuery: mediaQuery),
-                  CardDetails(textStyle: textStyle, cardInfo: cardInfo),
-                ],
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            centerTitle: true,
+            actions: [
+              getRefinedSearchButton(
+                context,
+                cardInfo,
+                ScryfallQueryMaps.inUserLanguageMap(settings.language),
+                'In ${settings.language.longName}',
+              ),
+              getRefinedSearchButton(
+                  context, cardInfo, ScryfallQueryMaps.printsMap, 'All Prints'),
+              getRefinedSearchButton(
+                  context, cardInfo, ScryfallQueryMaps.versionMap, 'All Arts'),
+            ],
+          ),
+          body: SizedBox(
+            height: mediaQuery.size.height,
+            child: Card(
+              color: Colors.transparent,
+              shadowColor: Colors.transparent,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CardDetailImageDisplay(
+                        cardInfo: cardInfo, mediaQuery: mediaQuery),
+                    CardDetails(textStyle: textStyle, cardInfo: cardInfo),
+                  ],
+                ),
               ),
             ),
           ),

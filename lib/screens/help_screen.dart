@@ -36,6 +36,7 @@ class _HelpScreenState extends State<HelpScreen> {
 
   ExpansionPanel helpMessageToText(HelpMessage helpMessage, int index) {
     return ExpansionPanel(
+        backgroundColor: Colors.transparent,
         canTapOnHeader: true,
         isExpanded: _isOpen[index],
         headerBuilder: (context, isExpanded) {
@@ -66,34 +67,51 @@ class _HelpScreenState extends State<HelpScreen> {
           NavigationHelper.showExitAppDialog(context);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Help'),
-        ),
-        drawer: const AppDrawer(),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(12.0),
-          child: ExpansionPanelList(
-            elevation: 0,
-            dividerColor: Colors.black54,
-            materialGapSize: 8,
-            expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 8),
-            expansionCallback: (i, isOpen) => setState(() {
-              _isOpen[i] = isOpen;
-            }),
-            children: [
-              helpMessageToText(AllHelpMessages.linksToWeb, 0),
-              helpMessageToText(AllHelpMessages.dataOrigin, 1),
-              helpMessageToText(AllHelpMessages.downloadDB, 2),
-              helpMessageToText(AllHelpMessages.localDB, 3),
-              helpMessageToText(AllHelpMessages.showImages, 4),
-              helpMessageToText(AllHelpMessages.search, 5),
-              helpMessageToText(AllHelpMessages.cardDetailScreen, 6),
-              getAdvancesSearchHelpMessage(context, 7),
-              helpMessageToText(AllHelpMessages.cardNotFound, 8),
-              helpMessageToText(AllHelpMessages.prices, 9),
-              helpMessageToText(AllHelpMessages.historyScreen, 10),
+      child: Container(
+        alignment: Alignment.topLeft,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          gradient: LinearGradient(
+            begin: Alignment.bottomLeft,
+            end: Alignment.bottomRight,
+            stops: [0.1, 0.9],
+            colors: [
+              Color.fromRGBO(199, 195, 205, 1.0),
+              Color.fromRGBO(218, 229, 223, 1.0),
             ],
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            title: const Text('Help'),
+          ),
+          drawer: const AppDrawer(),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(12.0),
+            child: ExpansionPanelList(
+              elevation: 0,
+              dividerColor: Colors.black54,
+              materialGapSize: 8,
+              expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 8),
+              expansionCallback: (i, isOpen) => setState(() {
+                _isOpen[i] = isOpen;
+              }),
+              children: [
+                helpMessageToText(AllHelpMessages.linksToWeb, 0),
+                helpMessageToText(AllHelpMessages.dataOrigin, 1),
+                helpMessageToText(AllHelpMessages.downloadDB, 2),
+                helpMessageToText(AllHelpMessages.localDB, 3),
+                helpMessageToText(AllHelpMessages.showImages, 4),
+                helpMessageToText(AllHelpMessages.search, 5),
+                helpMessageToText(AllHelpMessages.cardDetailScreen, 6),
+                getAdvancesSearchHelpMessage(context, 7),
+                helpMessageToText(AllHelpMessages.cardNotFound, 8),
+                helpMessageToText(AllHelpMessages.prices, 9),
+                helpMessageToText(AllHelpMessages.historyScreen, 10),
+              ],
+            ),
           ),
         ),
       ),
@@ -102,6 +120,7 @@ class _HelpScreenState extends State<HelpScreen> {
 
   ExpansionPanel getAdvancesSearchHelpMessage(BuildContext context, int index) {
     return ExpansionPanel(
+        backgroundColor: Colors.transparent,
         canTapOnHeader: true,
         isExpanded: _isOpen[index],
         headerBuilder: (context, isExpanded) {

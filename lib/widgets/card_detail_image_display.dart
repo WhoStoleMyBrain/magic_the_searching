@@ -326,37 +326,40 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
 
   Widget cardText() {
     return Card(
+        color: Colors.transparent,
+        shadowColor: Colors.transparent,
         child: Container(
-      height:
-          (widget.mediaQuery.size.height - widget.mediaQuery.padding.top - 30) -
+          height: (widget.mediaQuery.size.height -
+                  widget.mediaQuery.padding.top -
+                  30) -
               100 -
               32 -
               16 -
               32,
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...cardNameAndManaSymbol(),
-          const Divider(
-            thickness: 1,
-            color: Colors.black,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...cardNameAndManaSymbol(),
+              const Divider(
+                thickness: 1,
+                color: Colors.black,
+              ),
+              ...cardTypeLine(),
+              const Divider(
+                thickness: 1,
+                color: Colors.black,
+              ),
+              const SizedBox(
+                height: 4,
+              ),
+              oracleText(),
+              ...flavorText(),
+              ...setNameAndPowerAndToughness(),
+            ],
           ),
-          ...cardTypeLine(),
-          const Divider(
-            thickness: 1,
-            color: Colors.black,
-          ),
-          const SizedBox(
-            height: 4,
-          ),
-          oracleText(),
-          ...flavorText(),
-          ...setNameAndPowerAndToughness(),
-        ],
-      ),
-    ));
+        ));
   }
 
   @override
