@@ -1,7 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart' as url;
 import '../helpers/navigation_helper.dart';
+import '../providers/color_provider.dart';
 import '../widgets/all_help_messages.dart';
 import '../widgets/app_drawer.dart';
 import '../models/help_message.dart';
@@ -36,6 +38,7 @@ class _HelpScreenState extends State<HelpScreen> {
 
   ExpansionPanel helpMessageToText(HelpMessage helpMessage, int index) {
     return ExpansionPanel(
+        backgroundColor: Colors.transparent,
         canTapOnHeader: true,
         isExpanded: _isOpen[index],
         headerBuilder: (context, isExpanded) {
@@ -56,6 +59,7 @@ class _HelpScreenState extends State<HelpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ColorProvider colorProvider = Provider.of<ColorProvider>(context);
     return PopScope(
       canPop: Navigator.canPop(context),
       onPopInvoked: (didPop) {
@@ -66,34 +70,51 @@ class _HelpScreenState extends State<HelpScreen> {
           NavigationHelper.showExitAppDialog(context);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Help'),
-        ),
-        drawer: const AppDrawer(),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(12.0),
-          child: ExpansionPanelList(
-            elevation: 0,
-            dividerColor: Colors.black54,
-            materialGapSize: 8,
-            expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 8),
-            expansionCallback: (i, isOpen) => setState(() {
-              _isOpen[i] = isOpen;
-            }),
-            children: [
-              helpMessageToText(AllHelpMessages.linksToWeb, 0),
-              helpMessageToText(AllHelpMessages.dataOrigin, 1),
-              helpMessageToText(AllHelpMessages.downloadDB, 2),
-              helpMessageToText(AllHelpMessages.localDB, 3),
-              helpMessageToText(AllHelpMessages.showImages, 4),
-              helpMessageToText(AllHelpMessages.search, 5),
-              helpMessageToText(AllHelpMessages.cardDetailScreen, 6),
-              getAdvancesSearchHelpMessage(context, 7),
-              helpMessageToText(AllHelpMessages.cardNotFound, 8),
-              helpMessageToText(AllHelpMessages.prices, 9),
-              helpMessageToText(AllHelpMessages.historyScreen, 10),
+      child: Container(
+        alignment: Alignment.topLeft,
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          gradient: LinearGradient(
+            begin: Alignment.bottomLeft,
+            end: Alignment.bottomRight,
+            stops: const [0.1, 0.9],
+            colors: [
+              colorProvider.backgroundColor1,
+              colorProvider.backgroundColor2,
             ],
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            title: const Text('Help'),
+          ),
+          drawer: const AppDrawer(),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(12.0),
+            child: ExpansionPanelList(
+              elevation: 0,
+              dividerColor: Colors.black54,
+              materialGapSize: 8,
+              expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 8),
+              expansionCallback: (i, isOpen) => setState(() {
+                _isOpen[i] = isOpen;
+              }),
+              children: [
+                helpMessageToText(AllHelpMessages.linksToWeb, 0),
+                helpMessageToText(AllHelpMessages.dataOrigin, 1),
+                helpMessageToText(AllHelpMessages.downloadDB, 2),
+                helpMessageToText(AllHelpMessages.localDB, 3),
+                helpMessageToText(AllHelpMessages.showImages, 4),
+                helpMessageToText(AllHelpMessages.search, 5),
+                helpMessageToText(AllHelpMessages.cardDetailScreen, 6),
+                getAdvancesSearchHelpMessage(context, 7),
+                helpMessageToText(AllHelpMessages.cardNotFound, 8),
+                helpMessageToText(AllHelpMessages.prices, 9),
+                helpMessageToText(AllHelpMessages.historyScreen, 10),
+              ],
+            ),
           ),
         ),
       ),
@@ -102,6 +123,7 @@ class _HelpScreenState extends State<HelpScreen> {
 
   ExpansionPanel getAdvancesSearchHelpMessage(BuildContext context, int index) {
     return ExpansionPanel(
+        backgroundColor: Colors.transparent,
         canTapOnHeader: true,
         isExpanded: _isOpen[index],
         headerBuilder: (context, isExpanded) {

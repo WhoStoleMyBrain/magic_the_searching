@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/providers/color_provider.dart';
 import 'package:mailto/mailto.dart';
 
 import 'package:provider/provider.dart';
@@ -161,14 +162,16 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   GridView myGridView(
       MediaQueryData mediaQuery, CardDataProvider cardDataProvider) {
     double cardAspectRatio = 1 / 1.4;
-    int cardPriceDisplayHeight = 183; //183
-    // final totalHeight = MediaQuery.of(context).size.width / cardAspectRatio;
+    int priceDisplaySize = 12 + 12 + 3 + 16;
+    int gridPadding = 20;
+    int gridWidthPadding = 20 + 8; // TODO: last 20 is temporary
+    int cardPriceDisplayHeight = priceDisplaySize + gridPadding;
     double totalHeight = MediaQuery.of(context).size.width / cardAspectRatio +
         cardPriceDisplayHeight;
-    double childAspectRatio = MediaQuery.of(context).size.width / totalHeight;
+    double childAspectRatio =
+        (MediaQuery.of(context).size.width - gridWidthPadding) / totalHeight;
     return GridView.builder(
       controller: _controller,
-      // key: UniqueKey(),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -242,6 +245,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   Widget build(BuildContext context) {
     CardDataProvider cardDataProvider = Provider.of<CardDataProvider>(context);
     MediaQueryData mediaQuery = MediaQuery.of(context);
+    ColorProvider colorProvider = Provider.of<ColorProvider>(context);
     Future.delayed(
       Duration.zero,
       () => showDialogIfFirstLoaded(context),
@@ -257,21 +261,51 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
           NavigationHelper.showExitAppDialog(context);
         }
       },
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: const PreferredSize(
-            preferredSize: Size(double.infinity, kToolbarHeight),
-            child: MyMainAppBar()),
-        drawer: const AppDrawer(),
-        body: cardDataProvider.isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : cardDataProvider.cards.isEmpty
-                ? const Center(
-                    child: Text('No cards found. Try searching for some!'))
-                : myGridView(mediaQuery, cardDataProvider),
-        floatingActionButton: const MyMainFloatingActionButtons(),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: const [0.1, 0.3, 0.65, 0.9],
+            colors: [
+              colorProvider.mainScreenColor1,
+              colorProvider.mainScreenColor2,
+              colorProvider.mainScreenColor3,
+              colorProvider.mainScreenColor4,
+            ],
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          key: _scaffoldKey,
+          appBar: const PreferredSize(
+              preferredSize: Size(double.infinity, kToolbarHeight),
+              child: MyMainAppBar()),
+          drawer: const AppDrawer(),
+          body: cardDataProvider.isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : cardDataProvider.cards.isEmpty
+                  ? const Center(
+                      child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'No cards found.',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Try searching for some!',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ))
+                  : myGridView(mediaQuery, cardDataProvider),
+          floatingActionButton: const MyMainFloatingActionButtons(),
+        ),
       ),
     );
   }

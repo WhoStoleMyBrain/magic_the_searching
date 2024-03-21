@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 
 import '../helpers/navigation_helper.dart';
+import '../providers/color_provider.dart';
 import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import '../widgets/card_detail_image_display.dart';
@@ -56,6 +57,7 @@ class CardDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ColorProvider colorProvider = Provider.of<ColorProvider>(context);
     final id = ModalRoute.of(context)?.settings.arguments as String? ?? '';
     final CardInfo cardInfo =
         Provider.of<CardDataProvider>(context, listen: false).getCardById(id);
@@ -74,34 +76,53 @@ class CardDetailScreen extends StatelessWidget {
           NavigationHelper.showExitAppDialog(context);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          actions: [
-            getRefinedSearchButton(
-              context,
-              cardInfo,
-              ScryfallQueryMaps.inUserLanguageMap(settings.language),
-              'In ${settings.language.longName}',
-            ),
-            getRefinedSearchButton(
-                context, cardInfo, ScryfallQueryMaps.printsMap, 'All Prints'),
-            getRefinedSearchButton(
-                context, cardInfo, ScryfallQueryMaps.versionMap, 'All Arts'),
-          ],
+      child: Container(
+        alignment: Alignment.topLeft,
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          gradient: LinearGradient(
+            begin: Alignment.bottomLeft,
+            end: Alignment.bottomRight,
+            stops: const [0.1, 0.9],
+            colors: [
+              colorProvider.backgroundColor1,
+              colorProvider.backgroundColor2,
+            ],
+          ),
         ),
-        body: SizedBox(
-          height: mediaQuery.size.height,
-          child: Card(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CardDetailImageDisplay(
-                      cardInfo: cardInfo, mediaQuery: mediaQuery),
-                  CardDetails(textStyle: textStyle, cardInfo: cardInfo),
-                ],
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            centerTitle: true,
+            actions: [
+              getRefinedSearchButton(
+                context,
+                cardInfo,
+                ScryfallQueryMaps.inUserLanguageMap(settings.language),
+                'In ${settings.language.longName}',
+              ),
+              getRefinedSearchButton(
+                  context, cardInfo, ScryfallQueryMaps.printsMap, 'All Prints'),
+              getRefinedSearchButton(
+                  context, cardInfo, ScryfallQueryMaps.versionMap, 'All Arts'),
+            ],
+          ),
+          body: SizedBox(
+            height: mediaQuery.size.height,
+            child: Card(
+              color: Colors.transparent,
+              shadowColor: Colors.transparent,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CardDetailImageDisplay(
+                        cardInfo: cardInfo, mediaQuery: mediaQuery),
+                    CardDetails(textStyle: textStyle, cardInfo: cardInfo),
+                  ],
+                ),
               ),
             ),
           ),
