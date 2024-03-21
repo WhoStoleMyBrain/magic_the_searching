@@ -42,6 +42,15 @@ class Constants {
   static const imageTextMapCardType = 'cardType';
   static const imageTextMapCreatureType = 'creatureType';
 
+  static const settingsBackgroundColor1Name = "backgroundColor1";
+  static const settingsBackgroundColor2Name = "backgroundColor2";
+  static const settingsAppDrawer1ColorName = "appdrawerColor1";
+  static const settingsAppDrawer2ColorName = "appdrawerColor2";
+  static const settingsMainScreen1ColorName = "mainScreenColor1";
+  static const settingsMainScreen2ColorName = "mainScreenColor2";
+  static const settingsMainScreen3ColorName = "mainScreenColor3";
+  static const settingsMainScreen4ColorName = "mainScreenColor4";
+
   static String defaultTimestamp =
       DateTime.parse("1969-07-20 20:18:04Z").toIso8601String();
 

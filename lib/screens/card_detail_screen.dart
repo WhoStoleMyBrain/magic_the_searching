@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 
 import '../helpers/navigation_helper.dart';
+import '../providers/color_provider.dart';
 import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 import '../widgets/card_detail_image_display.dart';
@@ -56,6 +57,7 @@ class CardDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ColorProvider colorProvider = Provider.of<ColorProvider>(context);
     final id = ModalRoute.of(context)?.settings.arguments as String? ?? '';
     final CardInfo cardInfo =
         Provider.of<CardDataProvider>(context, listen: false).getCardById(id);
@@ -76,15 +78,15 @@ class CardDetailScreen extends StatelessWidget {
       },
       child: Container(
         alignment: Alignment.topLeft,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
           gradient: LinearGradient(
             begin: Alignment.bottomLeft,
             end: Alignment.bottomRight,
-            stops: [0.1, 0.9],
+            stops: const [0.1, 0.9],
             colors: [
-              Color.fromRGBO(199, 195, 205, 1.0),
-              Color.fromRGBO(218, 229, 223, 1.0),
+              colorProvider.backgroundColor1,
+              colorProvider.backgroundColor2,
             ],
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/providers/color_provider.dart';
 import 'package:mailto/mailto.dart';
 
 import 'package:provider/provider.dart';
@@ -244,6 +245,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   Widget build(BuildContext context) {
     CardDataProvider cardDataProvider = Provider.of<CardDataProvider>(context);
     MediaQueryData mediaQuery = MediaQuery.of(context);
+    ColorProvider colorProvider = Provider.of<ColorProvider>(context);
     Future.delayed(
       Duration.zero,
       () => showDialogIfFirstLoaded(context),
@@ -260,16 +262,16 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         }
       },
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            stops: [0.1, 0.3, 0.65, 0.9],
+            stops: const [0.1, 0.3, 0.65, 0.9],
             colors: [
-              Color.fromRGBO(243, 187, 180, 1.0),
-              Color.fromRGBO(172, 121, 143, 1.0),
-              Color.fromRGBO(71, 86, 138, 1.0),
-              Color.fromRGBO(20, 64, 101, 1.0)
+              colorProvider.mainScreenColor1,
+              colorProvider.mainScreenColor2,
+              colorProvider.mainScreenColor3,
+              colorProvider.mainScreenColor4,
             ],
           ),
         ),

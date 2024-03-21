@@ -54,6 +54,7 @@ dependencies:
   mailto: ^2.0.0
   connectivity_plus: ^5.0.2
   camera: ^0.10.5+9
+  flex_color_picker: ^3.4.1
 
 
 dev_dependencies:

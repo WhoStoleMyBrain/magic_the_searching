@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/providers/card_symbol_provider.dart';
+import 'package:magic_the_searching/providers/color_provider.dart';
 import 'package:magic_the_searching/providers/image_taken_provider.dart';
 import 'package:magic_the_searching/providers/settings.dart';
-// import 'package:magic_the_searching/screens/camera_app.dart';
 import 'package:magic_the_searching/screens/help_screen.dart';
 import 'package:magic_the_searching/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
@@ -57,9 +57,6 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => History(),
         ),
-        // ChangeNotifierProvider(
-        //   create: (_) => InternetUsageHelper(),
-        // ),
         ChangeNotifierProvider(
           create: (_) {
             Settings settings =
@@ -85,6 +82,14 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) {
             return ImageTakenProvider('', [], []);
+          },
+        ),
+        ChangeNotifierProvider(
+          lazy: false,
+          create: (_) {
+            ColorProvider colorProvider = ColorProvider();
+            colorProvider.init();
+            return colorProvider;
           },
         )
       ],

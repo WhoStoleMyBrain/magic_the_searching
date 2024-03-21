@@ -1,7 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart' as url;
 import '../helpers/navigation_helper.dart';
+import '../providers/color_provider.dart';
 import '../widgets/all_help_messages.dart';
 import '../widgets/app_drawer.dart';
 import '../models/help_message.dart';
@@ -57,6 +59,7 @@ class _HelpScreenState extends State<HelpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ColorProvider colorProvider = Provider.of<ColorProvider>(context);
     return PopScope(
       canPop: Navigator.canPop(context),
       onPopInvoked: (didPop) {
@@ -69,15 +72,15 @@ class _HelpScreenState extends State<HelpScreen> {
       },
       child: Container(
         alignment: Alignment.topLeft,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
           gradient: LinearGradient(
             begin: Alignment.bottomLeft,
             end: Alignment.bottomRight,
-            stops: [0.1, 0.9],
+            stops: const [0.1, 0.9],
             colors: [
-              Color.fromRGBO(199, 195, 205, 1.0),
-              Color.fromRGBO(218, 229, 223, 1.0),
+              colorProvider.backgroundColor1,
+              colorProvider.backgroundColor2,
             ],
           ),
         ),

@@ -8,6 +8,8 @@ import 'package:magic_the_searching/helpers/bulk_data_helper.dart';
 import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/helpers/db_helper.dart';
 import 'package:magic_the_searching/helpers/navigation_helper.dart';
+import 'package:magic_the_searching/providers/color_provider.dart';
+import 'package:magic_the_searching/screens/color_picker_demo.dart';
 import 'package:magic_the_searching/widgets/app_drawer.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -514,6 +516,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<Settings>(context);
+    final colorProvider = Provider.of<ColorProvider>(context);
     checkIfCanUpdateDB(settings);
     checkIfUseImagesFromNet(settings);
     bool useLocalDB = settings.useLocalDB;
@@ -532,15 +535,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
       child: Container(
         alignment: Alignment.topLeft,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
           gradient: LinearGradient(
             begin: Alignment.bottomLeft,
             end: Alignment.bottomRight,
-            stops: [0.1, 0.9],
+            stops: const [0.1, 0.9],
             colors: [
-              Color.fromRGBO(199, 195, 205, 1.0),
-              Color.fromRGBO(218, 229, 223, 1.0),
+              colorProvider.backgroundColor1,
+              colorProvider.backgroundColor2,
             ],
           ),
         ),
@@ -558,19 +561,105 @@ class _SettingsScreenState extends State<SettingsScreen> {
           drawer: const AppDrawer(),
           body: Stack(
             children: [
-              Column(
-                children: [
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  getListTileUseLocalDb(useLocalDB, context),
-                  getListTileShowImages(useImagesFromNet),
-                  getListTileDownloadBulkData(
-                      dbDate, canUpdateDB, context, settings),
-                  getListTileFreeUpStorage(),
-                  getListTileLanguages(settings),
-                  if (kDebugMode) ...getDebuggingWidgets()
-                ],
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    getListTileUseLocalDb(useLocalDB, context),
+                    getListTileShowImages(useImagesFromNet),
+                    getListTileDownloadBulkData(
+                        dbDate, canUpdateDB, context, settings),
+                    getListTileFreeUpStorage(),
+                    getListTileLanguages(settings),
+                    ColorPickerPage(
+                      startColor: colorProvider.mainScreenColor1,
+                      setNewColor: ((Color newColor) {
+                        setState(() {
+                          colorProvider.mainScreenColor1 = newColor;
+                        });
+                      }),
+                      colorName: "First Main Screen",
+                    ),
+                    ColorPickerPage(
+                      startColor: colorProvider.mainScreenColor2,
+                      setNewColor: ((Color newColor) {
+                        setState(() {
+                          colorProvider.mainScreenColor2 = newColor;
+                        });
+                      }),
+                      colorName: "Second Main Screen",
+                    ),
+                    ColorPickerPage(
+                      startColor: colorProvider.mainScreenColor3,
+                      setNewColor: ((Color newColor) {
+                        setState(() {
+                          colorProvider.mainScreenColor3 = newColor;
+                        });
+                      }),
+                      colorName: "3rd Main Screen",
+                    ),
+                    ColorPickerPage(
+                      startColor: colorProvider.mainScreenColor4,
+                      setNewColor: ((Color newColor) {
+                        setState(() {
+                          colorProvider.mainScreenColor4 = newColor;
+                        });
+                      }),
+                      colorName: "4th Main Screen",
+                    ),
+                    ColorPickerPage(
+                      startColor: colorProvider.appDrawerColor1,
+                      setNewColor: ((Color newColor) {
+                        setState(() {
+                          colorProvider.appDrawerColor1 = newColor;
+                        });
+                      }),
+                      colorName: "First App Drawer",
+                    ),
+                    ColorPickerPage(
+                      startColor: colorProvider.appDrawerColor2,
+                      setNewColor: ((Color newColor) {
+                        setState(() {
+                          colorProvider.appDrawerColor2 = newColor;
+                        });
+                      }),
+                      colorName: "Second App Drawer",
+                    ),
+                    ColorPickerPage(
+                      startColor: colorProvider.backgroundColor1,
+                      setNewColor: ((Color newColor) {
+                        setState(() {
+                          colorProvider.backgroundColor1 = newColor;
+                        });
+                      }),
+                      colorName: "First Background",
+                    ),
+                    ColorPickerPage(
+                      startColor: colorProvider.backgroundColor2,
+                      setNewColor: ((Color newColor) {
+                        setState(() {
+                          colorProvider.backgroundColor2 = newColor;
+                        });
+                      }),
+                      colorName: "Second Background",
+                    ),
+                    ElevatedButton(
+                        onPressed: () async {
+                          colorProvider.restoreDefaultColors();
+                          setState(() {});
+                        },
+                        child: const Text('Restore default colors')),
+                    ElevatedButton(
+                        onPressed: () async {
+                          colorProvider.setAllWhite();
+                          setState(() {});
+                        },
+                        child: const Text('Set all colors white')),
+                    if (kDebugMode) ...getDebuggingWidgets()
+                  ],
+                ),
               ),
               getBulkDataDownloadOverlay(),
             ],
