@@ -202,7 +202,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
                 to: [
                   'magicthesearching@gmail.com',
                 ],
-                subject: 'Feedback or Trouble with Magic the Searching',
+                subject: 'Feedback to or Problems with Magic the Searching',
                 body:
                     'Enter your suggestions or a description of your errors below. Please try to be as precise as possible and feel free to append screenshots, images or links to further clarify your request! Thank you!');
             return AlertDialog(
@@ -285,7 +285,10 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
           drawer: const AppDrawer(),
           body: cardDataProvider.isLoading
               ? const Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 6.0,
+                    color: Colors.amber,
+                  ),
                 )
               : cardDataProvider.cards.isEmpty
                   ? const Center(
