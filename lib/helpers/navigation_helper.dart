@@ -11,6 +11,10 @@ class NavigationHelper {
           content: const Text(
             'Are you sure you want to exit the app?',
           ),
+          titlePadding: const EdgeInsets.all(24.0),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32))),
+          backgroundColor: Colors.blueGrey.shade200,
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(

@@ -253,7 +253,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _getMultiDropdownSelectionField(
-      Function(List<String>, String)? onSelectionChanged,
+      Function(List<String>, String) onSelectionChanged,
       List<String> selectedObjectItems,
       List<String> options,
       TextEditingController textEditingController,
@@ -266,6 +266,9 @@ class _SearchPageState extends State<SearchPage> {
         if (kDebugMode) {
           print('Multi selection on saved: $newValue');
         }
+      },
+      onChanged: (value) {
+        onSelectionChanged(value, '');
       },
       dropdownDecoratorProps: DropDownDecoratorProps(
           dropdownSearchDecoration: InputDecoration(labelText: label)),
@@ -375,7 +378,6 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
           floatingActionButton: FloatingActionButton(
-            // backgroundColor: Color.fromRGBO(r, g, b, opacity),
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 MtGSet? set = scryfallProvider.sets

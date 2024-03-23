@@ -22,6 +22,10 @@ class CardDetailScreen extends StatelessWidget {
       builder: (bCtx) {
         return AlertDialog(
           title: const Text('No results found'),
+          titlePadding: const EdgeInsets.all(24.0),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32))),
+          backgroundColor: Colors.blueGrey.shade200,
           content: SingleChildScrollView(
               child: Text('No results matching \'$query\' found.')),
           actions: [

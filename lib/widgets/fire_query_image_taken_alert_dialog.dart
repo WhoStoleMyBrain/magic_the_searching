@@ -22,18 +22,22 @@ class FireQueryImageTakenAlertDialog extends StatelessWidget {
     History historyProvider = Provider.of<History>(context, listen: false);
     return AlertDialog(
       title: const Text('Search for Card?'),
+      titlePadding: const EdgeInsets.all(24.0),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(32))),
+      backgroundColor: Colors.blueGrey.shade200,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text('Name: $cardName'),
-          ...[
-            Text(
-                'Card Types: ${cardType.isNotEmpty ? cardType.reduce((value, element) => "$value $element") : ""}'),
-            Text(
-                'Creature Types: ${creatureType.isNotEmpty ? creatureType.reduce((value, element) => "$value $element") : ""}')
-          ]
+          const SizedBox(height: 8),
+          Text(
+              'Card Types: ${cardType.isNotEmpty ? cardType.reduce((value, element) => "$value $element") : ""}'),
+          const SizedBox(height: 8),
+          Text(
+              'Creature Types: ${creatureType.isNotEmpty ? creatureType.reduce((value, element) => "$value $element") : ""}')
         ],
       ),
       actions: <Widget>[

@@ -49,6 +49,7 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     });
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
+    showDialogIfFirstLoaded(context);
   }
 
   @override
@@ -206,26 +207,30 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
                     'Enter your suggestions or a description of your errors below. Please try to be as precise as possible and feel free to append screenshots, images or links to further clarify your request! Thank you!');
             return AlertDialog(
               title: const Text('Your feedback matters!'),
-              content: Center(
-                child: RichText(
-                    text: TextSpan(children: [
-                  TextSpan(
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 20),
-                      text:
-                          'This app is still under development and part of my humble desire to bring high quality apps free of charge and free of those horrible ads to users!\nIf you have any suggestions for improvements or trouble while using the app, please contact me either via the google play store or via mail at '),
-                  TextSpan(
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary,
-                          fontSize: 20),
-                      text: 'magicthesearching@gmail.com',
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          launchUrl(Uri.parse(mailtoLink.toString()));
-                        }),
-                ])),
-              ),
+              titlePadding: const EdgeInsets.all(24.0),
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(32))),
+              backgroundColor: Colors.blueGrey.shade200,
+              content: RichText(
+                  text: TextSpan(children: [
+                const TextSpan(
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        overflow: TextOverflow.visible),
+                    text:
+                        'This app is still under development and part of my humble desire to bring high quality apps free of charge and free of those horrible ads to users!\nIf you have any suggestions for improvements or trouble while using the app, please contact me either via the google play store or via mail at: '),
+                TextSpan(
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontSize: 18,
+                        overflow: TextOverflow.visible),
+                    text: 'magicthesearching@gmail.com',
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        launchUrl(Uri.parse(mailtoLink.toString()));
+                      }),
+              ])),
               actions: [
                 ElevatedButton(
                     onPressed: () {
@@ -246,10 +251,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
     CardDataProvider cardDataProvider = Provider.of<CardDataProvider>(context);
     MediaQueryData mediaQuery = MediaQuery.of(context);
     ColorProvider colorProvider = Provider.of<ColorProvider>(context);
-    Future.delayed(
-      Duration.zero,
-      () => showDialogIfFirstLoaded(context),
-    );
 
     return PopScope(
       canPop: Navigator.canPop(context),

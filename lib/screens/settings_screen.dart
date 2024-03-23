@@ -53,6 +53,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Error!'),
+          titlePadding: const EdgeInsets.all(24.0),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32))),
+          backgroundColor: Colors.blueGrey.shade200,
           content: SingleChildScrollView(
             child: (errorMessage == null)
                 ? const Text(
@@ -188,6 +192,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (bCtx) {
         return AlertDialog(
           title: const Text('Download Data first!'),
+          titlePadding: const EdgeInsets.all(24.0),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32))),
+          backgroundColor: Colors.blueGrey.shade200,
           content: const SingleChildScrollView(
               child: Text(
                   'The local database file could not be found. Be sure to download the data before trying to use it.')),
@@ -374,6 +382,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       builder: (bCtx) {
                         return AlertDialog(
                           title: const Text('Info!'),
+                          titlePadding: const EdgeInsets.all(24.0),
+                          shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(32))),
+                          backgroundColor: Colors.blueGrey.shade200,
                           content: SingleChildScrollView(
                               child: Text(
                                   '''Downloading and processing the data may take up to a few minutes, depending on your internet speed and the model of your phone.\nIt is highly recommended to use a Wi-Fi connection to download data!\nThe downloaded file is approximately ${value != null ? value.size / 1024 ~/ 1024 : 150} MB large.''')),
