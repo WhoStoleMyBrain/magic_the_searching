@@ -10,6 +10,7 @@ import 'package:magic_the_searching/screens/help_screen.dart';
 import 'package:magic_the_searching/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 import './providers/handedness.dart';
 import './providers/card_data_provider.dart';
 import './providers/history.dart';
@@ -99,20 +100,25 @@ class MyApp extends StatelessWidget {
         settings.checkUseImagesFromNet();
 
         return MaterialApp(
-          title: 'Magic The Searching',
-          theme: ThemeData(
-            primarySwatch: Colors.blueGrey,
-            // scaffoldBackgroundColor: Colors.transparent,
-          ),
-          routes: {
-            CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),
-            HistoryScreen.routeName: (ctx) => const HistoryScreen(),
-            SettingsScreen.routeName: (ctx) => const SettingsScreen(),
-            HelpScreen.routeName: (ctx) => const HelpScreen(),
-            CameraScreen.routeName: (ctx) => CameraScreen(_cameras),
-          },
-          home: const CardSearchScreen(),
-        );
+            title: 'Magic The Searching',
+            theme: ThemeData(
+              primarySwatch: Colors.blueGrey,
+              // scaffoldBackgroundColor: Colors.transparent,
+            ),
+            routes: {
+              CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),
+              HistoryScreen.routeName: (ctx) => const HistoryScreen(),
+              SettingsScreen.routeName: (ctx) => const SettingsScreen(),
+              HelpScreen.routeName: (ctx) => const HelpScreen(),
+              CameraScreen.routeName: (ctx) => CameraScreen(_cameras),
+            },
+            home: ShowCaseWidget(
+              onFinish: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setBool(Constants.tutorialSeen, true);
+              },
+              builder: Builder(builder: (context) => const CardSearchScreen()),
+            ));
       }),
     );
   }

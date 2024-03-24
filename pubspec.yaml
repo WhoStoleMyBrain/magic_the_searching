@@ -55,6 +55,7 @@ dependencies:
   connectivity_plus: ^5.0.2
   camera: ^0.10.5+9
   flex_color_picker: ^3.4.1
+  showcaseview: ^2.0.3
 
 
 dev_dependencies:

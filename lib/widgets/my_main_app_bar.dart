@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../enums/query_location.dart';
 import '../helpers/constants.dart';
@@ -10,7 +11,17 @@ import '../providers/settings.dart';
 import '../screens/search_page.dart';
 
 class MyMainAppBar extends StatefulWidget {
-  const MyMainAppBar({super.key});
+  const MyMainAppBar(
+      {super.key,
+      required this.one,
+      required this.two,
+      required this.three,
+      required this.four});
+
+  final GlobalKey one;
+  final GlobalKey two;
+  final GlobalKey three;
+  final GlobalKey four;
 
   @override
   State<MyMainAppBar> createState() => _MyMainAppBarState();
@@ -46,19 +57,28 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
     final cardDataProvider =
         Provider.of<CardDataProvider>(context, listen: true);
     setTitle();
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      title: (cardDataProvider.cards.isNotEmpty && title != '')
-          ? Text(
-              'Searched for: $title',
-              style: const TextStyle(fontSize: 18),
-              maxLines: 2,
-            )
-          : const Text(
-              'No search performed yet',
-              style: TextStyle(fontSize: 18),
-            ),
-      actions: [...getActions(context, cardDataProvider)],
+    return Showcase(
+      key: widget.one,
+      description: "The app bar yields general information.",
+      child: AppBar(
+        backgroundColor: Colors.transparent,
+        title: Showcase(
+          key: widget.two,
+          targetPadding: const EdgeInsets.all(8.0),
+          description: "This will display your search term",
+          child: (cardDataProvider.cards.isNotEmpty && title != '')
+              ? Text(
+                  'Searched for: $title',
+                  style: const TextStyle(fontSize: 18),
+                  maxLines: 2,
+                )
+              : const Text(
+                  'No search performed yet',
+                  style: TextStyle(fontSize: 18),
+                ),
+        ),
+        actions: [...getActions(context, cardDataProvider)],
+      ),
     );
   }
 
@@ -78,30 +98,40 @@ class _MyMainAppBarState extends State<MyMainAppBar> {
   }
 
   Widget getIconDisplayQueryMethod(CardDataProvider cardDataProvider) {
-    return Tooltip(
-      triggerMode: TooltipTriggerMode.tap,
-      showDuration: const Duration(seconds: 5),
-      message:
-          'NON: no source available\nLCL: used local DB\nSCR: used Scryfall',
-      child: Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: switch (cardDataProvider.queryLocation) {
-            QueryLocation.local =>
-              const Text('LCL', style: TextStyle(color: Colors.green)),
-            QueryLocation.scryfall =>
-              const Text('SCR', style: TextStyle(color: Colors.deepPurple)),
-            QueryLocation.none =>
-              const Text('NON', style: TextStyle(color: Colors.black)),
-          }),
+    return Showcase(
+      key: widget.three,
+      description:
+          "This will show you where your query was executed. Tap this button for more information!",
+      child: Tooltip(
+        triggerMode: TooltipTriggerMode.tap,
+        showDuration: const Duration(seconds: 5),
+        message:
+            'NON: no source available\nLCL: used local DB\nSCR: used Scryfall',
+        child: Padding(
+            padding: const EdgeInsets.all(6.0),
+            child: switch (cardDataProvider.queryLocation) {
+              QueryLocation.local =>
+                const Text('LCL', style: TextStyle(color: Colors.green)),
+              QueryLocation.scryfall =>
+                const Text('SCR', style: TextStyle(color: Colors.deepPurple)),
+              QueryLocation.none =>
+                const Text('NON', style: TextStyle(color: Colors.black)),
+            }),
+      ),
     );
   }
 
-  IconButton iconButtonEmpty() {
-    return IconButton(
-      icon: Icon(Icons.mode),
-      // color: Colors.grey,
-      disabledColor: Colors.grey.shade600,
-      onPressed: null,
+  Showcase iconButtonEmpty() {
+    return Showcase(
+      key: widget.four,
+      description:
+          "Use this to edit your query if you want to modify your search!",
+      child: IconButton(
+        icon: const Icon(Icons.mode),
+        // color: Colors.grey,
+        disabledColor: Colors.grey.shade600,
+        onPressed: null,
+      ),
     );
   }
 

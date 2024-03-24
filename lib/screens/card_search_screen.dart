@@ -6,6 +6,7 @@ import 'package:mailto/mailto.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../helpers/constants.dart';
@@ -36,6 +37,14 @@ class CardSearchScreen extends StatefulWidget {
 }
 
 class _CardSearchScreenState extends State<CardSearchScreen> {
+  final GlobalKey _one = GlobalKey();
+  final GlobalKey _two = GlobalKey();
+  final GlobalKey _three = GlobalKey();
+  final GlobalKey _four = GlobalKey();
+  final GlobalKey _five = GlobalKey();
+  final GlobalKey _six = GlobalKey();
+  final GlobalKey _seven = GlobalKey();
+
   ScrollController _controller = ScrollController();
   bool endOfScrollReached = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -43,13 +52,20 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _navigateToSearchScreenAfterLoad();
-      getUseLocalDB();
+    SharedPreferences.getInstance().then((SharedPreferences prefs) {
+      bool tutorialSeen = prefs.getBool(Constants.tutorialSeen) ?? false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToSearchScreenAfterLoad();
+        getUseLocalDB();
+        if (!tutorialSeen) {
+          ShowCaseWidget.of(context)
+              .startShowCase([_one, _two, _three, _four, _five, _six, _seven]);
+        }
+      });
+      _controller = ScrollController();
+      _controller.addListener(_scrollListener);
+      showDialogIfFirstLoaded(context);
     });
-    _controller = ScrollController();
-    _controller.addListener(_scrollListener);
-    showDialogIfFirstLoaded(context);
   }
 
   @override
@@ -79,9 +95,6 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
       String query = cardDataProvider.query;
       Map<String, dynamic> prefilledValues =
           SearchStartHelper.mapQueryToPrefilledValues(query, scryfallProvider);
-      // if (kDebugMode) {
-      //   print('query in history clicked: $query');
-      // }
       await Navigator.of(context)
           .push(
         MaterialPageRoute(
@@ -193,8 +206,9 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
   showDialogIfFirstLoaded(BuildContext context) async {
     await SharedPreferences.getInstance().then((SharedPreferences prefs) {
       bool isFirstLoaded =
-          prefs.getBool(Constants.settingIsFirstLoaded) ?? true;
-      if (isFirstLoaded) {
+          prefs.getBool(Constants.settingIsFirstLoaded) ?? false;
+      bool tutorialSeen = prefs.getBool(Constants.tutorialSeen) ?? false;
+      if (isFirstLoaded && !tutorialSeen) {
         showDialog(
           context: context,
           builder: (context) {
@@ -279,9 +293,14 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           key: _scaffoldKey,
-          appBar: const PreferredSize(
-              preferredSize: Size(double.infinity, kToolbarHeight),
-              child: MyMainAppBar()),
+          appBar: PreferredSize(
+              preferredSize: const Size(double.infinity, kToolbarHeight),
+              child: MyMainAppBar(
+                one: _one,
+                two: _two,
+                three: _three,
+                four: _four,
+              )),
           drawer: const AppDrawer(),
           body: cardDataProvider.isLoading
               ? const Center(
@@ -291,24 +310,40 @@ class _CardSearchScreenState extends State<CardSearchScreen> {
                   ),
                 )
               : cardDataProvider.cards.isEmpty
-                  ? const Center(
-                      child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'No cards found.',
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
+                  ? Center(
+                      child: Showcase(
+                        targetShapeBorder: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(32))),
+                        key: _five,
+                        description:
+                            "In the center your search results will be displayed",
+                        child: const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'No cards found.',
+                                style: TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                'Try searching for some!',
+                                style: TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          ),
                         ),
-                        Text(
-                          'Try searching for some!',
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ))
+                      ),
+                    )
                   : myGridView(mediaQuery, cardDataProvider),
-          floatingActionButton: const MyMainFloatingActionButtons(),
+          floatingActionButton: MyMainFloatingActionButtons(
+            one: _six,
+            two: _seven,
+          ),
         ),
       ),
     );

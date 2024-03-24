@@ -42,6 +42,8 @@ class Constants {
   static const imageTextMapCardType = 'cardType';
   static const imageTextMapCreatureType = 'creatureType';
 
+  static const tutorialSeen = "tutorialSeen";
+
   static const settingsBackgroundColor1Name = "backgroundColor1";
   static const settingsBackgroundColor2Name = "backgroundColor2";
   static const settingsAppDrawer1ColorName = "appdrawerColor1";

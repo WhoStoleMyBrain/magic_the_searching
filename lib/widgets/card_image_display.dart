@@ -242,6 +242,15 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),
       builder: (context, snapshot) {
+        print(widget.cardInfo.hasTwoSides &&
+            (widget.cardInfo.imageUris?.normal == null) &&
+            settings.useImagesFromNet);
+        print((widget.mediaQuery.size.width -
+                    widget.mediaQuery.padding.horizontal) /
+                2 /
+                2 -
+            50);
+        print((widget.mediaQuery.size.height / 3) - 50 - 10 - 15);
         if (!(snapshot.hasError) &&
             (snapshot.hasData || snapshot.data is DownloadProgress) &&
             settings.useImagesFromNet) {
@@ -264,6 +273,7 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: (_hasInternetConnection && settings.useImagesFromNet)
+                        // ? null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(24.0),
                             child: _networkImageStream)
@@ -282,12 +292,16 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
                 (widget.cardInfo.imageUris?.normal == null) &&
                 settings.useImagesFromNet)
               Positioned(
+                // left: (widget.mediaQuery.size.width -
+                //         widget.mediaQuery.padding.horizontal) /
+                //     6,
                 left: (widget.mediaQuery.size.width -
                             widget.mediaQuery.padding.horizontal) /
                         2 /
                         2 -
                     50,
-                top: (widget.mediaQuery.size.height / 3) - 50 - 10 - 15,
+                // top: (widget.mediaQuery.size.height / 4),
+                top: (widget.mediaQuery.size.height / 3) - 50 - 50 - 10 - 15,
                 child: MaterialButton(
                   onPressed: () {
                     setState(() {

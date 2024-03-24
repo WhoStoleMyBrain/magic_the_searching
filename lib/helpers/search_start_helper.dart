@@ -94,10 +94,6 @@ class SearchStartHelper {
     RegExp conditionRegExp = RegExp(r'(<=)|(>=)|(<)|(>)|(=)');
     RegExp numberRegExp = RegExp(r'\d');
     String? cmcCondition = conditionRegExp.firstMatch(foundCmcValues)?[0];
-    print('cmc conditions: $cmcCondition');
-    for (RegExpMatch mat in conditionRegExp.allMatches(foundCmcValues)) {
-      print(mat[0]);
-    }
     String? cmcValue = numberRegExp.firstMatch(foundCmcValues)?[0];
 
     // fetch colors
