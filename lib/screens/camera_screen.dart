@@ -127,7 +127,7 @@ class _CameraScreenState extends State<CameraScreen>
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Camera example'),
+          title: const Text('Take a picture of your card!'),
           backgroundColor: Colors.transparent,
         ),
         body: Column(

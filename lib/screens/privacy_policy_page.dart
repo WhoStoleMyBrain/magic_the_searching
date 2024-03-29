@@ -95,15 +95,17 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                       height: 12,
                     ),
                     RichText(
-                        text: TextSpan(
-                            style: TextStyle(
-                                fontSize: style.fontSize,
-                                color: Colors.deepPurple.shade600),
-                            text: "Privacy Policy",
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () async {
-                                _launchURL(Constants.privacyInformation6);
-                              })),
+                        text: TextSpan(children: [
+                      TextSpan(
+                          style: TextStyle(
+                              fontSize: style.fontSize,
+                              color: Colors.deepPurple.shade600),
+                          text: "Privacy Policy",
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              _launchURL(Constants.privacyInformation7);
+                            }),
+                    ]))
                   ]),
                 ),
               ),
