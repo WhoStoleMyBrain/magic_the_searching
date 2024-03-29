@@ -69,7 +69,7 @@ class AllHelpMessages {
     title: 'What does TCG and CDM mean?',
     message:
         'The prices provided by Scryfall are either in € or in \$. It is assumed that the €-price is the average price of the card at cardmarket (CDM), '
-        'while the \$-price is the average price on TCGPlayer (TCG). For more refined results click on the card and then scroll down. There will be links available to open the card in the web on either cardmarket or TCGPlayer.',
+        'while the \$-price is the average price on TCGPlayer (TCG). The price for foil variants of the same cards are displayed in round brackets behind the non-foil price. For more refined results click on the card and then scroll down. There will be links available to open the card in the web on either cardmarket or TCGPlayer.',
   );
 
   static HelpMessage historyScreen = HelpMessage(
