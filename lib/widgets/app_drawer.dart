@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/screens/about_screen.dart';
 import 'package:magic_the_searching/screens/card_search_screen.dart';
 import 'package:magic_the_searching/screens/help_screen.dart';
 import 'package:magic_the_searching/screens/history_screen.dart';
@@ -80,7 +81,16 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.of(context).pushNamed(PrivacyPolicyPage.routeName);
               },
-            )
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text("About"),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed(AboutScreen.routeName);
+              },
+            ),
           ],
         ),
       ),

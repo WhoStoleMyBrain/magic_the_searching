@@ -71,6 +71,13 @@ class Constants {
   static const privacyInformation7 =
       "https://www.freeprivacypolicy.com/live/bfd459f6-0363-4fa7-9154-d2a92613e753";
 
+  static const aboutPage1 =
+      "If you enjoy this app, feel free to share it with your friends and other Magic the Gathering entusiasts. I am constantly trying to improve this app, and as such your feedback as a user is most important to me!\nIf you have any suggestions for improvements or find any bugs or weird behaviour, please contact me either at the google play store or via mail at ";
+  static const aboutPage2 =
+      "\n\nAlso, if you like my work and want to buy me a coffee, you can do so over at \n";
+
+  static const buyMeACoffee = "https://www.buymeacoffee.com/marcowetter";
+
   static String defaultTimestamp =
       DateTime.parse("1969-07-20 20:18:04Z").toIso8601String();
 
