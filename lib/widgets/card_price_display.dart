@@ -16,9 +16,6 @@ class CardPriceDisplay extends StatelessWidget {
       color: Colors.transparent,
       elevation: 0,
       child: Container(
-        // height: 90,
-        // color: Colors.transparent,
-        // color: Colors.white,
         padding: const EdgeInsets.all(8.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,

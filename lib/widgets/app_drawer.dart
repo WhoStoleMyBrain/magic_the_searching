@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:magic_the_searching/screens/card_search_screen.dart';
 import 'package:magic_the_searching/screens/help_screen.dart';
 import 'package:magic_the_searching/screens/history_screen.dart';
+import 'package:magic_the_searching/screens/privacy_policy_page.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/color_provider.dart';
@@ -42,7 +43,6 @@ class AppDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).pushNamed(CardSearchScreen.routeName);
-                // Navigator.of(context).pushReplacementNamed('/');
               },
             ),
             const Divider(),
@@ -52,7 +52,6 @@ class AppDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).pushNamed(HistoryScreen.routeName);
-                // .pushReplacementNamed(HistoryScreen.routeName);
               },
             ),
             const Divider(),
@@ -62,7 +61,6 @@ class AppDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).pushNamed(SettingsScreen.routeName);
-                // .pushReplacementNamed(SettingsScreen.routeName);
               },
             ),
             const Divider(),
@@ -72,9 +70,17 @@ class AppDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).pushNamed(HelpScreen.routeName);
-                // Navigator.of(context).pushReplacementNamed(HelpScreen.routeName);
               },
             ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: const Text("Privacy Policy"),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed(PrivacyPolicyPage.routeName);
+              },
+            )
           ],
         ),
       ),

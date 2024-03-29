@@ -20,38 +20,17 @@ class CardDetails extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(
-                'Normal',
-                style: textStyle,
+              buildCombinedPriceItem('TCG Player', cardInfo.prices?.usd,
+                  cardInfo.prices?.usdFoil, '\$', textStyle),
+              const SizedBox(
+                height: 3,
               ),
-              Text(
-                'Foil',
-                style: textStyle,
-              ),
-            ],
-          ),
-          const Divider(
-            color: Colors.black,
-            thickness: 1,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              buildSinglePriceItem('TCG', cardInfo.prices?.usd, '\$'),
-              buildSinglePriceItem('TCG', cardInfo.prices?.usdFoil, '\$'),
-            ],
-          ),
-          const SizedBox(
-            height: 4,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              buildSinglePriceItem('CDM', cardInfo.prices?.eur, '€'),
-              buildSinglePriceItem('CDM', cardInfo.prices?.eurFoil, '€'),
+              buildCombinedPriceItem('Cardmarket', cardInfo.prices?.eur,
+                  cardInfo.prices?.eurFoil, '€', textStyle)
             ],
           ),
           const SizedBox(
@@ -67,6 +46,15 @@ class CardDetails extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Text buildCombinedPriceItem(String name, String? value, String? foilValue,
+      String currency, TextStyle style) {
+    return Text(
+      '$name: $currency${value ?? "--.--"} ($currency${foilValue ?? "--.--"})',
+      overflow: TextOverflow.ellipsis,
+      style: style,
     );
   }
 

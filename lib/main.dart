@@ -7,6 +7,7 @@ import 'package:magic_the_searching/providers/color_provider.dart';
 import 'package:magic_the_searching/providers/image_taken_provider.dart';
 import 'package:magic_the_searching/providers/settings.dart';
 import 'package:magic_the_searching/screens/help_screen.dart';
+import 'package:magic_the_searching/screens/privacy_policy_page.dart';
 import 'package:magic_the_searching/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -111,6 +112,7 @@ class MyApp extends StatelessWidget {
               SettingsScreen.routeName: (ctx) => const SettingsScreen(),
               HelpScreen.routeName: (ctx) => const HelpScreen(),
               CameraScreen.routeName: (ctx) => CameraScreen(_cameras),
+              PrivacyPolicyPage.routeName: (ctx) => const PrivacyPolicyPage(),
             },
             home: ShowCaseWidget(
               onFinish: () async {

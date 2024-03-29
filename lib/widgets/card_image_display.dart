@@ -242,15 +242,6 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
     return StreamBuilder<FileResponse>(
       stream: getLocalImage(settings),
       builder: (context, snapshot) {
-        print(widget.cardInfo.hasTwoSides &&
-            (widget.cardInfo.imageUris?.normal == null) &&
-            settings.useImagesFromNet);
-        print((widget.mediaQuery.size.width -
-                    widget.mediaQuery.padding.horizontal) /
-                2 /
-                2 -
-            50);
-        print((widget.mediaQuery.size.height / 3) - 50 - 10 - 15);
         if (!(snapshot.hasError) &&
             (snapshot.hasData || snapshot.data is DownloadProgress) &&
             settings.useImagesFromNet) {
@@ -266,62 +257,56 @@ class _CardImageDisplayState extends State<CardImageDisplay> {
           _networkImageStream = null;
           _hasInternetConnection = false;
         }
-        return Stack(
-          children: [
-            (snapshot.connectionState == ConnectionState.done ||
-                    !settings.useImagesFromNet)
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: (_hasInternetConnection && settings.useImagesFromNet)
-                        // ? null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(24.0),
-                            child: _networkImageStream)
-                        : cardText(),
-                  )
-                : SizedBox(
-                    width: (widget.mediaQuery.size.width -
-                            widget.mediaQuery.padding.horizontal) /
-                        2,
-                    height: (widget.mediaQuery.size.height / 4),
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-            if (widget.cardInfo.hasTwoSides &&
-                (widget.cardInfo.imageUris?.normal == null) &&
-                settings.useImagesFromNet)
-              Positioned(
-                // left: (widget.mediaQuery.size.width -
-                //         widget.mediaQuery.padding.horizontal) /
-                //     6,
-                left: (widget.mediaQuery.size.width -
-                            widget.mediaQuery.padding.horizontal) /
-                        2 /
-                        2 -
-                    50,
-                // top: (widget.mediaQuery.size.height / 4),
-                top: (widget.mediaQuery.size.height / 3) - 50 - 50 - 10 - 15,
-                child: MaterialButton(
-                  onPressed: () {
-                    setState(() {
-                      CardImageDisplay.pictureLoaded = false;
-                      getLocalImage(settings);
-                      _side == 0 ? _side = 1 : _side = 0;
-                    });
-                  },
-                  height: 45,
-                  shape: const CircleBorder(),
-                  color: const Color.fromRGBO(128, 128, 128, 0.5),
-                  child: const Icon(
-                    Icons.compare_arrows,
-                    size: 30,
-                    color: Colors.black87,
-                  ),
+        return (snapshot.connectionState == ConnectionState.done ||
+                !settings.useImagesFromNet)
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: (_hasInternetConnection && settings.useImagesFromNet)
+                    // ? null
+                    ? Stack(
+                        children: [
+                          ClipRRect(
+                              borderRadius: BorderRadius.circular(24.0),
+                              child: _networkImageStream),
+                          if (widget.cardInfo.hasTwoSides &&
+                              (widget.cardInfo.imageUris?.normal == null) &&
+                              settings.useImagesFromNet)
+                            Positioned(
+                              left: (widget.mediaQuery.size.width) / 2 - 16,
+                              bottom: 32,
+                              width: 128,
+                              height: 128,
+                              child: MaterialButton(
+                                onPressed: () {
+                                  setState(() {
+                                    CardImageDisplay.pictureLoaded = false;
+                                    getLocalImage(settings);
+                                    _side == 0 ? _side = 1 : _side = 0;
+                                  });
+                                },
+                                height: 64,
+                                shape: const CircleBorder(),
+                                color: const Color.fromRGBO(128, 128, 128, 0.5),
+                                child: const Icon(
+                                  Icons.compare_arrows,
+                                  size: 92,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                        ],
+                      )
+                    : cardText(),
+              )
+            : SizedBox(
+                width: (widget.mediaQuery.size.width -
+                        widget.mediaQuery.padding.horizontal) /
+                    2,
+                height: (widget.mediaQuery.size.height / 4),
+                child: const Center(
+                  child: CircularProgressIndicator(),
                 ),
-              ),
-          ],
-        );
+              );
       },
     );
   }

@@ -415,7 +415,7 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
                   widget.mediaQuery.padding.horizontal) /
               2 -
           50,
-      top: (widget.mediaQuery.size.height * 2 / 3) - 70 - 10,
+      top: (widget.mediaQuery.size.height * 2 / 3) - 70 - 30,
       child: MaterialButton(
         onPressed: () {
           setState(() {

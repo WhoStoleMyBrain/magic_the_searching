@@ -53,6 +53,24 @@ class Constants {
   static const settingsMainScreen3ColorName = "mainScreenColor3";
   static const settingsMainScreen4ColorName = "mainScreenColor4";
 
+  static const privacyInformation1 =
+      "This app does not in any way collect usage data or personal data of any kind.";
+  static const privacyInformation2 =
+      "However, for functionality the following device permissions are required:";
+  static const privacyInformation3 =
+      "Camera: If you wish to quick search for cards, access to the camera is obligatory. However, the images taken are only stored as long as they are needed to process the task requested by the user, and discarded immediately afterwards.";
+  static const privacyInformation41 =
+      "Internet: Since this app does obtain it's data from the open API at";
+  static const privacyInformation42 = " Scryfall.com ";
+  static const privacyInformation43 =
+      "an internet connection and access to such internet connection is required for the app to function.";
+  static const privacyInformation5 =
+      "User History: Using the app will result in a search history of the last 7 days to be stored on the device. This information is only stored locally and not sent to any external service. It is solely being used for it's intended function, i.e. displaying the information on the screen and making quick searches available.";
+  static const privacyInformation6 =
+      "For a complete privacy information please refer to this link: ";
+  static const privacyInformation7 =
+      "https://www.freeprivacypolicy.com/live/bfd459f6-0363-4fa7-9154-d2a92613e753";
+
   static String defaultTimestamp =
       DateTime.parse("1969-07-20 20:18:04Z").toIso8601String();
 

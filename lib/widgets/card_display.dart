@@ -51,19 +51,10 @@ class CardDisplay extends StatelessWidget {
                 ),
               ),
               CardPriceDisplay(cardInfo: cardInfo),
-              // Card(
-              //     borderOnForeground: true,
-              //     elevation: 0,
-              //     shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.only(
-              //             bottomLeft: Radius.circular(8.0),
-              //             bottomRight: Radius.circular(8.0))),
-              //     child: CardPriceDisplay(cardInfo: cardInfo)),
             ],
           ),
         ),
       ),
-      // ),
     );
   }
 }
