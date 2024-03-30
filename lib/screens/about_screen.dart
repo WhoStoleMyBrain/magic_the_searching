@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:mailto/mailto.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../helpers/navigation_helper.dart';
@@ -103,7 +102,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
   Future<void> _launchURL(String webpage) async {
     if (!await launchUrlString(webpage)) {
-    //if (!await launchUrl(Uri.parse(webpage))) {
+      //if (!await launchUrl(Uri.parse(webpage))) {
       throw 'Could not launch $webpage';
     }
   }
