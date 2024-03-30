@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.magic_the_searching">
     <uses-permission android:name="android.permission.INTERNET"/>
+    
    <application
         android:label="Magic The Searching"
         android:name="${applicationName}"
@@ -28,6 +29,16 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <queries>
+                <intent>
+                    <action android:name="android.intent.action.VIEW" />
+                    <data android:scheme="https" />
+                </intent>
+                <intent>
+                    <action android:name="android.intent.action.SEND" />
+                    <data android:mimeType="*/*" />
+                </intent>
+            </queries>
         </activity>
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
@@ -38,5 +49,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+            
     </application>
+    
 </manifest>

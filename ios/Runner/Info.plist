@@ -49,5 +49,15 @@
 	<string>This app needs permission to take pictures</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs permission to take pictures</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>mailto</string>
+		<string>http</string>
+		<string>https</string>
+	</array>
 </dict>
 </plist>
