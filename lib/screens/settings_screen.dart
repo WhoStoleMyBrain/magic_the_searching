@@ -593,7 +593,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           colorProvider.mainScreenColor1 = newColor;
                         });
                       }),
-                      colorName: "First Main Screen",
+                      colorName: "1st Main Screen",
                     ),
                     ColorPickerPage(
                       startColor: colorProvider.mainScreenColor2,
@@ -602,7 +602,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           colorProvider.mainScreenColor2 = newColor;
                         });
                       }),
-                      colorName: "Second Main Screen",
+                      colorName: "2nd Main Screen",
                     ),
                     ColorPickerPage(
                       startColor: colorProvider.mainScreenColor3,
@@ -629,7 +629,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           colorProvider.appDrawerColor1 = newColor;
                         });
                       }),
-                      colorName: "First App Drawer",
+                      colorName: "1st App Drawer",
                     ),
                     ColorPickerPage(
                       startColor: colorProvider.appDrawerColor2,
@@ -638,7 +638,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           colorProvider.appDrawerColor2 = newColor;
                         });
                       }),
-                      colorName: "Second App Drawer",
+                      colorName: "2nd App Drawer",
                     ),
                     ColorPickerPage(
                       startColor: colorProvider.backgroundColor1,
@@ -647,7 +647,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           colorProvider.backgroundColor1 = newColor;
                         });
                       }),
-                      colorName: "First Background",
+                      colorName: "1st Background",
                     ),
                     ColorPickerPage(
                       startColor: colorProvider.backgroundColor2,
@@ -656,7 +656,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           colorProvider.backgroundColor2 = newColor;
                         });
                       }),
-                      colorName: "Second Background",
+                      colorName: "2nd Background",
                     ),
                     ElevatedButton(
                         onPressed: () async {

@@ -1,11 +1,48 @@
-include ':app'
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }()
 
-def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
-def properties = new Properties()
+    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
-assert localPropertiesFile.exists()
-localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+    // resolutionStrategy {
+    //     eachPlugin {
+    //         if (requested.id.namespace == "org.jetbrains.kotlin") {
+    //             useModule("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.21")
+    //         } else if (requested.id.namespace == "")
+    //     }
+    // }
 
-def flutterSdkPath = properties.getProperty("flutter.sdk")
-assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    id "com.android.application" version "7.3.0" apply false
+    id "org.jetbrains.kotlin.android" version "1.8.21" apply false
+    // id "org.jetbrains.kotlin.kotlin-stdlib-jdk7" version "1.8.21" apply false
+    // id 'com.google.mlkit.text-recognition-chinese' version '16.0.0-beta6' apply false
+    // id 'com.google.mlkit.text-recognition-devanagari' version '16.0.0-beta6' apply false
+    // id 'com.google.mlkit.text-recognition-japanese' version '16.0.0-beta6' apply false
+    // id 'com.google.mlkit.text-recognition-korean' version '16.0.0-beta6' apply false
+    // id "androidx.activity.activity" version "1.6.0-alpha05" apply false
+}
+
+// dependencies {
+//     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.21"
+//     implementation 'com.google.mlkit:text-recognition-chinese:16.0.0-beta6'
+//     implementation 'com.google.mlkit:text-recognition-devanagari:16.0.0-beta6'
+//     implementation 'com.google.mlkit:text-recognition-japanese:16.0.0-beta6'
+//     implementation 'com.google.mlkit:text-recognition-korean:16.0.0-beta6'
+//     implementation "androidx.activity:activity:1.6.0-alpha05"
+// }
+
+include ":app"

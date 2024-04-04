@@ -6,12 +6,6 @@ class ScryfallQueryMaps {
     'lang': 'any',
   };
 
-  static Map<String, String> inEnglishMap = {
-    'include_multilingual': 'true',
-    'lang': 'en',
-    'unique': 'cards',
-  };
-
   static Map<String, String> versionMap = {
     'unique': 'art',
   };

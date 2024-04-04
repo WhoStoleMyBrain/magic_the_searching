@@ -29,21 +29,9 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <queries>
-                <intent>
-                    <action android:name="android.intent.action.VIEW" />
-                    <data android:scheme="https" />
-                </intent>
-                <intent>
-                    <action android:name="android.intent.action.SEND" />
-                    <data android:mimeType="*/*" />
-                </intent>
-            </queries>
+            
         </activity>
-        <activity
-            android:name="com.yalantis.ucrop.UCropActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -51,5 +39,16 @@
             android:value="2" />
             
     </application>
+
+    <!-- <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="*/*" />
+        </intent>
+    </queries> -->
     
 </manifest>

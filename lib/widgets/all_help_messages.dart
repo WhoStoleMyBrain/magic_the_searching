@@ -23,14 +23,14 @@ class AllHelpMessages {
         'What does the switch \'Use local DB\' do in the settings screen do?',
     message:
         'After having downloaded data from Scryfall the local SQLite database is searched instead of requesting data from Scryfall. '
-        'Please note, that while using the local database, you do not necessarily need an internet connection, the provided data might not be up to date and not reflect the current price of any card.'
+        'Please note, that while using the local database, you do not necessarily need an internet connection, the provided data might not be up to date and not reflect the current price of any card. '
         'Check the date of your local database in the settings screen.',
   );
   static HelpMessage showImages = HelpMessage(
     title: 'What does the switch \'Show Images\' do?',
     message: 'If switched on, images of cards are displayed.\n'
         'If switched off, instead of an image only the title, oracle text and set name will be displayed instead. '
-        'This is intended to reduce mobile data usage, since images can be quite large and for rather open searches (i.e. the search term \'Goblin\' will have many results) many images will be loaded.'
+        'This is intended to reduce mobile data usage, since images can be quite large and for rather open searches (i.e. the search term \'Goblin\' will have many results) many images will be loaded. '
         'Please note, that for cards from specific sets or with special artworks, the correct identification without image is almost impossible. '
         'Nevertheless, this can still give a rough estimate on what you can expect while reducing mobile data usage significantly.',
   );

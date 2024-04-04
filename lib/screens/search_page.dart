@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 import 'package:magic_the_searching/helpers/constants.dart';
+import 'package:magic_the_searching/helpers/google_mlkit_helper.dart';
 import 'package:magic_the_searching/providers/history.dart';
 import 'package:magic_the_searching/providers/image_taken_provider.dart';
 import 'package:magic_the_searching/providers/scryfall_provider.dart';
@@ -51,7 +52,7 @@ class _SearchPageState extends State<SearchPage> {
   LanguageIdentifier languageIdentifier =
       LanguageIdentifier(confidenceThreshold: 0.5);
 
-  final List<String> _languages = [];
+  Languages _language = Languages.en;
   List<String> _selectedKeywordAbilities = [];
   List<String> _selectedCreatureTypes = [];
   List<String> _selectedCardTypes = [];
@@ -60,6 +61,7 @@ class _SearchPageState extends State<SearchPage> {
   final _creatureTypeKey = GlobalKey<DropdownSearchState>();
   final _cardTypeKey = GlobalKey<DropdownSearchState>();
   final _keywordAbilitiesKey = GlobalKey<DropdownSearchState>();
+  // final _languagesKey = GlobalKey<DropdownSearchState>();
   late FocusScopeNode _focusScopeNode;
 
   String _selectedCmcCondition = '<';
@@ -80,6 +82,7 @@ class _SearchPageState extends State<SearchPage> {
 
     setState(() {
       if (widget.prefilledValues != null) {
+        print('prefilled values: ${widget.prefilledValues}');
         _searchTermController.text =
             widget.prefilledValues![Constants.contextSearchTerm] ?? '';
         _selectedCreatureTypes =
@@ -97,6 +100,8 @@ class _SearchPageState extends State<SearchPage> {
         _manaSymbolsSelected =
             widget.prefilledValues![Constants.contextManaSymbols] ??
                 _manaSymbolsSelected;
+        _language =
+            widget.prefilledValues![Constants.contextLanguages] ?? _language;
       }
     });
   }
@@ -371,6 +376,29 @@ class _SearchPageState extends State<SearchPage> {
                         height: 8,
                       ),
                       _getManaSymbolsField(),
+
+                      DropdownButtonFormField<String>(
+                        decoration: const InputDecoration(
+                            labelText: "Language",
+                            labelStyle: TextStyle(fontSize: 18)),
+                        value: _language.name,
+                        items: Languages.values
+                            .map<DropdownMenuItem<String>>((Languages value) {
+                          return DropdownMenuItem<String>(
+                            value: value.name,
+                            child: Text(value.longName),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            if (newValue != null) {
+                              _language = Languages.values
+                                  .where((element) => element.name == newValue)
+                                  .first;
+                            }
+                          });
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -380,24 +408,41 @@ class _SearchPageState extends State<SearchPage> {
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
-                MtGSet? set = scryfallProvider.sets
-                    .where((element) => element.code == _setController.text)
-                    .firstOrNull;
-                Navigator.pop(context, {
-                  Constants.contextSearchTerm: _searchTermController.text,
-                  Constants.contextLanguages: _languages,
-                  Constants.contextCreatureTypes: _selectedCreatureTypes
-                      .map((e) => scryfallProvider.mappedCreatureTypes[e]!)
-                      .toList(),
-                  Constants.contextCardTypes: _selectedCardTypes,
-                  Constants.contextKeywords: _selectedKeywordAbilities
-                      .map((e) => scryfallProvider.mappedKeywordAbilities[e]!)
-                      .toList(),
-                  Constants.contextSet: set ?? MtGSet.empty(),
-                  Constants.contextCmcValue: _cmcValueController.text,
-                  Constants.contextCmcCondition: _selectedCmcCondition,
-                  Constants.contextManaSymbols: _manaSymbolsSelected,
-                });
+                await GoogleMlkitHelper.getLanguageOfString(
+                        _searchTermController.text)
+                    .then(
+                  (searchTermLanguage) {
+                    MtGSet? set = scryfallProvider.sets
+                        .where((element) => element.code == _setController.text)
+                        .firstOrNull;
+                    Languages searchTermLang = Languages.values.firstWhere(
+                      (element) => element.googleMlKitId == searchTermLanguage,
+                      orElse: () => Languages.en,
+                    );
+                    List<Languages> languages = [_language, searchTermLang];
+                    languages = languages.toSet().toList();
+                    Navigator.pop(
+                      context,
+                      {
+                        Constants.contextSearchTerm: _searchTermController.text,
+                        Constants.contextLanguages: languages,
+                        Constants.contextCreatureTypes: _selectedCreatureTypes
+                            .map(
+                                (e) => scryfallProvider.mappedCreatureTypes[e]!)
+                            .toList(),
+                        Constants.contextCardTypes: _selectedCardTypes,
+                        Constants.contextKeywords: _selectedKeywordAbilities
+                            .map((e) =>
+                                scryfallProvider.mappedKeywordAbilities[e]!)
+                            .toList(),
+                        Constants.contextSet: set ?? MtGSet.empty(),
+                        Constants.contextCmcValue: _cmcValueController.text,
+                        Constants.contextCmcCondition: _selectedCmcCondition,
+                        Constants.contextManaSymbols: _manaSymbolsSelected,
+                      },
+                    );
+                  },
+                );
               }
             },
             child: const Icon(Icons.search),

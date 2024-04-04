@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 import 'package:magic_the_searching/widgets/app_drawer.dart';
@@ -40,7 +41,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       History history, CardDataProvider cardDataProvider, int index) async {
     HistoryObject thisHistoryObject = history.data[index];
     String searchText = thisHistoryObject.query;
-    List<String> languages = thisHistoryObject.languages;
+    List<Languages> languages = thisHistoryObject.languages;
     cardDataProvider.query = searchText;
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.languages = languages;
@@ -55,7 +56,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       History history, CardDataProvider cardDataProvider, int index) async {
     HistoryObject thisHistoryObject = history.data[index];
     String searchText = thisHistoryObject.query;
-    List<String> languages = thisHistoryObject.languages;
+    List<Languages> languages = thisHistoryObject.languages;
     cardDataProvider.query = searchText;
     cardDataProvider.isStandardQuery = true;
     cardDataProvider.languages = languages;

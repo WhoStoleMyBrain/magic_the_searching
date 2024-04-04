@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -40,35 +38,12 @@ class GoogleMlkitHelper {
     }
   }
 
-  static Future<Map<String, dynamic>> getCardNameFromImage(File image,
-      {ScryfallProvider? scryfallProvider}) async {
-    List<String> cardType = [];
-    List<String> creatureType = [];
-    final InputImage inputImage = InputImage.fromFile(image);
-    final RecognizedText recognisedText =
-        await GoogleMlkitHelper.textDetector.processImage(inputImage);
-    Map<String, dynamic> returnMap = {};
-    if (recognisedText.blocks.isEmpty) return returnMap;
-    final cardName = _getCardNameFromBlocks(recognisedText.blocks);
-    if (scryfallProvider != null) {
-      cardType =
-          _getCardTypeFromBlocks(recognisedText.blocks, scryfallProvider);
-      creatureType =
-          _getCreatureTypeFromBlocks(recognisedText.blocks, scryfallProvider);
-    }
-    returnMap[Constants.imageTextMapCardName] = cardName;
-    returnMap[Constants.imageTextMapCardType] = cardType;
-    returnMap[Constants.imageTextMapCreatureType] = creatureType;
-
-    return returnMap;
-  }
-
   static Future<Map<String, dynamic>> getCardNameFromXfile(XFile image,
       {ScryfallProvider? scryfallProvider}) async {
     List<String> cardType = [];
     List<String> creatureType = [];
+    List<String> languages = [];
     final InputImage inputImage = InputImage.fromFilePath(image.path);
-    // final InputImage inputImage = InputImage.fromFile(image);
     final RecognizedText recognisedText =
         await GoogleMlkitHelper.textDetector.processImage(inputImage);
     Map<String, dynamic> returnMap = {};
@@ -85,10 +60,25 @@ class GoogleMlkitHelper {
             'not getting card type and creature type, since there is no scryfall provider');
       }
     }
+    languages.add(await getLanguageOfString(cardName));
+    for (String cardTyp in cardType) {
+      languages.add(await getLanguageOfString(cardTyp));
+    }
+    for (String creatureTyp in creatureType) {
+      languages.add(await getLanguageOfString(creatureTyp));
+    }
+    languages = languages.toSet().toList();
+    languages.removeWhere((element) => element == "und");
+    List<Languages> scryfallLanguages = languages
+        .map((e) => Languages.values.firstWhere(
+              (element) => element.googleMlKitId == e,
+              orElse: () => Languages.en,
+            ))
+        .toList();
     returnMap[Constants.imageTextMapCardName] = cardName;
     returnMap[Constants.imageTextMapCardType] = cardType;
     returnMap[Constants.imageTextMapCreatureType] = creatureType;
-
+    returnMap[Constants.imageTextMapLanguages] = scryfallLanguages;
     return returnMap;
   }
 

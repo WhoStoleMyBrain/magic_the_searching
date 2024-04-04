@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/providers/history.dart';
 import 'package:sqflite/sqflite.dart' as sql;

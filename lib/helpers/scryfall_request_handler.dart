@@ -1,8 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
-
+import '../helpers/constants.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
 
 class ScryfallRequestHandler {
@@ -17,30 +16,27 @@ class ScryfallRequestHandler {
   static const String queryBaseString = '/cards/search';
   String searchText = '';
   String query = '';
-  List<String> languages = [];
+  List<Languages> languages = [];
   Map<String, dynamic> responseData = {};
 
   void _configureSearchTextToScryfall(bool isStandardQuery) {
-    languages.removeWhere((element) => element == '');
-    searchText = isStandardQuery
-        ? languages.isEmpty
-            ? searchText
-            : languages.length > 1
-                ? '(l:${languages.join(' or l:')}) $searchText'
-                : 'l:${languages[0]} $searchText'
-        : languages.isEmpty
-            ? '!"$searchText"'
-            : languages.length > 1
-                ? '(l:${languages.join(' or l:')}) !"$searchText"'
-                : 'l:${languages[0]} !"$searchText"';
+    // languages.removeWhere((element) => element == '');
+    searchText = searchText;
+    // searchText = isStandardQuery
+    //     ? languages.isEmpty
+    //         ? searchText
+    //         : languages.length > 1
+    //             ? '(l:${languages.join(' or l:')}) $searchText'
+    //             : 'l:${languages[0]} $searchText'
+    //     : languages.isEmpty
+    //         ? '!"$searchText"'
+    //         : languages.length > 1
+    //             ? '(l:${languages.join(' or l:')}) !"$searchText"'
+    //             : 'l:${languages[0]} !"$searchText"';
   }
 
-  void setHttpsQuery(Map<String, String> queryMap, bool isStandardQuery) {
-    if (queryMap == ScryfallQueryMaps.inEnglishMap) {
-      languages = ['en'];
-    } else {
-      languages.removeWhere((element) => element == 'any');
-    }
+  void setHttpsQuery(Map<String, dynamic> queryMap, bool isStandardQuery) {
+    //TODO: Add any language to query
     _configureSearchTextToScryfall(isStandardQuery);
     queryMap['q'] = searchText;
     query = Uri.https(apiBasePath, queryBaseString, queryMap).toString();

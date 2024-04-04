@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:magic_the_searching/enums/query_location.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 
 import '../helpers/scryfall_request_handler.dart';
 import '../helpers/db_helper.dart';
@@ -7,13 +8,13 @@ import '../scryfall_api_json_serialization/card_info.dart';
 
 class CardDataProvider with ChangeNotifier {
   List<CardInfo> _cards = [];
-  List<String> languages = [];
+  List<Languages> languages = [];
   String query = '';
   bool isLoading = false;
   bool isStandardQuery = true;
   bool hasMore = false;
   QueryLocation _queryLocation = QueryLocation.none;
-  Map<String, String> scryfallQueryMaps = {};
+  Map<String, dynamic> scryfallQueryMaps = {};
   Map<String, dynamic> allQueryParameters = {};
   late ScryfallRequestHandler scryfallRequestHandler;
 
@@ -58,7 +59,8 @@ class CardDataProvider with ChangeNotifier {
         'searchText': query,
         'matches': dbResult.length,
         'dateTime': DateTime.now().toIso8601String(),
-        'languages': languages.join(';'),
+        'languages': languages.fold(
+            '', (previousvalue, element) => '$previousvalue;${element.name}'),
       };
       DBHelper.insertIntoHistory(historyData);
       return false;
@@ -67,7 +69,8 @@ class CardDataProvider with ChangeNotifier {
         'searchText': query,
         'matches': dbResult.length,
         'dateTime': DateTime.now().toIso8601String(),
-        'languages': languages.join(';'),
+        'languages': languages.fold(
+            '', (previousvalue, element) => '$previousvalue;${element.name}'),
       };
       DBHelper.insertIntoHistory(historyData);
     }
@@ -77,12 +80,16 @@ class CardDataProvider with ChangeNotifier {
 
   Future<bool> _requestDataFromScryfall() async {
     scryfallRequestHandler = ScryfallRequestHandler();
-    languages = scryfallQueryMaps.entries
-        .where((element) => element.key == 'lang')
-        .map((e) => e.value)
-        .toList();
+    // languages = scryfallQueryMaps.entries
+    //     .where((element) => element.key == 'lang')
+    //     .map((e) => Languages.values.firstWhere(
+    //           (lan) => e.value == lan.name,
+    //           orElse: () => Languages.en,
+    //         ))
+    //     .toSet()
+    //     .toList();
     scryfallRequestHandler.searchText = query;
-    scryfallRequestHandler.languages = languages;
+    // scryfallRequestHandler.languages = languages;
     scryfallRequestHandler.setHttpsQuery(scryfallQueryMaps, isStandardQuery);
     await scryfallRequestHandler.sendQueryRequest();
     final queryResult = scryfallRequestHandler.processQueryData();
@@ -95,7 +102,8 @@ class CardDataProvider with ChangeNotifier {
         'searchText': query,
         'matches': 0,
         'dateTime': DateTime.now().toIso8601String(),
-        'languages': languages.join(';'),
+        'languages': languages.fold(
+            '', (previousvalue, element) => '$previousvalue;${element.name}'),
       };
       DBHelper.insertIntoHistory(historyData);
       return false;
@@ -108,7 +116,8 @@ class CardDataProvider with ChangeNotifier {
                 ? scryfallRequestHandler.responseData["total_cards"]
                 : 0, // queryResult.length,
         'dateTime': DateTime.now().toIso8601String(),
-        'languages': languages.join(';'),
+        'languages': languages.fold(
+            '', (previousvalue, element) => '$previousvalue;${element.name}'),
       };
       DBHelper.insertIntoHistory(historyData);
       cards = queryResult;

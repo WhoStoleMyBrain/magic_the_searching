@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/providers/history.dart';
 import 'package:magic_the_searching/providers/image_taken_provider.dart';
 import 'package:magic_the_searching/screens/card_search_screen.dart';
@@ -9,11 +10,12 @@ import '../models/mtg_set.dart';
 
 class FireQueryImageTakenAlertDialog extends StatelessWidget {
   const FireQueryImageTakenAlertDialog(
-      this.cardName, this.cardType, this.creatureType,
+      this.cardName, this.cardType, this.creatureType, this.languages,
       {super.key});
   final String cardName;
   final List<String> cardType;
   final List<String> creatureType;
+  final List<Languages> languages;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +60,7 @@ class FireQueryImageTakenAlertDialog extends StatelessWidget {
               context,
               cardName,
               // languages,
-              ['en'],
+              [Languages.en],
               creatureType,
               [],
               cardType,

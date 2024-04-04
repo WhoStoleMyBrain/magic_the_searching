@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 
 import '../helpers/db_helper.dart';
 
@@ -23,7 +24,7 @@ class HistoryObject {
   String query;
   String matches;
   DateTime dateTime;
-  List<String> languages;
+  List<Languages> languages;
 
   HistoryObject(
       {required this.query,
@@ -31,19 +32,33 @@ class HistoryObject {
       required this.dateTime,
       required this.languages});
 
-  factory HistoryObject.fromDB(Map<String, dynamic> json) => HistoryObject(
-        query: json['searchText'].toString(),
-        matches: json['matches'].toString(),
-        dateTime: DateTime.parse(json['dateTime'].toString()),
-        languages: json['languages'].toString().split(';'),
-      );
+  factory HistoryObject.fromDB(Map<String, dynamic> json) {
+    print('parsing json: $json');
+    return HistoryObject(
+      query: json['searchText'].toString(),
+      matches: json['matches'].toString(),
+      dateTime: DateTime.parse(json['dateTime'].toString()),
+      languages: json['languages']
+          .toString()
+          .split(';')
+          .map((e) => Languages.values.firstWhere(
+                (element) => element.name == e,
+                orElse: () => Languages.en,
+              ))
+          .toList(),
+    );
+  }
 
   Map<String, dynamic> toDB() {
     return {
       'searchText': query,
       'count': matches,
       'requestTime': dateTime,
-      'languages': languages.join(';'),
+      'languages': languages.fold(
+          '',
+          (previousValue, element) => previousValue == ''
+              ? '$element'
+              : '$previousValue;${element.name}'),
     };
   }
 }

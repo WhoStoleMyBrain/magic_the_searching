@@ -82,6 +82,8 @@ class SearchStartHelper {
         splitQuery.where((element) => element.contains('keyword:'));
     Iterable<String> types =
         splitQuery.where((element) => element.contains('t:'));
+    Iterable<String> languages =
+        splitQuery.where((element) => element.contains('lang:'));
 
     // fetch set
     MtGSet? foundSet = scryfallProvider.sets
@@ -110,6 +112,13 @@ class SearchStartHelper {
     List<String> creatureTypes = _getCreatureTypes(types, scryfallProvider);
     // fetch keywords
     List<String>? foundKeywords = _getKeywords(keywords, scryfallProvider);
+    List<Languages> foundLanguages = languages
+        .map((e) => Languages.values.firstWhere(
+              (element) => element.name == e.split(':')[1],
+              orElse: () => Languages.en,
+            ))
+        .toSet()
+        .toList();
 
     return {
       Constants.contextCreatureTypes: creatureTypes,
@@ -120,6 +129,10 @@ class SearchStartHelper {
       Constants.contextSearchTerm: restOfQuery,
       Constants.contextCmcCondition: cmcCondition,
       Constants.contextCmcValue: cmcValue,
+      Constants.contextLanguages: foundLanguages.firstWhere(
+        (element) => element != Languages.en,
+        orElse: () => Languages.en,
+      ),
     };
   }
 
@@ -171,7 +184,8 @@ class SearchStartHelper {
   static String? _getRestOfQuery(List<String> splitQuery) {
     try {
       return splitQuery
-          .where((element) => !element.contains(RegExp(r'[<>:=]')))
+          .where((element) =>
+              !element.contains(RegExp(r'[<>:=()]')) && element.trim() != "or")
           .reduce((value, element) => '$value $element');
     } catch (e) {
       return null;
@@ -181,7 +195,7 @@ class SearchStartHelper {
   static Future<void> startSearchForCard(
       BuildContext ctx,
       String text,
-      List<String> languages,
+      List<Languages> languages,
       List<String> creatureTypes,
       List<String> keywordAbilities,
       List<String> cardTypes,
@@ -193,8 +207,15 @@ class SearchStartHelper {
     final settings = Provider.of<Settings>(ctx, listen: false);
     // building all the necessary parameters for queries
     String languageQuery = languages.isNotEmpty
-        ? languages.map((language) => "lang:$language").join(' ').trim()
+        ? languages.length == 1
+            ? "lang:${languages.first.name}"
+            : "${languages.fold('(', (previousValue, element) {
+                return previousValue == '('
+                    ? '$previousValue lang:${element.name}'
+                    : '$previousValue or lang:${element.name}';
+              }).trim()})"
         : '';
+
     String creatureTypesQuery = buildCumulativeQuery(creatureTypes, 't').trim();
     String cardTypesQuery = buildCumulativeQuery(cardTypes, 't').trim();
     String keywordAbilitiesQuery =

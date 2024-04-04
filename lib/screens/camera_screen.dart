@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import '../helpers/google_mlkit_helper.dart';
+import '../helpers/constants.dart';
 import '../providers/color_provider.dart';
 import '../providers/scryfall_provider.dart';
 import '../widgets/fire_query_image_taken_alert_dialog.dart';
@@ -410,7 +411,10 @@ class _CameraScreenState extends State<CameraScreen>
           context: context,
           builder: (bCtx) {
             return FireQueryImageTakenAlertDialog(
-                value['cardName'], value['cardType'], value['creatureType']);
+                value[Constants.imageTextMapCardName],
+                value[Constants.imageTextMapCardType],
+                value[Constants.imageTextMapCreatureType],
+                value[Constants.imageTextMapLanguages]);
           },
         );
       } else {

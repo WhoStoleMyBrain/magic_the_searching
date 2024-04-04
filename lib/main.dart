@@ -40,7 +40,6 @@ class MyApp extends StatelessWidget {
         today.subtract(const Duration(days: 100)).millisecondsSinceEpoch;
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     if (today.difference(dateTime).inDays > 7) {
-      // print('clearing db...');
       await DBHelper.cleanDB();
       await prefs.setInt('lastDbCleaned', today.millisecondsSinceEpoch);
     }
@@ -84,7 +83,7 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) {
-            return ImageTakenProvider('', [], []);
+            return ImageTakenProvider('', [], [], 'en');
           },
         ),
         ChangeNotifierProvider(
@@ -105,7 +104,6 @@ class MyApp extends StatelessWidget {
             title: 'Magic The Searching',
             theme: ThemeData(
               primarySwatch: Colors.blueGrey,
-              // scaffoldBackgroundColor: Colors.transparent,
             ),
             routes: {
               CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),

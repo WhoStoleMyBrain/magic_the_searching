@@ -8,5 +8,8 @@ class ImageTakenProvider with ChangeNotifier {
 
   List<String> creatureType;
 
-  ImageTakenProvider(this.cardName, this.cardType, this.creatureType);
+  String language;
+
+  ImageTakenProvider(
+      this.cardName, this.cardType, this.creatureType, this.language);
 }
