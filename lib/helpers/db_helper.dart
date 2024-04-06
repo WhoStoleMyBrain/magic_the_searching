@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/providers/history.dart';
 import 'package:sqflite/sqflite.dart' as sql;
@@ -12,6 +11,11 @@ class DBHelper {
     return _dbHelper;
   }
   DBHelper._internal();
+
+  static Future<void> vacuum() async{
+    final db = await DBHelper.cardDatabase();
+    await db.execute('VACUUM');
+  }
 
   static Future<void> deleteTablesIfExists() async {
     final db = await DBHelper.cardDatabase();
@@ -49,7 +53,6 @@ class DBHelper {
         return await value.close().then((value) async {
           final dbPath = await sql.getDatabasesPath();
           String fullDbPath = path.join(dbPath, dbName);
-
           final file = File(fullDbPath).openRead();
           final size = await file.length;
           return size;
@@ -210,11 +213,12 @@ class DBHelper {
       'cmc': 'manaCost',
       'manaSymbols': 'manaCost',
       'keywordAbilities': 'oracleText',
+      'language':'language',
     };
     var tmp = allQueryParameters.entries
         .where((element) =>
             (element.value != null) &&
-            (!['set', 'cmc', 'manaSymbols'].contains(element.key)))
+            (!['set', 'cmc', 'manaSymbols', 'language'].contains(element.key)))
         .fold(
             '',
             (previousValue, element) =>
@@ -226,6 +230,7 @@ class DBHelper {
 
   static Future<List<Map<String, dynamic>>> getCardsByName(
       Map<String, dynamic> allQueryParameters) async {
+        print('all query params: $allQueryParameters');
     //TODO Implement limit and offset to limit query and also request new data at end of scroll
     final db = await DBHelper.cardDatabase();
     var tmp = buildRawQuery(allQueryParameters);

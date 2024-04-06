@@ -19,25 +19,8 @@ class ScryfallRequestHandler {
   List<Languages> languages = [];
   Map<String, dynamic> responseData = {};
 
-  void _configureSearchTextToScryfall(bool isStandardQuery) {
-    // languages.removeWhere((element) => element == '');
-    searchText = searchText;
-    // searchText = isStandardQuery
-    //     ? languages.isEmpty
-    //         ? searchText
-    //         : languages.length > 1
-    //             ? '(l:${languages.join(' or l:')}) $searchText'
-    //             : 'l:${languages[0]} $searchText'
-    //     : languages.isEmpty
-    //         ? '!"$searchText"'
-    //         : languages.length > 1
-    //             ? '(l:${languages.join(' or l:')}) !"$searchText"'
-    //             : 'l:${languages[0]} !"$searchText"';
-  }
-
   void setHttpsQuery(Map<String, dynamic> queryMap, bool isStandardQuery) {
     //TODO: Add any language to query
-    _configureSearchTextToScryfall(isStandardQuery);
     queryMap['q'] = searchText;
     query = Uri.https(apiBasePath, queryBaseString, queryMap).toString();
   }

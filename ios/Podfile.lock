@@ -3,11 +3,9 @@ PODS:
     - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
+    - FlutterMacOS
     - ReachabilitySwift
   - Flutter (1.0.0)
-  - FMDB (2.7.9):
-    - FMDB/standard (= 2.7.9)
-  - FMDB/standard (2.7.9)
   - google_mlkit_commons (0.6.1):
     - Flutter
     - MLKitVision
@@ -31,6 +29,18 @@ PODS:
   - GoogleMLKit/TextRecognition (4.0.0):
     - GoogleMLKit/MLKitCore
     - MLKitTextRecognition (~> 2.0.0)
+  - GoogleMLKit/TextRecognitionChinese (4.0.0):
+    - GoogleMLKit/MLKitCore
+    - MLKitTextRecognitionChinese (~> 1.0.0)
+  - GoogleMLKit/TextRecognitionDevanagari (4.0.0):
+    - GoogleMLKit/MLKitCore
+    - MLKitTextRecognitionDevanagari (~> 1.0.0)
+  - GoogleMLKit/TextRecognitionJapanese (4.0.0):
+    - GoogleMLKit/MLKitCore
+    - MLKitTextRecognitionJapanese (~> 1.0.0)
+  - GoogleMLKit/TextRecognitionKorean (4.0.0):
+    - GoogleMLKit/MLKitCore
+    - MLKitTextRecognitionKorean (~> 1.0.0)
   - GoogleToolboxForMac/DebugUtils (2.3.2):
     - GoogleToolboxForMac/Defines (= 2.3.2)
   - GoogleToolboxForMac/Defines (2.3.2)
@@ -80,8 +90,24 @@ PODS:
     - MLKitCommon (~> 9.0)
     - MLKitTextRecognitionCommon (= 1.0.0)
     - MLKitVision (~> 5.0)
+  - MLKitTextRecognitionChinese (1.0.0):
+    - MLKitCommon (~> 9.0)
+    - MLKitTextRecognitionCommon (= 1.0.0)
+    - MLKitVision (~> 5.0)
   - MLKitTextRecognitionCommon (1.0.0):
     - MLKitCommon (~> 9.0)
+    - MLKitVision (~> 5.0)
+  - MLKitTextRecognitionDevanagari (1.0.0):
+    - MLKitCommon (~> 9.0)
+    - MLKitTextRecognitionCommon (= 1.0.0)
+    - MLKitVision (~> 5.0)
+  - MLKitTextRecognitionJapanese (1.0.0):
+    - MLKitCommon (~> 9.0)
+    - MLKitTextRecognitionCommon (= 1.0.0)
+    - MLKitVision (~> 5.0)
+  - MLKitTextRecognitionKorean (1.0.0):
+    - MLKitCommon (~> 9.0)
+    - MLKitTextRecognitionCommon (= 1.0.0)
     - MLKitVision (~> 5.0)
   - MLKitVision (5.0.0):
     - GoogleToolboxForMac/Logger (~> 2.1)
@@ -104,25 +130,28 @@ PODS:
     - FlutterMacOS
   - sqflite (0.0.3):
     - Flutter
-    - FMDB (>= 2.7.5)
+    - FlutterMacOS
   - url_launcher_ios (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
-  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - Flutter (from `Flutter`)
   - google_mlkit_commons (from `.symlinks/plugins/google_mlkit_commons/ios`)
   - google_mlkit_language_id (from `.symlinks/plugins/google_mlkit_language_id/ios`)
   - google_mlkit_text_recognition (from `.symlinks/plugins/google_mlkit_text_recognition/ios`)
+  - GoogleMLKit/TextRecognitionChinese (~> 4.0.0)
+  - GoogleMLKit/TextRecognitionDevanagari (~> 4.0.0)
+  - GoogleMLKit/TextRecognitionJapanese (~> 4.0.0)
+  - GoogleMLKit/TextRecognitionKorean (~> 4.0.0)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - sqflite (from `.symlinks/plugins/sqflite/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
   trunk:
-    - FMDB
     - GoogleDataTransport
     - GoogleMLKit
     - GoogleToolboxForMac
@@ -134,7 +163,11 @@ SPEC REPOS:
     - MLKitLanguageID
     - MLKitNaturalLanguage
     - MLKitTextRecognition
+    - MLKitTextRecognitionChinese
     - MLKitTextRecognitionCommon
+    - MLKitTextRecognitionDevanagari
+    - MLKitTextRecognitionJapanese
+    - MLKitTextRecognitionKorean
     - MLKitVision
     - nanopb
     - PromisesObjC
@@ -144,7 +177,7 @@ EXTERNAL SOURCES:
   camera_avfoundation:
     :path: ".symlinks/plugins/camera_avfoundation/ios"
   connectivity_plus:
-    :path: ".symlinks/plugins/connectivity_plus/ios"
+    :path: ".symlinks/plugins/connectivity_plus/darwin"
   Flutter:
     :path: Flutter
   google_mlkit_commons:
@@ -158,15 +191,14 @@ EXTERNAL SOURCES:
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite:
-    :path: ".symlinks/plugins/sqflite/ios"
+    :path: ".symlinks/plugins/sqflite/darwin"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  camera_avfoundation: 8b8d780bcfb6a4a02b0fbe2b4bd17b5b71946e68
-  connectivity_plus: bf0076dd84a130856aa636df1c71ccaff908fa1d
+  camera_avfoundation: 759172d1a77ae7be0de08fc104cfb79738b8a59e
+  connectivity_plus: e2dad488011aeb593e219360e804c43cc1af5770
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  FMDB: aa44149f6fb634b1ac54f64f47064bb0d0c5a032
   google_mlkit_commons: 3857c1e9f23ca02073f8dd34a7a3580feb814cef
   google_mlkit_language_id: f925908aa8c6ae0ae21a976260b526415877d0d7
   google_mlkit_text_recognition: 9225b4bf1b176dd18b05c9594e5347834e793440
@@ -181,16 +213,20 @@ SPEC CHECKSUMS:
   MLKitLanguageID: 9d37b66ae77a2e04190a9c69acdc8df0dbbeb41c
   MLKitNaturalLanguage: cf9de96911516fc83297429b7d7b6b33bfa56a93
   MLKitTextRecognition: 9ff0c843f2723d31d4bdd0c0d17a0a18382ed23e
+  MLKitTextRecognitionChinese: 1c2d90260b0ee2b5541bb6ce3b60fa5fed66a2a5
   MLKitTextRecognitionCommon: 0d48930fee25cce9d52d0ba217490d4797061aa2
+  MLKitTextRecognitionDevanagari: ed581ba85fccbbcf3e15629ec8be6d6abb02d2d1
+  MLKitTextRecognitionJapanese: bbcaa15796ca9a1f42e3191e57468beb51b1035e
+  MLKitTextRecognitionKorean: 8de40a4e5081242a7a83187583a3a7b57b5a703b
   MLKitVision: 8baa5f46ee3352614169b85250574fde38c36f49
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
-  sqflite: 50a33e1d72bd59ee092a519a35d107502757ebed
-  url_launcher_ios: bbd758c6e7f9fd7b5b1d4cde34d2b95fcce5e812
+  sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
+  url_launcher_ios: 6116280ddcfe98ab8820085d8d76ae7449447586
 
-PODFILE CHECKSUM: c6ccf7f7ed3087c406969c6504dfc28c91d9a74d
+PODFILE CHECKSUM: c17cd542f2e3c19e19e3281e02ee6153514a202b
 
 COCOAPODS: 1.15.2

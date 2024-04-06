@@ -384,6 +384,7 @@
 				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = L8JFMCZC7K;
 				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Magic The Searching";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.card-games";
@@ -530,6 +531,7 @@
 				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = L8JFMCZC7K;
 				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Magic The Searching";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.card-games";
@@ -562,6 +564,7 @@
 				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = L8JFMCZC7K;
 				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Magic The Searching";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.card-games";

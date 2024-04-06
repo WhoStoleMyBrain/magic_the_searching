@@ -228,7 +228,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }).then((value) async {
       if (value ~/ (1024 * 1024) < 3) {
         settings.useLocalDB = false;
-        await showNoLocalDB(ctx);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(Constants.settingUseLocalDB, false).whenComplete(() async { await showNoLocalDB(ctx);});
+        //await showNoLocalDB(ctx);
       } else {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(Constants.settingUseLocalDB, newValue);
@@ -297,10 +299,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       BuildContext context, Settings settings) {
     return ListTile(
       leading: const Icon(Icons.download),
-      title: const Text('Download database for offline use'),
+      title: const Text('Download english database for offline use'),
       subtitle: getBulkDataInfo(dbDate),
       trailing: getCardInfoDownloadButton(canUpdateDB, context, settings),
-      // ],
     );
   }
 
@@ -321,8 +322,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         trailing: ElevatedButton(
             onPressed: () async {
-              await DBHelper.deleteTablesIfExists();
-              await setDbUpdatedAtTimestamp();
+              await DBHelper.deleteTablesIfExists().whenComplete(() async {await DBHelper.vacuum();});
+              await setDbUpdatedAtTimestamp().whenComplete(() async {
+              await changeUseLocalDB(false, context);
+              });
               setState(() {});
             },
             child: const Text('Delete')));
@@ -470,10 +473,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: const Text('Check history db file...')),
       ElevatedButton(
         onPressed: () async {
-          await DBHelper.deleteTablesIfExists();
+          await DBHelper.deleteTablesIfExists().whenComplete(() async {await DBHelper.vacuum();});
         },
         child: const Text('Delete local DB!'),
-      )
+      ),
+      ElevatedButton(onPressed: () async {
+        await DBHelper.vacuum();
+      }, child: const Text('vaccum db')),
     ];
   }
 
