@@ -13,6 +13,8 @@ class CardDataProvider with ChangeNotifier {
   bool isLoading = false;
   bool isStandardQuery = true;
   bool hasMore = false;
+  int localQueryLimit = 20;
+  int localQueryOffset = 0;
   QueryLocation _queryLocation = QueryLocation.none;
   Map<String, dynamic> scryfallQueryMaps = {};
   Map<String, dynamic> allQueryParameters = {};
@@ -52,7 +54,7 @@ class CardDataProvider with ChangeNotifier {
     notifyListeners();
 
     List<Map<String, dynamic>> dbResult =
-        await DBHelper.getCardsByName(allQueryParameters);
+        await DBHelper.getCardsByName(allQueryParameters, 20, 0);
     if (dbResult.isEmpty) {
       cards = [];
       Map<String, dynamic> historyData = {
@@ -117,6 +119,28 @@ class CardDataProvider with ChangeNotifier {
   }
 
   Future<void> requestDataAtEndOfScroll() async {
+    switch (_queryLocation) {
+      case QueryLocation.none:
+        break;
+      case QueryLocation.scryfall:
+        await requestDataAtEndOfScrollScryfall();
+        break;
+      case QueryLocation.local:
+        await requestDataAtEndOfScrollLocally();
+        break;
+    }
+  }
+
+  Future<void> requestDataAtEndOfScrollLocally() async {
+    localQueryOffset += localQueryLimit;
+    List<Map<String, dynamic>> dbResult = await DBHelper.getCardsByName(
+        allQueryParameters, localQueryLimit, localQueryOffset);
+    List<CardInfo> newCards = dbResult.map((e) => CardInfo.fromDB(e)).toList();
+    _cards.addAll(newCards);
+    notifyListeners();
+  }
+
+  Future<void> requestDataAtEndOfScrollScryfall() async {
     if (hasMore) {
       final List<CardInfo> response =
           await scryfallRequestHandler.getDataEndOfScroll().whenComplete(() {

@@ -12,7 +12,7 @@ class DBHelper {
   }
   DBHelper._internal();
 
-  static Future<void> vacuum() async{
+  static Future<void> vacuum() async {
     final db = await DBHelper.cardDatabase();
     await db.execute('VACUUM');
   }
@@ -213,7 +213,7 @@ class DBHelper {
       'cmc': 'manaCost',
       'manaSymbols': 'manaCost',
       'keywordAbilities': 'oracleText',
-      'language':'language',
+      'language': 'language',
     };
     var tmp = allQueryParameters.entries
         .where((element) =>
@@ -229,13 +229,12 @@ class DBHelper {
   }
 
   static Future<List<Map<String, dynamic>>> getCardsByName(
-      Map<String, dynamic> allQueryParameters) async {
-        print('all query params: $allQueryParameters');
-    //TODO Implement limit and offset to limit query and also request new data at end of scroll
+      Map<String, dynamic> allQueryParameters, int limit, int offset) async {
+    // print('all query params: $allQueryParameters');
     final db = await DBHelper.cardDatabase();
     var tmp = buildRawQuery(allQueryParameters);
-    List<Map<String, dynamic>> cardDetail =
-        await db.rawQuery('SELECT * FROM card_detail $tmp LIMIT 10 OFFSET 0');
+    List<Map<String, dynamic>> cardDetail = await db
+        .rawQuery('SELECT * FROM card_detail $tmp LIMIT $limit OFFSET $offset');
     if (cardDetail.isEmpty) {
       return [];
     }
