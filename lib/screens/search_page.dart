@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../helpers/card_symbol_helper.dart';
 import '../helpers/navigation_helper.dart';
 import '../models/mtg_set.dart';
+import '../providers/color_provider.dart';
 
 class FilterStateColor extends MaterialStateColor {
   const FilterStateColor() : super(0xcafefeed);
@@ -294,6 +295,7 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    ColorProvider colorProvider = Provider.of<ColorProvider>(context);
     ScryfallProvider scryfallProvider =
         Provider.of<ScryfallProvider>(context, listen: true);
     return PopScope(
@@ -311,20 +313,20 @@ class _SearchPageState extends State<SearchPage> {
       },
       child: Container(
         alignment: Alignment.topLeft,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
           gradient: LinearGradient(
             begin: Alignment.bottomLeft,
             end: Alignment.bottomRight,
-            stops: [0.1, 0.9],
+            stops: const [0.1, 0.9],
             colors: [
-              Color.fromRGBO(199, 195, 205, 1.0),
-              Color.fromRGBO(218, 229, 223, 1.0),
+              colorProvider.backgroundColor1,
+              colorProvider.backgroundColor2,
             ],
           ),
         ),
         child: Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor: const Color.fromARGB(0, 190, 95, 95),
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             title: const Text('Search'),
