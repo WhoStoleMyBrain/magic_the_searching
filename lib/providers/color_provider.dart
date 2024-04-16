@@ -54,6 +54,40 @@ class ColorProvider with ChangeNotifier {
   final Color _defaultMainScreenColor3 = const Color.fromRGBO(71, 86, 138, 1.0);
   final Color _defaultMainScreenColor4 = const Color.fromRGBO(20, 64, 101, 1.0);
 
+  final Color defaultBackgroundColorDarkMode1 =
+      const Color.fromRGBO(13, 13, 13, 1.0);
+  final Color defaultBackgroundColorDarkMode2 =
+      const Color.fromRGBO(48, 48, 48, 1.0);
+  final Color defaultAppdrawerColorDarkMode1 =
+      const Color.fromRGBO(13, 13, 13, 1.0);
+  final Color defaultAppdrawerColorDarkMode2 =
+      const Color.fromRGBO(48, 48, 48, 1.0);
+  final Color defaultMainScreenColorDarkMode1 =
+      const Color.fromRGBO(26, 26, 26, 1.0);
+  final Color defaultMainScreenColorDarkMode2 =
+      const Color.fromRGBO(44, 44, 44, 1.0);
+  final Color defaultMainScreenColorDarkMode3 =
+      const Color.fromRGBO(67, 67, 67, 1.0);
+  final Color defaultMainScreenColorDarkMode4 =
+      const Color.fromRGBO(92, 92, 92, 1.0);
+  // the following is not dark mode, its rather flashy and more like tron
+  final Color defaultBackgroundColorTronMode1 =
+      const Color.fromRGBO(0, 255, 255, 1.0);
+  final Color defaultBackgroundColorTronMode2 =
+      const Color.fromRGBO(255, 0, 166, 1.0);
+  final Color defaultAppdrawerColorTronMode1 =
+      const Color.fromRGBO(0, 255, 255, 1.0);
+  final Color defaultAppdrawerColorTronMode2 =
+      const Color.fromRGBO(255, 0, 166, 1.0);
+  final Color defaultMainScreenColorTronMode1 =
+      const Color.fromRGBO(12, 113, 195, 1.0);
+  final Color defaultMainScreenColorTronMode2 =
+      const Color.fromRGBO(0, 255, 209, 1.0);
+  final Color defaultMainScreenColorTronMode3 =
+      const Color.fromRGBO(255, 0, 185, 1.0);
+  final Color defaultMainScreenColorTronMode4 =
+      const Color.fromRGBO(85, 0, 255, 1.0);
+
   late SharedPreferences sharedPreferences;
 
   late Color _backgroundColor1 = _defaultBackgroundColor1;
@@ -162,6 +196,28 @@ class ColorProvider with ChangeNotifier {
     mainScreenColor2 = _defaultMainScreenColor2;
     mainScreenColor3 = _defaultMainScreenColor3;
     mainScreenColor4 = _defaultMainScreenColor4;
+  }
+
+  void setDarkMode() {
+    appDrawerColor1 = defaultAppdrawerColorDarkMode1;
+    appDrawerColor2 = defaultAppdrawerColorDarkMode2;
+    backgroundColor1 = defaultBackgroundColorDarkMode1;
+    backgroundColor2 = defaultAppdrawerColorDarkMode2;
+    mainScreenColor1 = defaultMainScreenColorDarkMode1;
+    mainScreenColor2 = defaultMainScreenColorDarkMode2;
+    mainScreenColor3 = defaultMainScreenColorDarkMode3;
+    mainScreenColor4 = defaultMainScreenColorDarkMode4;
+  }
+
+  void setTronMode() {
+    appDrawerColor1 = defaultAppdrawerColorTronMode1;
+    appDrawerColor2 = defaultAppdrawerColorTronMode2;
+    backgroundColor1 = defaultBackgroundColorTronMode1;
+    backgroundColor2 = defaultAppdrawerColorTronMode2;
+    mainScreenColor1 = defaultMainScreenColorTronMode1;
+    mainScreenColor2 = defaultMainScreenColorTronMode2;
+    mainScreenColor3 = defaultMainScreenColorTronMode3;
+    mainScreenColor4 = defaultMainScreenColorTronMode4;
   }
 
   void setAllWhite() {
