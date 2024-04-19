@@ -9,6 +9,7 @@ import 'package:magic_the_searching/providers/settings.dart';
 import 'package:magic_the_searching/screens/about_screen.dart';
 import 'package:magic_the_searching/screens/help_screen.dart';
 import 'package:magic_the_searching/screens/privacy_policy_page.dart';
+import 'package:magic_the_searching/screens/search_page.dart';
 import 'package:magic_the_searching/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -106,13 +107,59 @@ class MyApp extends StatelessWidget {
               primarySwatch: Colors.blueGrey,
             ),
             routes: {
-              CardDetailScreen.routeName: (ctx) => const CardDetailScreen(),
-              HistoryScreen.routeName: (ctx) => const HistoryScreen(),
-              SettingsScreen.routeName: (ctx) => const SettingsScreen(),
+              CardDetailScreen.routeName: (ctx) => ShowCaseWidget(
+                    onFinish: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.setBool(Constants.tutorialCardDetailSeen, true);
+                    },
+                    builder: Builder(builder: (context) {
+                      return const CardDetailScreen();
+                    }),
+                  ),
+              HistoryScreen.routeName: (ctx) => ShowCaseWidget(
+                    onFinish: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.setBool(Constants.tutoriaHistorySeen, true);
+                    },
+                    builder: Builder(builder: (context) {
+                      return const HistoryScreen();
+                    }),
+                  ),
+              SettingsScreen.routeName: (ctx) => ShowCaseWidget(
+                    onFinish: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.setBool(Constants.tutorialSettingsSeen, true);
+                    },
+                    builder: Builder(builder: (context) {
+                      return const SettingsScreen();
+                    }),
+                  ),
               HelpScreen.routeName: (ctx) => const HelpScreen(),
-              CameraScreen.routeName: (ctx) => CameraScreen(_cameras),
+              CameraScreen.routeName: (ctx) => ShowCaseWidget(
+                    onFinish: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.setBool(Constants.tutorialImageTakenSeen, true);
+                    },
+                    builder: Builder(builder: (context) {
+                      return CameraScreen(_cameras);
+                    }),
+                  ),
               PrivacyPolicyPage.routeName: (ctx) => const PrivacyPolicyPage(),
               AboutScreen.routeName: (ctx) => const AboutScreen(),
+              SearchPage.routeName: (ctx) => ShowCaseWidget(
+                    onFinish: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.setBool(Constants.tutorialSearchMaskSeen, true);
+                    },
+                    builder: Builder(builder: (context) {
+                      return const SearchPage();
+                    }),
+                  )
             },
             home: ShowCaseWidget(
               onFinish: () async {

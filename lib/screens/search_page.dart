@@ -33,6 +33,7 @@ class FilterStateColor extends MaterialStateColor {
 }
 
 class SearchPage extends StatefulWidget {
+  static const routeName = 'searchPage';
   final Map<String, dynamic>? prefilledValues;
   const SearchPage({super.key, this.prefilledValues});
 

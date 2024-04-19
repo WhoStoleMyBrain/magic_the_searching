@@ -45,6 +45,11 @@ class Constants {
   static const imageTextMapLanguages = 'languages';
 
   static const tutorialSeen = "tutorialSeen";
+  static const tutorialSettingsSeen = "tutorialSettingsSeen";
+  static const tutoriaHistorySeen = "tutoriaHistorySeen";
+  static const tutorialCardDetailSeen = "tutorialCardDetailSeen";
+  static const tutorialSearchMaskSeen = "tutorialSearchMaskSeen";
+  static const tutorialImageTakenSeen = "tutorialImageTakenSeen";
 
   static const settingsBackgroundColor1Name = "backgroundColor1";
   static const settingsBackgroundColor2Name = "backgroundColor2";
