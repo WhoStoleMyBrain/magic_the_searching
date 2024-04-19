@@ -14,6 +14,7 @@ import 'package:magic_the_searching/widgets/app_drawer.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/bulk_data.dart';
@@ -35,6 +36,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isDownloading = false;
   bool _isProcessingToLocalDB = false;
   http.Client? _client = http.Client();
+
+  final GlobalKey _one = GlobalKey();
+  final GlobalKey _two = GlobalKey();
+  final GlobalKey _three = GlobalKey();
+  final GlobalKey _four = GlobalKey();
+  final GlobalKey _five = GlobalKey();
+  final GlobalKey _six = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((SharedPreferences prefs) {
+      bool tutorialSettingsSeen =
+          prefs.getBool(Constants.tutorialSettingsSeen) ?? false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!tutorialSettingsSeen || true) {
+          ShowCaseWidget.of(context)
+              .startShowCase([_one, _two, _three, _four, _five, _six]);
+        }
+      });
+    });
+  }
 
   void setBulkDataState(
       {bool isRequestingBulkData = false,
@@ -229,8 +252,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (value ~/ (1024 * 1024) < 3) {
         settings.useLocalDB = false;
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(Constants.settingUseLocalDB, false).whenComplete(() async { await showNoLocalDB(ctx);});
-        //await showNoLocalDB(ctx);
+        await prefs
+            .setBool(Constants.settingUseLocalDB, false)
+            .whenComplete(() async {
+          await showNoLocalDB(ctx);
+        });
       } else {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(Constants.settingUseLocalDB, newValue);
@@ -273,90 +299,118 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  ListTile getListTileLanguages(Settings settings) {
-    return ListTile(
-      // dense: true,
-      // isThreeLine: true,
-      leading: const Icon(Icons.language),
-      title: const Text('Language'),
-      trailing: DropdownMenu(
-          enableSearch: false,
-          // width: MediaQuery.of(context).size.width * 0.4,
-          textStyle: const TextStyle(fontSize: 12),
-          initialSelection: settings.language.name,
-          onSelected: (value) async {
-            if (value != null) {
-              settings.saveUserLanguage(Languages.values.byName(value));
-            }
-          },
-          dropdownMenuEntries: Languages.values
-              .map((e) => DropdownMenuEntry(value: e.name, label: e.longName))
-              .toList()),
+  Widget getListTileLanguages(Settings settings) {
+    return Showcase(
+      key: _five,
+      description:
+          "Set your preferred language here. This will be used in your queries in addition to english and the language detected in the card. This allows for greater consistency in search results.\nAlso, this will enable you to search a specific card from a card detail screen in your preferred language.\nPlease note that information on non-english cards might be incomplete.",
+      child: ListTile(
+        leading: const Icon(Icons.language),
+        title: const Text('Preferred Language'),
+        trailing: DropdownMenu(
+            enableSearch: false,
+            textStyle: const TextStyle(fontSize: 12),
+            initialSelection: settings.language.name,
+            onSelected: (value) async {
+              if (value != null) {
+                settings.saveUserLanguage(Languages.values.byName(value));
+              }
+            },
+            dropdownMenuEntries: Languages.values
+                .map((e) => DropdownMenuEntry(value: e.name, label: e.longName))
+                .toList()),
+      ),
     );
   }
 
-  ListTile getListTileDownloadBulkData(DateTime dbDate, bool canUpdateDB,
+  Widget getListTileDownloadBulkData(DateTime dbDate, bool canUpdateDB,
       BuildContext context, Settings settings) {
-    return ListTile(
-      leading: const Icon(Icons.download),
-      title: const Text('Download english database for offline use'),
-      subtitle: getBulkDataInfo(dbDate),
-      trailing: getCardInfoDownloadButton(canUpdateDB, context, settings),
+    return Showcase(
+      key: _two,
+      description:
+          "Use this to download all known cards in the english language with the prices for the current day to your phone. That way you can use this app even without any internet connection. \nThere are some caveats for offline usage: \n\t1. You cannot search for cards in any language other than english\n\t2. The search algorithm is way weaker and only allows searches for the card name, card type and creature type\n\t3. You cannot search for alternate versions of a card since for each card only one version is downloaded.\n\t4. The data in this database is only update when you replace it by pressing this button again. This means, that prices might not be up to date.\nAdditionally, downloading the data takes approx. 50 MB of storage on your phone.",
+      child: Tooltip(
+        triggerMode: TooltipTriggerMode.tap,
+        showDuration: const Duration(seconds: 10),
+        message:
+            "Downloads all known cards in english, if available, and with current prices",
+        child: ListTile(
+          leading: const Icon(Icons.download),
+          title: const Text('Download english database for offline use'),
+          subtitle: getBulkDataInfo(dbDate),
+          trailing: getCardInfoDownloadButton(canUpdateDB, context, settings),
+        ),
+      ),
     );
   }
 
-  ListTile getListTileFreeUpStorage() {
-    return ListTile(
-        leading: const Icon(Icons.delete),
-        title: const Text('Card info stored on device'),
-        subtitle: FutureBuilder(
-          future: checkLocalDBSize(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done &&
-                snapshot.hasData) {
-              return Text(
-                  'takes up approx. MB: ${snapshot.data! / 1024 ~/ 1024}');
-            }
-            return const Text('takes up approx. MB:');
+  Widget getListTileFreeUpStorage() {
+    return Showcase(
+      key: _three,
+      description:
+          "If you don't want and/or need the local database anymore, you can delete it by pressing this button.",
+      child: ListTile(
+          leading: const Icon(Icons.delete),
+          title: const Text('Card info stored on device'),
+          subtitle: FutureBuilder(
+            future: checkLocalDBSize(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData) {
+                return Text(
+                    'takes up approx. MB: ${snapshot.data! / 1024 ~/ 1024}');
+              }
+              return const Text('takes up approx. MB:');
+            },
+          ),
+          trailing: ElevatedButton(
+              onPressed: () async {
+                await DBHelper.deleteTablesIfExists().whenComplete(() async {
+                  await DBHelper.vacuum();
+                });
+                await setDbUpdatedAtTimestamp().whenComplete(() async {
+                  await changeUseLocalDB(false, context);
+                });
+                setState(() {});
+              },
+              child: const Text('Delete'))),
+    );
+  }
+
+  Widget getListTileShowImages(bool useImagesFromNet) {
+    return Showcase(
+      key: _one,
+      description:
+          "Turn this off to show only the text of the cards and reduce mobile data consumption. Note that clear identification is only possible via image. Refer to the images or the linked websites on a card detail page for accurate information!",
+      child: ListTile(
+        leading: const Icon(Icons.settings),
+        title: const Text('Show Images'),
+        subtitle: const Text('This uses up more internet volume'),
+        trailing: Switch(
+          value: useImagesFromNet,
+          onChanged: (newValue) {
+            changeUseImagesFromNet(newValue);
           },
         ),
-        trailing: ElevatedButton(
-            onPressed: () async {
-              await DBHelper.deleteTablesIfExists().whenComplete(() async {await DBHelper.vacuum();});
-              await setDbUpdatedAtTimestamp().whenComplete(() async {
-              await changeUseLocalDB(false, context);
-              });
-              setState(() {});
-            },
-            child: const Text('Delete')));
-  }
-
-  ListTile getListTileShowImages(bool useImagesFromNet) {
-    return ListTile(
-      // mainAxisAlignment: MainAxisAlignment.center,
-      // children: [
-      leading: const Icon(Icons.settings),
-      title: const Text('Show Images'),
-      subtitle: const Text('This uses up more internet volume'),
-      trailing: Switch(
-        value: useImagesFromNet,
-        onChanged: (newValue) {
-          changeUseImagesFromNet(newValue);
-        },
+        // ],
       ),
-      // ],
     );
   }
 
-  ListTile getListTileUseLocalDb(bool useLocalDB, BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.dataset),
-      title: const Text('Use local DB'),
-      trailing: Switch(
-        value: useLocalDB,
-        onChanged: (newValue) {
-          changeUseLocalDB(newValue, context);
-        },
+  Widget getListTileUseLocalDb(bool useLocalDB, BuildContext context) {
+    return Showcase(
+      key: _four,
+      description:
+          "Once you have downloaded your data, use this switch to flip between the usage of your local database versus scryfall.",
+      child: ListTile(
+        leading: const Icon(Icons.dataset),
+        title: const Text('Use local DB'),
+        trailing: Switch(
+          value: useLocalDB,
+          onChanged: (newValue) {
+            changeUseLocalDB(newValue, context);
+          },
+        ),
       ),
     );
   }
@@ -473,13 +527,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: const Text('Check history db file...')),
       ElevatedButton(
         onPressed: () async {
-          await DBHelper.deleteTablesIfExists().whenComplete(() async {await DBHelper.vacuum();});
+          await DBHelper.deleteTablesIfExists().whenComplete(() async {
+            await DBHelper.vacuum();
+          });
         },
         child: const Text('Delete local DB!'),
       ),
-      ElevatedButton(onPressed: () async {
-        await DBHelper.vacuum();
-      }, child: const Text('vaccum db')),
+      ElevatedButton(
+          onPressed: () async {
+            await DBHelper.vacuum();
+          },
+          child: const Text('vaccum db')),
     ];
   }
 
@@ -592,90 +650,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         dbDate, canUpdateDB, context, settings),
                     getListTileFreeUpStorage(),
                     getListTileLanguages(settings),
-                    ColorPickerPage(
-                      startColor: colorProvider.mainScreenColor1,
-                      setNewColor: ((Color newColor) {
-                        setState(() {
-                          colorProvider.mainScreenColor1 = newColor;
-                        });
-                      }),
-                      colorName: "1st Main Screen",
-                    ),
-                    ColorPickerPage(
-                      startColor: colorProvider.mainScreenColor2,
-                      setNewColor: ((Color newColor) {
-                        setState(() {
-                          colorProvider.mainScreenColor2 = newColor;
-                        });
-                      }),
-                      colorName: "2nd Main Screen",
-                    ),
-                    ColorPickerPage(
-                      startColor: colorProvider.mainScreenColor3,
-                      setNewColor: ((Color newColor) {
-                        setState(() {
-                          colorProvider.mainScreenColor3 = newColor;
-                        });
-                      }),
-                      colorName: "3rd Main Screen",
-                    ),
-                    ColorPickerPage(
-                      startColor: colorProvider.mainScreenColor4,
-                      setNewColor: ((Color newColor) {
-                        setState(() {
-                          colorProvider.mainScreenColor4 = newColor;
-                        });
-                      }),
-                      colorName: "4th Main Screen",
-                    ),
-                    ColorPickerPage(
-                      startColor: colorProvider.appDrawerColor1,
-                      setNewColor: ((Color newColor) {
-                        setState(() {
-                          colorProvider.appDrawerColor1 = newColor;
-                        });
-                      }),
-                      colorName: "1st App Drawer",
-                    ),
-                    ColorPickerPage(
-                      startColor: colorProvider.appDrawerColor2,
-                      setNewColor: ((Color newColor) {
-                        setState(() {
-                          colorProvider.appDrawerColor2 = newColor;
-                        });
-                      }),
-                      colorName: "2nd App Drawer",
-                    ),
-                    ColorPickerPage(
-                      startColor: colorProvider.backgroundColor1,
-                      setNewColor: ((Color newColor) {
-                        setState(() {
-                          colorProvider.backgroundColor1 = newColor;
-                        });
-                      }),
-                      colorName: "1st Background",
-                    ),
-                    ColorPickerPage(
-                      startColor: colorProvider.backgroundColor2,
-                      setNewColor: ((Color newColor) {
-                        setState(() {
-                          colorProvider.backgroundColor2 = newColor;
-                        });
-                      }),
-                      colorName: "2nd Background",
-                    ),
-                    ElevatedButton(
-                        onPressed: () async {
-                          colorProvider.restoreDefaultColors();
-                          setState(() {});
-                        },
-                        child: const Text('Restore default colors')),
-                    ElevatedButton(
-                        onPressed: () async {
-                          colorProvider.setAllWhite();
-                          setState(() {});
-                        },
-                        child: const Text('Set all colors white')),
+                    ...getColorPickerMainScreen(colorProvider),
+                    ...getColorPickerAppDrawer(colorProvider),
+                    ...getColorPickerBackground(colorProvider),
+                    ...getColorButtons(colorProvider),
                     if (kDebugMode) ...getDebuggingWidgets()
                   ],
                 ),
@@ -686,5 +664,126 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  List<Widget> getColorPickerMainScreen(ColorProvider colorProvider) {
+    return [
+      Showcase(
+        key: _six,
+        description:
+            "Use this color picker and others to customize the background color to your liking! Click the color on the right side to open the color picker. \nDon't forget to scroll down to see more options and restore defaults!",
+        child: ColorPickerPage(
+          startColor: colorProvider.mainScreenColor1,
+          setNewColor: ((Color newColor) {
+            setState(() {
+              colorProvider.mainScreenColor1 = newColor;
+            });
+          }),
+          colorName: "1st Main Screen",
+        ),
+      ),
+      ColorPickerPage(
+        startColor: colorProvider.mainScreenColor2,
+        setNewColor: ((Color newColor) {
+          setState(() {
+            colorProvider.mainScreenColor2 = newColor;
+          });
+        }),
+        colorName: "2nd Main Screen",
+      ),
+      ColorPickerPage(
+        startColor: colorProvider.mainScreenColor3,
+        setNewColor: ((Color newColor) {
+          setState(() {
+            colorProvider.mainScreenColor3 = newColor;
+          });
+        }),
+        colorName: "3rd Main Screen",
+      ),
+      ColorPickerPage(
+        startColor: colorProvider.mainScreenColor4,
+        setNewColor: ((Color newColor) {
+          setState(() {
+            colorProvider.mainScreenColor4 = newColor;
+          });
+        }),
+        colorName: "4th Main Screen",
+      )
+    ];
+  }
+
+  List<Widget> getColorPickerAppDrawer(ColorProvider colorProvider) {
+    return [
+      ColorPickerPage(
+        startColor: colorProvider.appDrawerColor1,
+        setNewColor: ((Color newColor) {
+          setState(() {
+            colorProvider.appDrawerColor1 = newColor;
+          });
+        }),
+        colorName: "1st App Drawer",
+      ),
+      ColorPickerPage(
+        startColor: colorProvider.appDrawerColor2,
+        setNewColor: ((Color newColor) {
+          setState(() {
+            colorProvider.appDrawerColor2 = newColor;
+          });
+        }),
+        colorName: "2nd App Drawer",
+      )
+    ];
+  }
+
+  List<Widget> getColorPickerBackground(ColorProvider colorProvider) {
+    return [
+      ColorPickerPage(
+        startColor: colorProvider.backgroundColor1,
+        setNewColor: ((Color newColor) {
+          setState(() {
+            colorProvider.backgroundColor1 = newColor;
+          });
+        }),
+        colorName: "1st Background",
+      ),
+      ColorPickerPage(
+        startColor: colorProvider.backgroundColor2,
+        setNewColor: ((Color newColor) {
+          setState(() {
+            colorProvider.backgroundColor2 = newColor;
+          });
+        }),
+        colorName: "2nd Background",
+      )
+    ];
+  }
+
+  List<Widget> getColorButtons(ColorProvider colorProvider) {
+    return [
+      ElevatedButton(
+          onPressed: () async {
+            colorProvider.restoreDefaultColors();
+            setState(() {});
+          },
+          child: const Text('Restore default colors')),
+      ElevatedButton(
+          onPressed: () async {
+            colorProvider.setDarkMode();
+            setState(() {});
+          },
+          child: const Text('Dark Mode')),
+      ElevatedButton(
+          onPressed: () async {
+            colorProvider.setTronMode();
+            setState(() {});
+          },
+          child: const Text('Tron Mode')),
+      ElevatedButton(
+          onPressed: () async {
+            colorProvider.setAllWhite();
+            setState(() {});
+          },
+          child: const Text('Set all colors white'))
+    ];
   }
 }
