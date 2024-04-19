@@ -39,7 +39,12 @@ class FireQueryImageTakenAlertDialog extends StatelessWidget {
               'Card Types: ${cardType.isNotEmpty ? cardType.reduce((value, element) => "$value $element") : ""}'),
           const SizedBox(height: 8),
           Text(
-              'Creature Types: ${creatureType.isNotEmpty ? creatureType.reduce((value, element) => "$value $element") : ""}')
+              'Creature Types: ${creatureType.isNotEmpty ? creatureType.reduce((value, element) => "$value $element") : ""}'),
+          const SizedBox(
+            height: 8,
+          ),
+          Text(
+              'Detected Language: ${languages.isNotEmpty ? languages.fold("", (previousValue, element) => previousValue != "" ? "$previousValue ${element.longName}" : element.longName) : ""}')
         ],
       ),
       actions: <Widget>[
