@@ -33,7 +33,6 @@ class HistoryObject {
       required this.languages});
 
   factory HistoryObject.fromDB(Map<String, dynamic> json) {
-    print('parsing json: $json');
     return HistoryObject(
       query: json['searchText'].toString(),
       matches: json['matches'].toString(),

@@ -10,7 +10,7 @@ CardInfo _$CardInfoFromJson(Map<String, dynamic> json) => CardInfo(
       id: json['id'] as String,
       name: json['name'] as String?,
       printedName: json['printed_name'] as String?,
-      manaCost: json['mana_cost'] as String?,
+      manaCost: manaValueReadValue(json, 'mana_cost') as String?,
       typeLine: json['type_line'] as String?,
       printedTypeLine: json['printed_type_line'] as String?,
       oracleId: json['oracle_id'] as String?,

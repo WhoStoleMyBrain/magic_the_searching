@@ -84,7 +84,6 @@ class _SearchPageState extends State<SearchPage> {
 
     setState(() {
       if (widget.prefilledValues != null) {
-        print('prefilled values: ${widget.prefilledValues}');
         _searchTermController.text =
             widget.prefilledValues![Constants.contextSearchTerm] ?? '';
         _selectedCreatureTypes =

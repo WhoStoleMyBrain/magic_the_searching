@@ -88,6 +88,16 @@ String? oracleTextReadValue(Map<dynamic, dynamic>? json, String parameterName) {
           .join(Constants.placeholderSplitText);
 }
 
+String? manaValueReadValue(Map<dynamic, dynamic>? json, String parameterName) {
+  return (json?['card_faces'] == null)
+      ? (json?['mana_cost'] == null)
+          ? null
+          : json!['mana_cost']
+      : json?['card_faces']
+          .map((e) => e['mana_cost'])
+          .join("{${Constants.placeholderSplitText}}");
+}
+
 String? printedTextReadValue(
     Map<dynamic, dynamic>? json, String parameterName) {
   return (json?['card_faces'] == null)
@@ -148,6 +158,8 @@ class CardInfo {
   String id;
   String? name;
   String? printedName;
+
+  @JsonKey(readValue: manaValueReadValue)
   String? manaCost;
   String? typeLine;
   String? printedTypeLine;

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 
 class CardSymbolHelper {
   static final CardSymbolHelper _cardSymbolHelper =
@@ -35,7 +36,9 @@ class CardSymbolHelper {
   }
 
   static String symbolToAssetPath(String symbol) {
-    return 'assets/images/${symbol.replaceAll("/", "-")}.svg';
+    return symbol == Constants.placeholderSplitText
+        ? 'assets/images/forward-slash.svg'
+        : 'assets/images/${symbol.replaceAll("/", "-")}.svg';
   }
 
   static Future<List<String>> listAssetImages() async {

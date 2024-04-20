@@ -35,6 +35,7 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
   late Image? _networkImageStream;
   late bool _hasInternetConnection = true;
   late Stream<FileResponse> fileStream;
+  late Settings settings;
 
   Stream<FileResponse>? getLocalImage(Settings settings) {
     if (settings.useImagesFromNet) {
@@ -108,9 +109,17 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
     ];
   }
 
+  String getTextToDisplay() {
+    if (settings.language != Languages.en &&
+        widget.cardInfo.printedText != null) {
+      return widget.cardInfo.printedText ?? '';
+    } else {
+      return widget.cardInfo.oracleText ?? '';
+    }
+  }
+
   Widget oracleText() {
-    var richText = buildRichTextSpan(
-        widget.cardInfo.printedText ?? widget.cardInfo.oracleText ?? '');
+    var richText = buildRichTextSpan(getTextToDisplay());
     return Expanded(
       child: SingleChildScrollView(
         child: Container(
@@ -364,7 +373,7 @@ class _CardDetailImageDisplayState extends State<CardDetailImageDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = Provider.of<Settings>(context, listen: true);
+    settings = Provider.of<Settings>(context, listen: true);
     final CardSymbolProvider cardSymbolProvider =
         Provider.of<CardSymbolProvider>(context, listen: true);
     symbolImages = cardSymbolProvider.symbolImages;
