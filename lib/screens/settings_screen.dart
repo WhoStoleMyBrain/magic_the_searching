@@ -51,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       bool tutorialSettingsSeen =
           prefs.getBool(Constants.tutorialSettingsSeen) ?? false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!tutorialSettingsSeen || true) {
+        if (!tutorialSettingsSeen) {
           ShowCaseWidget.of(context)
               .startShowCase([_one, _two, _three, _four, _five, _six]);
         }
@@ -532,6 +532,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           });
         },
         child: const Text('Delete local DB!'),
+      ),
+      ElevatedButton(
+        onPressed: () async {
+          await DBHelper.deleteHistoryTablesIfExists().whenComplete(() async {
+            await DBHelper.vacuum();
+          });
+        },
+        child: const Text('Delete history DB!'),
       ),
       ElevatedButton(
           onPressed: () async {

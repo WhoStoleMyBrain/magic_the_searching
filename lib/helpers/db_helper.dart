@@ -15,6 +15,8 @@ class DBHelper {
   static Future<void> vacuum() async {
     final db = await DBHelper.cardDatabase();
     await db.execute('VACUUM');
+    final historyDb = await DBHelper.historyDatabase();
+    await historyDb.execute('VACUUM');
   }
 
   static Future<void> deleteTablesIfExists() async {
@@ -29,6 +31,20 @@ class DBHelper {
     // Therefore onCreate on the database would not be called again, which
     // in turn results in an empty database
     await recreateTablesIfTheyDoNotExist();
+  }
+
+  static Future<void> deleteHistoryTablesIfExists() async {
+    final db = await DBHelper.historyDatabase();
+    await db.execute('DELETE FROM search_history');
+    // await db.execute('DROP TABLE IF EXISTS card_detail');
+    // await db.execute('DROP TABLE IF EXISTS image_uris');
+    // await db.execute('DROP TABLE IF EXISTS card_faces');
+    // await db.execute('DROP TABLE IF EXISTS prices');
+    // await db.execute('DROP TABLE IF EXISTS purchase_uris');
+    // Make sure that the tables are there, since we manually deleted them.
+    // Therefore onCreate on the database would not be called again, which
+    // in turn results in an empty database
+    // await recreateTablesIfTheyDoNotExist();
   }
 
   static Future<void> recreateTablesIfTheyDoNotExist() async {
