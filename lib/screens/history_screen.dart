@@ -4,6 +4,8 @@ import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
 import 'package:magic_the_searching/widgets/app_drawer.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 import '../helpers/navigation_helper.dart';
 import '../helpers/search_start_helper.dart';
 import '../providers/color_provider.dart';
@@ -19,6 +21,14 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   bool isInit = false;
+  bool showcaseRunning = false;
+
+  final GlobalKey _one = GlobalKey();
+  final GlobalKey _two = GlobalKey();
+  final GlobalKey _three = GlobalKey();
+  final GlobalKey _four = GlobalKey();
+  final GlobalKey _five = GlobalKey();
+  final GlobalKey _six = GlobalKey();
 
   void setInitToTrue() {
     setState(() {
@@ -35,6 +45,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
         history.getDBData(setInitToTrue);
       });
     }
+    SharedPreferences.getInstance().then((SharedPreferences prefs) {
+      bool tutorialSettingsSeen =
+          prefs.getBool(Constants.tutorialSettingsSeen) ?? false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        History history = Provider.of<History>(context, listen: false);
+        if (!tutorialSettingsSeen &&
+            history.data.isNotEmpty &&
+            !showcaseRunning) {
+          ShowCaseWidget.of(context)
+              .startShowCase([_one, _two, _three, _four, _five, _six]);
+          showcaseRunning = true;
+        }
+      });
+    });
   }
 
   void _selectHistoryItem(
@@ -115,40 +139,105 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   : ListView.builder(
                       itemCount: history.data.length,
                       itemBuilder: (ctx, i) {
-                        return ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 4.0,
-                            horizontal: 24.0,
-                          ),
-                          title: history.data[i].query == ''
-                              ? const Text('*No Query*')
-                              : Text(
-                                  'Search term: ${history.data[i].query[0] == '!' ? history.data[i].query.substring(1) : history.data[i].query}'),
-                          subtitle: Text(
-                              'Matches for this search: ${history.data[i].matches}'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.mode),
-                                color: Colors.black,
-                                onPressed: () async {
-                                  _selectHistoryItemAndOpenInput(
-                                      history, cardDataProvider, i);
-                                },
-                              ),
-                              Text(
-                                  '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
-                            ],
-                          ),
-                          onTap: () {
-                            _selectHistoryItem(history, cardDataProvider, i);
-                          },
-                        );
+                        return i == 0
+                            ? getShowcaseListTile(history, i, cardDataProvider)
+                            : getGeneralListTile(history, i, cardDataProvider);
                       },
                     ),
         ),
       ),
+    );
+  }
+
+  Showcase getShowcaseListTile(
+      History history, int i, CardDataProvider cardDataProvider) {
+    return Showcase(
+        key: _one,
+        description: "Each row is one of your searches in the past 7 days.",
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 4.0,
+            horizontal: 24.0,
+          ),
+          title: history.data[i].query == ''
+              ? const Text('*No Query*')
+              : Showcase(
+                  key: _two,
+                  targetPadding: const EdgeInsets.all(6.0),
+                  description:
+                      "This will show what the exact search term was. Please note, that this is in scryfall-understandable coding, so cardtype=creature will be displayed as t:Creature. \nClick any history item to re-search for that exact search term.",
+                  child: Text(
+                      'Search term: ${history.data[i].query[0] == '!' ? history.data[i].query.substring(1) : history.data[i].query}'),
+                ),
+          subtitle: Showcase(
+            key: _three,
+            targetPadding: const EdgeInsets.all(6.0),
+            description:
+                "This will show how many results the search did yield in the past.",
+            child: Text('Matches for this search: ${history.data[i].matches}'),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Showcase(
+                key: _four,
+                targetPadding: const EdgeInsets.all(6.0),
+                description:
+                    "Click this button to re-open this search in the search mask.\nThen you can make adjustments to the search as needed!",
+                child: IconButton(
+                  icon: const Icon(Icons.mode),
+                  color: Colors.black,
+                  onPressed: () async {
+                    _selectHistoryItemAndOpenInput(
+                        history, cardDataProvider, i);
+                  },
+                ),
+              ),
+              Showcase(
+                key: _five,
+                targetPadding: const EdgeInsets.all(8.0),
+                description:
+                    "This is the day that this exact search term was last searched for.",
+                child: Text(
+                    '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
+              ),
+            ],
+          ),
+          onTap: () {
+            _selectHistoryItem(history, cardDataProvider, i);
+          },
+        ));
+  }
+
+  ListTile getGeneralListTile(
+      History history, int i, CardDataProvider cardDataProvider) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 4.0,
+        horizontal: 24.0,
+      ),
+      title: history.data[i].query == ''
+          ? const Text('*No Query*')
+          : Text(
+              'Search term: ${history.data[i].query[0] == '!' ? history.data[i].query.substring(1) : history.data[i].query}'),
+      subtitle: Text('Matches for this search: ${history.data[i].matches}'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.mode),
+            color: Colors.black,
+            onPressed: () async {
+              _selectHistoryItemAndOpenInput(history, cardDataProvider, i);
+            },
+          ),
+          Text(
+              '${history.data[i].dateTime.year}-${history.data[i].dateTime.month < 10 ? '0' : ''}${history.data[i].dateTime.month}-${history.data[i].dateTime.day < 10 ? '0' : ''}${history.data[i].dateTime.day}'),
+        ],
+      ),
+      onTap: () {
+        _selectHistoryItem(history, cardDataProvider, i);
+      },
     );
   }
 }
