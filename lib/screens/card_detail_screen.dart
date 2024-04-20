@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:magic_the_searching/helpers/constants.dart';
-import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
 import 'package:provider/provider.dart';
-import 'package:magic_the_searching/providers/card_data_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
 
+import '../helpers/constants.dart';
+import '../helpers/scryfall_query_maps.dart';
 import '../helpers/navigation_helper.dart';
+import '../providers/card_data_provider.dart';
 import '../providers/color_provider.dart';
 import '../providers/settings.dart';
 import '../scryfall_api_json_serialization/card_info.dart';
@@ -35,8 +35,6 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
 
   final GlobalKey _five = GlobalKey();
 
-  final GlobalKey _six = GlobalKey();
-
   @override
   void initState() {
     super.initState();
@@ -44,9 +42,9 @@ class _CardDetailScreenState extends State<CardDetailScreen> {
       bool tutorialCardDetailSeen =
           prefs.getBool(Constants.tutorialCardDetailSeen) ?? false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!tutorialCardDetailSeen || true) {
+        if (!tutorialCardDetailSeen) {
           ShowCaseWidget.of(context)
-              .startShowCase([_one, _two, _three, _four, _five, _six]);
+              .startShowCase([_one, _two, _three, _four, _five]);
         }
       });
     });

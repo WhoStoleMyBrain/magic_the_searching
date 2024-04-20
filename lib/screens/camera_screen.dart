@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 import '../helpers/google_mlkit_helper.dart';
 import '../helpers/constants.dart';
 import '../providers/color_provider.dart';
@@ -45,6 +47,14 @@ void _logError(String code, String? message) {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
+  final GlobalKey _one = GlobalKey();
+
+  final GlobalKey _two = GlobalKey();
+
+  final GlobalKey _three = GlobalKey();
+
+  final GlobalKey _four = GlobalKey();
+
   CameraController? controller;
   XFile? imageFile;
 
@@ -78,9 +88,17 @@ class _CameraScreenState extends State<CameraScreen>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      onNewCameraSelected(widget._cameras.first);
-      scryfallProvider = Provider.of<ScryfallProvider>(context, listen: false);
+    SharedPreferences.getInstance().then((SharedPreferences prefs) {
+      bool tutorialCardDetailSeen =
+          prefs.getBool(Constants.tutorialCardDetailSeen) ?? false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onNewCameraSelected(widget._cameras.first);
+        scryfallProvider =
+            Provider.of<ScryfallProvider>(context, listen: false);
+        if (!tutorialCardDetailSeen) {
+          ShowCaseWidget.of(context).startShowCase([_one, _two, _three, _four]);
+        }
+      });
     });
   }
 
@@ -145,10 +163,15 @@ class _CameraScreenState extends State<CameraScreen>
                     width: 3.0,
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: Center(
-                    child: _cameraPreviewWidget(),
+                child: Showcase(
+                  key: _one,
+                  description:
+                      "Here you see the current output of your camera. Make sure to try and keep the card steady until the image was taken and the query dialog shows up!",
+                  child: Padding(
+                    padding: const EdgeInsets.all(1.0),
+                    child: Center(
+                      child: _cameraPreviewWidget(),
+                    ),
                   ),
                 ),
               ),
@@ -158,7 +181,11 @@ class _CameraScreenState extends State<CameraScreen>
               padding: const EdgeInsets.all(5.0),
               child: Row(
                 children: <Widget>[
-                  _cameraTogglesRowWidget(),
+                  Showcase(
+                      key: _four,
+                      description:
+                          "Select the camera you want to use here. Usually the default should be correct, however all available cameras to this app will be shown here!",
+                      child: _cameraTogglesRowWidget()),
                   _thumbnailWidget(),
                 ],
               ),
@@ -247,20 +274,29 @@ class _CameraScreenState extends State<CameraScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        IconButton(
-          icon: const Icon(Icons.flash_on),
-          iconSize: 32.0,
-          color: Colors.blue,
-          onPressed: controller != null ? onFlashModeButtonPressed : null,
+        Showcase(
+          key: _two,
+          description: "Turn on your camera lightning with this button.",
+          child: IconButton(
+            icon: const Icon(Icons.flash_on),
+            iconSize: 32.0,
+            color: Colors.blue,
+            onPressed: controller != null ? onFlashModeButtonPressed : null,
+          ),
         ),
-        IconButton(
-          icon: const Icon(Icons.camera_alt),
-          iconSize: 32.0,
-          color: Colors.blue,
-          onPressed:
-              cameraController != null && cameraController.value.isInitialized
-                  ? onTakePictureButtonPressed
-                  : null,
+        Showcase(
+          key: _three,
+          description:
+              "Take a picture of your card with this button. The image will be stored only as long as needed for processing the card, afterwards it is discarded!",
+          child: IconButton(
+            icon: const Icon(Icons.camera_alt),
+            iconSize: 32.0,
+            color: Colors.blue,
+            onPressed:
+                cameraController != null && cameraController.value.isInitialized
+                    ? onTakePictureButtonPressed
+                    : null,
+          ),
         ),
       ],
     );
