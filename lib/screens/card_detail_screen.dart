@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:magic_the_searching/helpers/constants.dart';
 import 'package:magic_the_searching/helpers/scryfall_query_maps.dart';
 
 import 'package:provider/provider.dart';
 import 'package:magic_the_searching/providers/card_data_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../helpers/navigation_helper.dart';
 import '../providers/color_provider.dart';
@@ -12,10 +15,43 @@ import '../scryfall_api_json_serialization/card_info.dart';
 import '../widgets/card_detail_image_display.dart';
 import '../widgets/card_details.dart';
 
-class CardDetailScreen extends StatelessWidget {
+class CardDetailScreen extends StatefulWidget {
   static const routeName = '/card-detail';
 
   const CardDetailScreen({super.key});
+
+  @override
+  State<CardDetailScreen> createState() => _CardDetailScreenState();
+}
+
+class _CardDetailScreenState extends State<CardDetailScreen> {
+  final GlobalKey _one = GlobalKey();
+
+  final GlobalKey _two = GlobalKey();
+
+  final GlobalKey _three = GlobalKey();
+
+  final GlobalKey _four = GlobalKey();
+
+  final GlobalKey _five = GlobalKey();
+
+  final GlobalKey _six = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((SharedPreferences prefs) {
+      bool tutorialCardDetailSeen =
+          prefs.getBool(Constants.tutorialCardDetailSeen) ?? false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!tutorialCardDetailSeen || true) {
+          ShowCaseWidget.of(context)
+              .startShowCase([_one, _two, _three, _four, _five, _six]);
+        }
+      });
+    });
+  }
+
   Future<void> _showFailedQuery(BuildContext ctx, String query) async {
     return showDialog<void>(
       context: ctx,
@@ -100,16 +136,31 @@ class CardDetailScreen extends StatelessWidget {
             backgroundColor: Colors.transparent,
             centerTitle: true,
             actions: [
-              getRefinedSearchButton(
-                context,
-                cardInfo,
-                ScryfallQueryMaps.inUserLanguageMap(settings.language),
-                'In ${settings.language.longName}',
+              Showcase(
+                key: _two,
+                description:
+                    "Pressing this button will search for the card in your preferred language (see settings).",
+                child: getRefinedSearchButton(
+                  context,
+                  cardInfo,
+                  ScryfallQueryMaps.inUserLanguageMap(settings.language),
+                  'In ${settings.language.longName}',
+                ),
               ),
-              getRefinedSearchButton(
-                  context, cardInfo, ScryfallQueryMaps.printsMap, 'All Prints'),
-              getRefinedSearchButton(
-                  context, cardInfo, ScryfallQueryMaps.versionMap, 'All Arts'),
+              Showcase(
+                key: _three,
+                description:
+                    "This will search for all possible prints of the card. This means, that every art version and every print in every set will be displayed. Sometimes this can make a huge difference in price!",
+                child: getRefinedSearchButton(context, cardInfo,
+                    ScryfallQueryMaps.printsMap, 'All Prints'),
+              ),
+              Showcase(
+                key: _four,
+                description:
+                    "This will search for all possible art versions of this card. This is by definition only a subset of the results from the previous button. However, on heavily reprinted cards such as Collosal Dreadmaw this might be a better option.",
+                child: getRefinedSearchButton(context, cardInfo,
+                    ScryfallQueryMaps.versionMap, 'All Arts'),
+              ),
             ],
           ),
           body: SizedBox(
@@ -122,9 +173,18 @@ class CardDetailScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    CardDetailImageDisplay(
-                        cardInfo: cardInfo, mediaQuery: mediaQuery),
-                    CardDetails(textStyle: textStyle, cardInfo: cardInfo),
+                    Showcase(
+                      key: _one,
+                      description: "This is the card you searched for.",
+                      child: CardDetailImageDisplay(
+                          cardInfo: cardInfo, mediaQuery: mediaQuery),
+                    ),
+                    Showcase(
+                        key: _five,
+                        description:
+                            "The prices are listed here again. Click the links below to reach this specific card on scryfall, Cardmarket and TCGPlayer, respectively. These links allow you to get more information on the card and better evaluate it's current price.",
+                        child: CardDetails(
+                            textStyle: textStyle, cardInfo: cardInfo)),
                   ],
                 ),
               ),
