@@ -774,18 +774,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             setState(() {});
           },
           child: const Text('Restore default colors')),
-      ElevatedButton(
-          onPressed: () async {
-            colorProvider.setDarkMode();
-            setState(() {});
-          },
-          child: const Text('Dark Mode')),
-      ElevatedButton(
-          onPressed: () async {
-            colorProvider.setTronMode();
-            setState(() {});
-          },
-          child: const Text('Tron Mode')),
+      // ElevatedButton(
+      //     onPressed: () async {
+      //       colorProvider.setDarkMode();
+      //       setState(() {});
+      //     },
+      //     child: const Text('Dark Mode')),
+      // ElevatedButton(
+      //     onPressed: () async {
+      //       colorProvider.setTronMode();
+      //       setState(() {});
+      //     },
+      //     child: const Text('Tron Mode')),
       ElevatedButton(
           onPressed: () async {
             colorProvider.setAllWhite();
